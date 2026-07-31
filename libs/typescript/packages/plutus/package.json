@@ -1,0 +1,50 @@
+{
+  "name": "@xray-network/cardano-plutus",
+  "version": "0.1.0",
+  "description": "Typed Plutus Data, UPLC parsing and evaluation, and phase-two valuation",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist/esm/**/*.js",
+    "dist/esm/**/*.d.ts",
+    "dist/esm/**/*.map",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "./dist/esm/index.js",
+  "module": "./dist/esm/index.js",
+  "browser": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "browser": "./dist/esm/index.js",
+      "import": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    },
+    "./data": {
+      "types": "./dist/esm/typed_data/index.d.ts",
+      "browser": "./dist/esm/typed_data/index.js",
+      "import": "./dist/esm/typed_data/index.js",
+      "default": "./dist/esm/typed_data/index.js"
+    },
+    "./uplc": {
+      "types": "./dist/esm/uplc/index.d.ts",
+      "browser": "./dist/esm/uplc/index.js",
+      "import": "./dist/esm/uplc/index.js",
+      "default": "./dist/esm/uplc/index.js"
+    }
+  },
+  "dependencies": {
+    "@xray-network/cardano-chain": "0.1.0",
+    "@xray-network/cardano-core": "0.1.0",
+    "@xray-network/cardano-crypto": "0.1.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

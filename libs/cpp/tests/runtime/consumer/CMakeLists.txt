@@ -1,0 +1,5 @@
+add_executable(cardano_aggregate_smoke main.cpp)
+target_link_libraries(cardano_aggregate_smoke PRIVATE cardano::lib)
+cardano_owned_target(cardano_aggregate_smoke)
+add_test(NAME cardano_aggregate_smoke COMMAND cardano_aggregate_smoke)
+set_tests_properties(cardano_aggregate_smoke PROPERTIES LABELS "runtime")

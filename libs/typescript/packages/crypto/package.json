@@ -1,0 +1,39 @@
+{
+  "name": "@xray-network/cardano-crypto",
+  "version": "0.1.0",
+  "description": "Native ESM cryptography and Cardano key types for Cardano Lib",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist/esm/**/*.js",
+    "dist/esm/**/*.d.ts",
+    "dist/esm/**/*.map",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "./dist/esm/index.js",
+  "module": "./dist/esm/index.js",
+  "browser": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "browser": "./dist/esm/index.js",
+      "import": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    }
+  },
+  "dependencies": {
+    "@noble/ciphers": "2.2.0",
+    "@noble/curves": "2.2.0",
+    "@noble/hashes": "2.2.0",
+    "@xray-network/cardano-core": "0.1.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

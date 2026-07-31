@@ -1,0 +1,32 @@
+{
+  "name": "@xray-network/cardano-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Native TypeScript libraries for Cardano",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "packages/core",
+    "packages/crypto",
+    "packages/chain",
+    "packages/cip",
+    "packages/plutus",
+    "packages/runtime"
+  ],
+  "scripts": {
+    "build": "tsc -b --clean && tsc -b",
+    "typecheck": "tsc -b tsconfig.json --pretty false",
+    "lint": "npm run build && node --test packages/crypto/test/dependency-policy.test.mjs packages/runtime/test/browser-package.test.mjs",
+    "test": "npm run build && npm run test:built",
+    "test:built": "node tools/run-tests.mjs",
+    "pack:smoke": "npm run build && node packages/runtime/test/pack-smoke.mjs",
+    "check": "npm run build && npm run test:built && node packages/runtime/test/pack-smoke.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

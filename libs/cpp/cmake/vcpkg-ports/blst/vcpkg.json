@@ -1,0 +1,8 @@
+{
+  "name": "blst",
+  "version": "0.3.17",
+  "description": "Multilingual BLS12-381 signature library",
+  "homepage": "https://github.com/supranational/blst",
+  "license": "Apache-2.0",
+  "supports": "!uwp"
+}

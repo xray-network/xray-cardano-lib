@@ -1,0 +1,35 @@
+{
+  "name": "@xray-network/cardano-core",
+  "version": "0.1.0",
+  "description": "Browser-safe Cardano primitives, CBOR codecs, numeric types, and shared conventions",
+  "publishConfig": { "access": "public" },
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist/esm/**/*.js",
+    "dist/esm/**/*.d.ts",
+    "dist/esm/**/*.map",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/esm/index.js",
+  "module": "./dist/esm/index.js",
+  "browser": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "browser": "./dist/esm/index.js",
+      "import": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    },
+    "./bech32": {
+      "types": "./dist/esm/encoding/index.d.ts",
+      "browser": "./dist/esm/encoding/index.js",
+      "import": "./dist/esm/encoding/index.js",
+      "default": "./dist/esm/encoding/index.js"
+    }
+  },
+  "engines": { "node": ">=20.19.0" }
+}

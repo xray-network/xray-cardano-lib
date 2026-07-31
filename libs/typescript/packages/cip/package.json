@@ -1,0 +1,56 @@
+{
+  "name": "@xray-network/cardano-cip",
+  "version": "0.1.0",
+  "description": "Native ESM implementations of Cardano Improvement Proposals",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist/esm/**/*.js",
+    "dist/esm/**/*.d.ts",
+    "dist/esm/**/*.map",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "./dist/esm/index.js",
+  "module": "./dist/esm/index.js",
+  "browser": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "browser": "./dist/esm/index.js",
+      "import": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    },
+    "./cip25": {
+      "types": "./dist/esm/cip25/index.d.ts",
+      "browser": "./dist/esm/cip25/index.js",
+      "import": "./dist/esm/cip25/index.js",
+      "default": "./dist/esm/cip25/index.js"
+    },
+    "./cip36": {
+      "types": "./dist/esm/cip36/index.d.ts",
+      "browser": "./dist/esm/cip36/index.js",
+      "import": "./dist/esm/cip36/index.js",
+      "default": "./dist/esm/cip36/index.js"
+    },
+    "./cip8": {
+      "types": "./dist/esm/cip8/index.d.ts",
+      "browser": "./dist/esm/cip8/index.js",
+      "import": "./dist/esm/cip8/index.js",
+      "default": "./dist/esm/cip8/index.js"
+    }
+  },
+  "dependencies": {
+    "@xray-network/cardano-chain": "0.1.0",
+    "@xray-network/cardano-core": "0.1.0",
+    "@xray-network/cardano-crypto": "0.1.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

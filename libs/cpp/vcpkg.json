@@ -1,0 +1,72 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "cardano-lib-cpp",
+  "version-string": "0.1.0",
+  "dependencies": [
+    {
+      "name": "boost-multiprecision",
+      "default-features": false
+    },
+    {
+      "name": "botan",
+      "default-features": false
+    },
+    {
+      "name": "libsodium",
+      "default-features": false
+    },
+    {
+      "name": "secp256k1",
+      "default-features": false
+    },
+    {
+      "name": "nlohmann-json",
+      "default-features": false
+    },
+    {
+      "name": "blst",
+      "default-features": false
+    }
+  ],
+  "features": {
+    "tests": {
+      "description": "Build Cardano Lib's C++ validation suite",
+      "dependencies": [
+        {
+          "name": "catch2",
+          "default-features": false
+        }
+      ]
+    }
+  },
+  "overrides": [
+    {
+      "name": "boost-multiprecision",
+      "version": "1.91.0#0"
+    },
+    {
+      "name": "botan",
+      "version": "3.12.0#0"
+    },
+    {
+      "name": "libsodium",
+      "version": "1.0.22#0"
+    },
+    {
+      "name": "secp256k1",
+      "version": "0.7.1#0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version": "3.12.0#2"
+    },
+    {
+      "name": "catch2",
+      "version": "3.15.1#0"
+    },
+    {
+      "name": "blst",
+      "version": "0.3.17"
+    }
+  ]
+}

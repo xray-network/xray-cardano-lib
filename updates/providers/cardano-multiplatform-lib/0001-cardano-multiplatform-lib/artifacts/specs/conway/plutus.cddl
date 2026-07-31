@@ -1,0 +1,80 @@
+; bounded_bytes = bytes .size (0..64)
+;  ; the real bounded_bytes does not have this limit. it instead has a different
+;  ; limit which cannot be expressed in CDDL.
+;  ; The limit is as follows:
+;  ;  - bytes with a definite-length encoding are limited to size 0..64
+;  ;  - for bytes with an indefinite-length CBOR encoding, each chunk is
+;  ;    limited to size 0..64
+;  ;  ( reminder: in CBOR, the indefinite-length encoding of bytestrings
+;  ;    consists of a token #2.31 followed by a sequence of definite-length
+;  ;    encoded bytestrings and a stop code )
+bounded_bytes = bytes ; @no_alias
+
+plutus_v1_script = bytes ; @newtype
+plutus_v2_script = bytes ; @newtype
+plutus_v3_script = bytes ; @newtype
+
+; original def:
+; { * plutus_data => plutus_data }
+; we hand-code it to handle duplicates
+plutus_map = _CDDL_CODEGEN_EXTERN_TYPE_
+
+plutus_data =
+    constr_plutus_data
+  / plutus_map ; @name map
+  / [ * plutus_data ] ; @name list
+  / big_integer ; @name integer
+  / bounded_bytes ; @name bytes @custom_json @used_as_key
+
+big_integer = _CDDL_CODEGEN_EXTERN_TYPE_
+
+; original definition not used to avoid hundreds of variants:
+; constr<a> =
+;    #6.121([* a])
+;  / #6.122([* a])
+;  / #6.123([* a])
+;  / #6.124([* a])
+;  / #6.125([* a])
+;  / #6.126([* a])
+;  / #6.127([* a])
+;  ; similarly for tag range: 6.1280 .. 6.1400 inclusive
+;  / #6.102([alternative: uint, fields: [* a]])
+constr_plutus_data = _CDDL_CODEGEN_EXTERN_TYPE_
+
+redeemer_key = [ tag: redeemer_tag, index: uint ]
+
+redeemer_val = [ data: plutus_data, ex_units: ex_units ]
+
+legacy_redeemer = [ tag: redeemer_tag, index: uint, data: plutus_data, ex_units: ex_units ]
+
+; Flat Array support is included for backwards compatibility and will be removed in the next era.
+; It is recommended for tools to adopt using a Map instead of Array going forward.
+redeemers =
+  ; @name LegacyFlatFormat @doc This format will be deprecated in the next era
+  [ + legacy_redeemer ] /
+  ; @name MapFormat @doc New map format. Use this when possibe.
+  { + redeemer_key => redeemer_val }
+
+redeemer_tag =
+    0 ; @name Spend
+  / 1 ; @name Mint
+  / 2 ; @name Cert
+  / 3 ; @name Reward
+  / 4 ; @name Voting
+  / 5 ; @name Proposing
+
+ex_units = [mem: uint, steps: uint] ; @used_as_key
+
+ex_unit_prices =
+  [ mem_price: sub_coin, step_price: sub_coin ]
+
+language = 0 ; @name plutus_v1
+         / 1 ; @name plutus_v2
+         / 2 ; @name plutus_v3
+
+cost_models = { * uint => [* int64] } ; @newtype
+;cost_models = {
+;  ? 0 : [ 166*166 int ], ; @name plutus_v1
+;  ? 1 : [ 175*175 int ], ; @name plutus_v2
+;  ? 2 : [ 233*233 int ], ; @name plutus_v3
+;}

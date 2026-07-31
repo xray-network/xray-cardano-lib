@@ -1,0 +1,181 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Cardano Lib",
+  "description": "Architecture documentation for Cardano Lib",
+  "colors": {
+    "primary": "#0033AD"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Overview",
+        "pages": [
+          "README"
+        ]
+      },
+      {
+        "group": "Implementation updates",
+        "pages": [
+          {
+            "group": "TypeScript",
+            "pages": [
+              {
+                "group": "0001 — CML baseline",
+                "pages": [
+                  "impl/typescript/0001-IMPL-INSTR",
+                  "impl/typescript/0001-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0002 — Message signing",
+                "pages": [
+                  "impl/typescript/0002-IMPL-INSTR",
+                  "impl/typescript/0002-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0003 — UPLC",
+                "pages": [
+                  "impl/typescript/0003-IMPL-INSTR",
+                  "impl/typescript/0003-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0004 — Ledger validation",
+                "pages": [
+                  "impl/typescript/0004-IMPL-INSTR",
+                  "impl/typescript/0004-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0005 — Value and builder correctness",
+                "pages": [
+                  "impl/typescript/0005-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0006 — Typed Conway governance",
+                "pages": [
+                  "impl/typescript/0006-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0007 — CIP-14 asset fingerprints",
+                "pages": [
+                  "impl/typescript/0007-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0008 — Strict identities and HD derivation",
+                "pages": [
+                  "impl/typescript/0008-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0009 — CIP-57 Plutus blueprints",
+                "pages": [
+                  "impl/typescript/0009-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0010 — CIP-67/68 token metadata",
+                "pages": [
+                  "impl/typescript/0010-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0011 — Optional CIP-21 diagnostics",
+                "pages": [
+                  "impl/typescript/0011-IMPL-INSTR"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "C++",
+            "pages": [
+              {
+                "group": "0001 — Full TypeScript feature parity",
+                "pages": [
+                  "impl/cpp/0001-IMPL-INSTR",
+                  "impl/cpp/0001-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0002 — Builder and Conway hardening",
+                "pages": [
+                  "impl/cpp/0002-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0003 — Portability and lean components",
+                "pages": [
+                  "impl/cpp/0003-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0004 — CIP-14 asset fingerprints",
+                "pages": [
+                  "impl/cpp/0004-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0005 — Strict identities and HD derivation",
+                "pages": [
+                  "impl/cpp/0005-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0006 — CIP-57 Plutus blueprints",
+                "pages": [
+                  "impl/cpp/0006-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0007 — CIP-67/68 token metadata",
+                "pages": [
+                  "impl/cpp/0007-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0008 — Optional CIP-21 diagnostics",
+                "pages": [
+                  "impl/cpp/0008-IMPL-INSTR"
+                ]
+              },
+              {
+                "group": "0009 — Local CMake test ownership",
+                "pages": [
+                  "impl/cpp/0009-IMPL-INSTR",
+                  "impl/cpp/0009-IMPL-RESULT"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "group": "Architecture decisions",
+        "pages": [
+          {
+            "group": "Repository",
+            "pages": [
+              "adr/repository/0001-repository-architecture",
+              "adr/repository/0002-shared-update-ledger"
+            ]
+          },
+          {
+            "group": "TypeScript",
+            "pages": [
+              "adr/typescript/0001-lossless-cbor-and-encoding-metadata",
+              "adr/typescript/0002-cryptography-dependency-policy",
+              "adr/typescript/0003-upstream-evidence-and-package-ownership",
+              "adr/typescript/0004-cryptography-primitives"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

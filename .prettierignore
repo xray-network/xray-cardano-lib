@@ -1,0 +1,3 @@
+node_modules
+libs/*/packages/*/dist
+libs/*/package-lock.json

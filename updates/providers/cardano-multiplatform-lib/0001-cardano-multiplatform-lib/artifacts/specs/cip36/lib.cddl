@@ -1,0 +1,58 @@
+CIP36_registration_cbor = {
+  61284: CIP36_key_registration, ; @name key_registration
+  61285: CIP36_registration_witness, ; @name registration_witness
+}
+
+CIP36_voting_pub_key = public_key
+CIP36_nonce = uint
+CIP36_weight = uint .size 4
+CIP36_voting_purpose = uint
+CIP36_legacy_key_registration = CIP36_voting_pub_key
+CIP36_delegation = [
+  voting_pub_key: CIP36_voting_pub_key,
+  weight: CIP36_weight,
+]
+
+; May support other stake credentials in the future.
+; Such additional credentials should be tagged at the CDDL/CBOR level
+; so that parsing is not ambiguous and future proof.
+; However, to avoid breaking changes, the simple key credential is
+; left untagged.
+CIP36_stake_credential = CIP36_staking_pub_key
+; Witness for a stake key credential, not tagged for backward compatibility
+CIP36_stake_witness = ed25519_signature
+; A stake key credential, not tagged for backward compatibility
+CIP36_staking_pub_key = public_key
+
+CIP36_delegation_distribution =
+    [+CIP36_delegation] ; @name weighted
+  / CIP36_legacy_key_registration ; @name legacy
+
+CIP36_key_registration = {
+  1 : CIP36_delegation_distribution, ; @name delegation
+  2 : CIP36_stake_credential, ; @name stake_credential
+  3 : payment_address, ; @name payment_address
+  4 : CIP36_nonce, ; @name nonce
+  ? 5 : CIP36_voting_purpose .default 0, ; @name voting_purpose
+}
+
+
+CIP36_registration_witness = {
+  1 : CIP36_stake_witness, ; @name stake_witness
+}
+
+
+CIP36_deregistration_cbor = {
+  61286: CIP36_key_deregistration, ; @name key_deregistration
+  61285: CIP36_deregistration_witness, ; @name deregistration_witness
+}
+
+CIP36_key_deregistration = {
+  1 : CIP36_stake_credential, ; @name stake_credential
+  2 : CIP36_nonce, ; @name nonce
+  ? 3 : CIP36_voting_purpose .default 0, ; @name voting_purpose
+}
+
+CIP36_deregistration_witness = {
+  1 : CIP36_stake_witness, ; @name stake_witness
+}

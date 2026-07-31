@@ -1,0 +1,20 @@
+coin = uint
+
+positive_coin = coin ; @doc Does not enforce > 0: plain u64 alias for API convenience. Could become a bounds-checked newtype later.
+
+asset_name = bytes .size (0..32) ; @doc Use TryFrom<&str> / TryInto<&str> for utf8 text conversion and RawBytesEncoding for direct bytes access
+
+; these two are hand-written wrappers (AssetBundle<T> in the assets utils) but we keep the
+; rules here so generated code keeps treating them as maps — the inline preserve-encodings
+; handling (per-key encodings in the containing struct's encoding record) works through the
+; wrapper's Deref/DerefMut.
+multi_asset = { * policy_id => { * asset_name => uint } }
+mint = { * policy_id => { * asset_name => non_zero_int_64 } }
+
+int64 = -9223372036854775808 .. 9223372036854775807 ; @no_alias
+
+non_zero_int_64 = -9223372036854775808 .. 9223372036854775807 ; @doc Does not enforce != 0: plain i64 alias for API convenience. Could become a bounds-checked newtype later.
+
+; original def (hand-written due to be being such a common struct to improve API + match old CML):
+; value = coin / [coin,multiasset]
+value = _CDDL_CODEGEN_EXTERN_TYPE_

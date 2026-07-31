@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "https://github.com/dcSpark/cardano-multiplatform-lib.git",
+    "commit": "39681e0d435a71f7c47a2601507ab16e691abb9e"
+  },
+  "fixtureInventory": "manifest.json",
+  "licenseSha256": "4541e95aa81113643b71a96d7ff673c4a83ede3d2e8f0df2ad676e7970e2b1fa",
+  "supplementalSha256": {
+    "PROVENANCE.md": "f36364497bd77fa917b2fc239e72fa87b0e7c31405bcee4e385ff8191b53db01"
+  },
+  "licenses": [
+    {
+      "paths": [
+        "blocks/mainnet/**"
+      ],
+      "sourceRepository": "https://github.com/txpipe/dolos.git",
+      "revision": "ea7960a1c2e56c523fec7c4bab75f390ee443514",
+      "license": "Apache-2.0",
+      "licenseFile": "LICENSE-APACHE-2.0.txt"
+    },
+    {
+      "paths": [
+        "blocks/pallas/**"
+      ],
+      "sourceRepository": "https://github.com/txpipe/pallas.git",
+      "revision": "a7b5a86e3922ea46723e7959118293232db7bf3a",
+      "license": "Apache-2.0",
+      "licenseFile": "LICENSE-APACHE-2.0.txt"
+    }
+  ]
+}

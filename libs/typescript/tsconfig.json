@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/crypto" },
+    { "path": "./packages/chain" },
+    { "path": "./packages/cip" },
+    { "path": "./packages/plutus" },
+    { "path": "./packages/runtime" }
+  ]
+}

@@ -1,0 +1,67 @@
+allegra_block = [
+  header: shelley_header,
+  transaction_bodies         : [* allegra_transaction_body],
+  transaction_witness_sets   : [* allegra_transaction_witness_set],
+  auxiliary_data_set   :
+      { * transaction_index => allegra_auxiliary_data }
+  ]; Valid blocks must also satisfy the following two constraints:
+   ; 1) the length of transaction_bodies and transaction_witness_sets
+   ;    must be the same
+   ; 2) every transaction_index must be strictly smaller than the
+   ;    length of transaction_bodies
+
+MIR_pot = 0 ; @name reserve
+        / 1 ; @name treasury
+
+MIR_action = { * stake_credential => delta_coin } ; @name to_stake_credentials
+           / coin                                 ; @name to_other_pot
+
+move_instantaneous_reward = [
+  pot: MIR_pot,
+  action: MIR_action,
+]
+move_instantaneous_rewards_cert = (tag: 6, move_instantaneous_reward)
+
+allegra_certificate = [
+  stake_registration //
+  stake_deregistration //
+  stake_delegation //
+  shelley_pool_registration //
+  pool_retirement //
+  genesis_key_delegation //
+  move_instantaneous_rewards_cert
+]
+
+allegra_transaction = [
+  body: allegra_transaction_body,
+  witness_set: allegra_transaction_witness_set,
+  auxiliary_data: allegra_auxiliary_data / null,
+]
+
+allegra_transaction_witness_set = {
+  ? 0: [* vkeywitness ],        ; @name vkeywitnesses
+  ? 1: [* native_script ],      ; @name native_scripts
+  ? 2: [* bootstrap_witness ],  ; @name bootstrap_witnesses
+  ; In the future, new kinds of witnesses can be added like this:
+  ; , ? 4: [* foo_script ]
+  ; , ? 5: [* plutus_script ]
+  }
+
+
+
+allegra_auxiliary_data =
+    shelley_format_aux_data ; @name shelley
+  / shelley_MA_format_aux_data ; @name shelley_MA
+
+; allegra differences
+allegra_transaction_body = {
+  0 : [* transaction_input],           ; @name inputs
+  1 : [* shelley_transaction_output],  ; @name outputs
+  2 : coin,                            ; @name fee
+  ? 3 : uint,                          ; @name ttl
+  ? 4 : [* allegra_certificate],               ; @name certs
+  ? 5 : withdrawals,                   ; @name withdrawals
+  ? 6 : shelley_update,                ; @name update
+  ? 7 : auxiliary_data_hash,           ; @name auxiliary_data_hash
+  ? 8 : uint,                          ; @name validity_interval_start
+  }
