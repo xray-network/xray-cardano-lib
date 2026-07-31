@@ -18,3 +18,4 @@ This is the only lifecycle and decision-proof ledger for C++ implementation reco
 | `0007` | [CIP-67/68 token metadata](./0007-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
 | `0008` | [Optional CIP-21 compatibility diagnostics](./0008-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
 | `0009` | [Local CMake test ownership](./0009-IMPL-INSTR.md) | `REVIEW` | [Result](./0009-IMPL-RESULT.md) | `LOCAL` | Implementation completed with local domain CMake ownership and the full 141-test CI workflow passing; awaiting human decision. |
+| `0010` | [XRAY Cardano Lib package rename](./0010-IMPL-INSTR.md) | `REVIEW` | [Result](./0010-IMPL-RESULT.md) | `LOCAL` | Rename completed with the full 141-test C++ workflow passing; awaiting human decision. |

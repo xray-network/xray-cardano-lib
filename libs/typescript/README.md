@@ -14,7 +14,7 @@ published packages, including their source and tests, live under `packages/`.
 | [`@xray-network/cardano-chain`](./packages/chain/README.md) | Cardano eras, ledger models, addresses, validation, and transaction building |
 | [`@xray-network/cardano-cip`](./packages/cip/README.md) | Supported Cardano Improvement Proposal APIs |
 | [`@xray-network/cardano-plutus`](./packages/plutus/README.md) | Plutus Data, UPLC, cost models, contexts, and evaluation |
-| [`@xray-network/cardano-lib`](./packages/runtime/README.md) | Unified public runtime facade |
+| [`@xray-network/xray-cardano-lib`](./packages/runtime/README.md) | Unified public runtime facade |
 
 ## Development
 

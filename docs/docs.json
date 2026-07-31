@@ -1,8 +1,8 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Cardano Lib",
-  "description": "Architecture documentation for Cardano Lib",
+  "name": "XRAY Cardano Lib",
+  "description": "Architecture documentation for XRAY Cardano Lib",
   "colors": {
     "primary": "#0033AD"
   },
@@ -89,6 +89,13 @@
                 "pages": [
                   "impl/typescript/0011-IMPL-INSTR"
                 ]
+              },
+              {
+                "group": "0012 — XRAY Cardano Lib rename",
+                "pages": [
+                  "impl/typescript/0012-IMPL-INSTR",
+                  "impl/typescript/0012-IMPL-RESULT"
+                ]
               }
             ]
           },
@@ -150,6 +157,13 @@
                   "impl/cpp/0009-IMPL-INSTR",
                   "impl/cpp/0009-IMPL-RESULT"
                 ]
+              },
+              {
+                "group": "0010 — XRAY Cardano Lib rename",
+                "pages": [
+                  "impl/cpp/0010-IMPL-INSTR",
+                  "impl/cpp/0010-IMPL-RESULT"
+                ]
               }
             ]
           }
@@ -162,7 +176,8 @@
             "group": "Repository",
             "pages": [
               "adr/repository/0001-repository-architecture",
-              "adr/repository/0002-shared-update-ledger"
+              "adr/repository/0002-shared-update-ledger",
+              "adr/repository/0003-project-identity"
             ]
           },
           {

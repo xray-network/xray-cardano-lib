@@ -1,9 +1,9 @@
 ---
-title: Cardano Lib
-description: Architecture decisions for the Cardano Lib polyglot repository
+title: XRAY Cardano Lib
+description: Architecture decisions for the XRAY Cardano Lib polyglot repository
 ---
 
-# Cardano Lib documentation
+# XRAY Cardano Lib documentation
 
 Architecture decisions are grouped by their scope. Canonical implementation records live below
 `updates/implementations/`, while their workflow templates remain at the root of `updates/`.
@@ -21,6 +21,7 @@ copied into the documentation tree.
 |---|---|---|
 | [0001](adr/repository/0001-repository-architecture.md) | Repository architecture and implementation records | Accepted; layout superseded |
 | [0002](adr/repository/0002-shared-update-ledger.md) | Shared update ledger and provider evidence | Accepted |
+| [0003](adr/repository/0003-project-identity.md) | XRAY Cardano Lib project identity | Accepted |
 
 ## TypeScript decisions
 

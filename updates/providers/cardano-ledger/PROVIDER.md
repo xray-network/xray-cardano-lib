@@ -5,7 +5,7 @@ Provider-Version: v1
 
 ## Purpose
 
-Capture official Cardano Ledger CDDL needed to implement and validate Cardano Lib's owned
+Capture official Cardano Ledger CDDL needed to implement and validate XRAY Cardano Lib's owned
 TypeScript against the frozen CML comparison baseline. The files are evidence for an
 implementation plan; they never generate or overwrite runtime source.
 
@@ -68,7 +68,7 @@ at the pinned commit; do not copy an upstream changelog into the snapshot docume
 - Unexpected syntax, unsupported CDDL, unresolved references, and uncertain grammar mappings are
   preparation blockers.
 
-Dijkstra is evidence-only because Cardano Lib has no Dijkstra owner or public entry point. Adding
+Dijkstra is evidence-only because XRAY Cardano Lib has no Dijkstra owner or public entry point. Adding
 it requires an explicit scope decision, a provider-version update, package ownership, multi-era
 handling, fixtures, and tests. Until then, do not copy Dijkstra artifacts or include Dijkstra
 implementation work.

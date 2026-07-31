@@ -5,7 +5,7 @@
 
 ## Context
 
-Cardano Lib uses immutable upstream snapshots as evidence for reviewed TypeScript implementations.
+XRAY Cardano Lib uses immutable upstream snapshots as evidence for reviewed TypeScript implementations.
 CDDL and captured source define wire and runtime behavior, but they do not define TypeScript
 ownership, public APIs, browser boundaries, or lossless encoding metadata by themselves.
 
@@ -24,7 +24,7 @@ proposal-specific CIP formats are independent domains rather than generic utilit
 - Reusable upstream vectors remain in checksummed snapshot artifact trees with pinned provenance
   and license mapping. Published packages never load snapshot artifacts at runtime.
 - The published domain packages are `cardano-core`, `cardano-crypto`, `cardano-chain`,
-  `cardano-cip`, `cardano-plutus`, and the aggregate `cardano-lib` runtime.
+  `cardano-cip`, `cardano-plutus`, and the aggregate `xray-cardano-lib` runtime.
 - `@xray-network/cardano-cip` owns CIP-8, CIP-25, and CIP-36, with focused `./cip8`, `./cip25`,
   and `./cip36` subpaths.
 - `@xray-network/cardano-plutus` owns typed Data schemas, UPLC, parameter application, and raw
@@ -35,7 +35,7 @@ proposal-specific CIP formats are independent domains rather than generic utilit
 - Ledger wire models—including `PlutusData`, scripts, redeemers, and `ExUnits`—remain owned by
   `@xray-network/cardano-chain`. Ledger decoding, script resolution, and context construction used
   by raw valuation remain private to the Plutus package.
-- `@xray-network/cardano-lib` re-exports curated domain bindings by identity and owns no competing
+- `@xray-network/xray-cardano-lib` re-exports curated domain bindings by identity and owns no competing
   nominal implementation.
 - Domain packages use universal ESM, `Uint8Array`, `bigint`, Web Platform APIs, and the dependency
   direction declared by their project references.

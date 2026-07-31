@@ -34,9 +34,9 @@ import {
 import { PrivateKey, TransactionHash } from "../../crypto/dist/esm/index.js";
 import { BabbageTransactionBody } from "../../chain/dist/esm/era/babbage/index.js";
 
-const campaignCases = Number.parseInt(process.env.CARDANO_LIB_HARDENING_CASES ?? "6000", 10);
+const campaignCases = Number.parseInt(process.env.XRAY_CARDANO_LIB_HARDENING_CASES ?? "6000", 10);
 if (!Number.isSafeInteger(campaignCases) || campaignCases < 100) {
-  throw new RangeError("CARDANO_LIB_HARDENING_CASES must be an integer of at least 100");
+  throw new RangeError("XRAY_CARDANO_LIB_HARDENING_CASES must be an integer of at least 100");
 }
 
 function random(seed) {

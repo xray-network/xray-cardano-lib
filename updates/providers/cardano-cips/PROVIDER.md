@@ -5,7 +5,7 @@ Provider-Version: v1
 
 ## Purpose
 
-Capture the official specifications needed for Cardano Lib's focused encoding, native-asset,
+Capture the official specifications needed for XRAY Cardano Lib's focused encoding, native-asset,
 governance, Plutus-blueprint, and hardware-wallet interoperability plans. The snapshot is
 normative evidence for the selected standards only; it is not an instruction to implement every
 CIP, copy reference implementations, or expose a generic CIP registry.
@@ -90,7 +90,7 @@ reference implementation, or generated program.
 
 - Consume only the selected CIPs relevant to a bounded instruction. This provider does not justify
   an omnibus CIP API or automatic exports for every captured standard.
-- Reuse Cardano Lib's existing Bech32, Blake2b, key, address, ledger, Plutus Data, CBOR, and JSON
+- Reuse XRAY Cardano Lib's existing Bech32, Blake2b, key, address, ledger, Plutus Data, CBOR, and JSON
   owners. Do not create competing nominal primitives or ship snapshot artifacts.
 - Treat CIP-0005 as the prefix registry, CIP-0016 as the key-serialization contract, and CIP-0019
   as the address-format contract. Typed decoders must validate semantic HRP, payload shape, and

@@ -8,18 +8,18 @@ execute_process(
   RESULT_VARIABLE install_result
 )
 if(NOT install_result EQUAL 0)
-  message(FATAL_ERROR "CardanoLib installation failed")
+  message(FATAL_ERROR "XRAYCardanoLib installation failed")
 endif()
 
 foreach(required_path
     "include/cardano/cardano.hpp"
     "lib/libcardano.a"
-    "lib/cmake/CardanoLib/CardanoLibConfig.cmake"
-    "share/doc/CardanoLib/LICENSE"
-    "share/doc/CardanoLib/README.md"
-    "share/doc/CardanoLib/API_PARITY.md"
-    "share/doc/CardanoLib/examples/consumer/CMakeLists.txt"
-    "share/doc/CardanoLib/examples/consumer/main.cpp")
+    "lib/cmake/XRAYCardanoLib/XRAYCardanoLibConfig.cmake"
+    "share/doc/XRAYCardanoLib/LICENSE"
+    "share/doc/XRAYCardanoLib/README.md"
+    "share/doc/XRAYCardanoLib/API_PARITY.md"
+    "share/doc/XRAYCardanoLib/examples/consumer/CMakeLists.txt"
+    "share/doc/XRAYCardanoLib/examples/consumer/main.cpp")
   if(NOT EXISTS "${install_dir}/${required_path}")
     message(FATAL_ERROR "Installed package is missing ${required_path}")
   endif()

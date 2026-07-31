@@ -5,7 +5,7 @@ Provider-Version: v1
 
 ## Purpose
 
-Preserve the frozen CDDL comparison baseline and test-vector artifacts required by Cardano Lib's
+Preserve the frozen CDDL comparison baseline and test-vector artifacts required by XRAY Cardano Lib's
 compatibility tests. This provider is historical evidence, not a live update source or a runtime
 code generator.
 

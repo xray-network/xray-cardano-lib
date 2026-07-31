@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import * as cardano from "@xray-network/cardano-lib";
+import * as cardano from "@xray-network/xray-cardano-lib";
 import * as chain from "@xray-network/cardano-chain";
 import * as allegra from "@xray-network/cardano-chain/allegra";
 import * as alonzo from "@xray-network/cardano-chain/alonzo";

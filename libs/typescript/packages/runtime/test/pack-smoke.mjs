@@ -11,9 +11,9 @@ const packages = [
   ["chain", "@xray-network/cardano-chain"],
   ["cip", "@xray-network/cardano-cip"],
   ["plutus", "@xray-network/cardano-plutus"],
-  ["runtime", "@xray-network/cardano-lib"],
+  ["runtime", "@xray-network/xray-cardano-lib"],
 ];
-const temporaryRoot = await mkdtemp(path.join(tmpdir(), "cardano-lib-pack-smoke-"));
+const temporaryRoot = await mkdtemp(path.join(tmpdir(), "xray-cardano-lib-pack-smoke-"));
 let packedFileCount = 0;
 let packedByteCount = 0;
 
@@ -112,7 +112,7 @@ try {
   await mkdir(consumerRoot);
   await writeFile(
     path.join(consumerRoot, "package.json"),
-    '{\n  "name": "cardano-lib-pack-smoke-consumer",\n  "private": true,\n  "type": "module"\n}\n',
+    '{\n  "name": "xray-cardano-lib-pack-smoke-consumer",\n  "private": true,\n  "type": "module"\n}\n',
   );
   run(
     "npm",
@@ -123,7 +123,7 @@ try {
   await writeFile(
     path.join(consumerRoot, "esm-smoke.mjs"),
     [
-      'import * as cardano from "@xray-network/cardano-lib";',
+      'import * as cardano from "@xray-network/xray-cardano-lib";',
       'import * as chain from "@xray-network/cardano-chain";',
       'import * as multiEra from "@xray-network/cardano-chain/multi-era";',
       'import { BabbageTransactionBody } from "@xray-network/cardano-chain/babbage";',
@@ -188,7 +188,7 @@ try {
   await writeFile(
     path.join(consumerRoot, "types-smoke.ts"),
     [
-      'import * as cardano from "@xray-network/cardano-lib";',
+      'import * as cardano from "@xray-network/xray-cardano-lib";',
       'import * as chain from "@xray-network/cardano-chain";',
       'import * as allegra from "@xray-network/cardano-chain/allegra";',
       'import * as alonzo from "@xray-network/cardano-chain/alonzo";',
@@ -214,10 +214,10 @@ try {
       'import * as uplc from "@xray-network/cardano-plutus/uplc";',
       'import * as core from "@xray-network/cardano-core";',
       'import * as crypto from "@xray-network/cardano-crypto";',
-      'import type { PlutusDataJSON, TransactionMetadatumJSON } from "@xray-network/cardano-lib";',
+      'import type { PlutusDataJSON, TransactionMetadatumJSON } from "@xray-network/xray-cardano-lib";',
       'import type { MultiEraBlockJSON } from "@xray-network/cardano-chain/multi-era";',
       "const datum: PlutusDataJSON = { constructor: 0, fields: [{ int: 42 }] };",
-      'const metadata: TransactionMetadatumJSON = { string: "cardano-lib" };',
+      'const metadata: TransactionMetadatumJSON = { string: "xray-cardano-lib" };',
       "const block = { Conway: {} as never } satisfies MultiEraBlockJSON;",
       "const datumSchema = Data.Object({ owner: Data.Bytes(), amount: Data.Integer() });",
       "type DatumValue = Data.Static<typeof datumSchema>;",
@@ -255,7 +255,7 @@ try {
     }
   }
 
-  process.stdout.write(`Packed Cardano Lib package smoke tests passed: ${packedFileCount} intended files, ${packedByteCount} unpacked bytes, ESM + NodeNext + bundler consumers.\n`);
+  process.stdout.write(`Packed XRAY Cardano Lib package smoke tests passed: ${packedFileCount} intended files, ${packedByteCount} unpacked bytes, ESM + NodeNext + bundler consumers.\n`);
 } finally {
   if (process.env.KEEP_PACK_SMOKE !== "1") {
     await rm(temporaryRoot, { force: true, recursive: true });

@@ -1,4 +1,4 @@
-# Cardano Lib for C++
+# XRAY Cardano Lib for C++
 
 This directory is an independent C++23 workspace for Cardano wire formats, cryptography, ledger
 models, CIPs, and Plutus evaluation. It does not build, load, or depend on the TypeScript
@@ -78,7 +78,7 @@ Optionally install the package to a chosen prefix:
 cmake --install build/release --prefix /path/to/install
 ```
 
-Consumers can then use `find_package(CardanoLib CONFIG REQUIRED)` with that prefix on
+Consumers can then use `find_package(XRAYCardanoLib CONFIG REQUIRED)` with that prefix on
 `CMAKE_PREFIX_PATH`.
 
 ## Build and run tests

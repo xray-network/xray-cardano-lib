@@ -1,6 +1,6 @@
-# Contributing to Cardano Lib
+# Contributing to XRAY Cardano Lib
 
-Cardano Lib is a language-first polyglot repository. Source, provider evidence, and implementation
+XRAY Cardano Lib is a language-first polyglot repository. Source, provider evidence, and implementation
 history have separate ownership:
 
 - `libs/<language>/` owns implementation source, packages, tests, manifests, and validation.

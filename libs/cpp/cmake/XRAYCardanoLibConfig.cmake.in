@@ -1,0 +1,28 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Boost CONFIG)
+find_dependency(Botan CONFIG)
+find_dependency(unofficial-sodium CONFIG)
+find_dependency(libsecp256k1 CONFIG)
+find_dependency(nlohmann_json CONFIG)
+find_dependency(blst CONFIG)
+
+set(_XRAYCardanoLib_known_components core crypto chain cip plutus lib)
+foreach(_component IN LISTS XRAYCardanoLib_FIND_COMPONENTS)
+  if(NOT _component IN_LIST _XRAYCardanoLib_known_components)
+    set(XRAYCardanoLib_FOUND FALSE)
+    set(XRAYCardanoLib_NOT_FOUND_MESSAGE "Unknown XRAYCardanoLib component: ${_component}")
+    return()
+  endif()
+endforeach()
+
+include("${CMAKE_CURRENT_LIST_DIR}/XRAYCardanoLibTargets.cmake")
+
+foreach(_component IN LISTS _XRAYCardanoLib_known_components)
+  if(TARGET "cardano::${_component}")
+    set("XRAYCardanoLib_${_component}_FOUND" TRUE)
+  endif()
+endforeach()
+
+check_required_components(XRAYCardanoLib)

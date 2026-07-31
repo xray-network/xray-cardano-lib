@@ -6,7 +6,7 @@ Provider-Version: v1
 ## Purpose
 
 Capture EMURGO's CIP-0008/COSE message-signing implementation as immutable evidence for a
-browser-native, package-owned Cardano Lib TypeScript implementation. The captured Rust is a
+browser-native, package-owned XRAY Cardano Lib TypeScript implementation. The captured Rust is a
 behavior and wire-format reference; it is not a runtime dependency, generated source, or
 instruction set.
 
@@ -62,9 +62,9 @@ Do not run any upstream test, build, script, package manager, binary, filter, or
 
 ## Consumption and planning requirements
 
-- Implement message signing as ordinary TypeScript owned by the Cardano Lib package selected
+- Implement message signing as ordinary TypeScript owned by the XRAY Cardano Lib package selected
   during preparation; do not publish or invoke upstream Rust, WASM, ASM.js, or native artifacts.
-- Reuse Cardano Lib's existing generic lossless CBOR and cryptography owners. Do not duplicate
+- Reuse XRAY Cardano Lib's existing generic lossless CBOR and cryptography owners. Do not duplicate
   generic CBOR values, integers, Ed25519 key/signature classes, or Blake2b primitives.
 - Map the selected signing structures, protected and unprotected headers, signature structures,
   builders, COSE key representation, detached payload behavior, external AAD, payload hashing,

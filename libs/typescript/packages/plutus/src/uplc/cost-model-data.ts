@@ -1,4 +1,4 @@
-// Derived from the accepted snapshot inputs during Cardano Lib implementation.
+// Derived from the accepted snapshot inputs during XRAY Cardano Lib implementation.
 // It is package-owned TypeScript data; no upstream artifact is loaded at runtime.
 
 export const COST_MODEL_PARAMETER_NAMES: readonly (readonly string[])[] =

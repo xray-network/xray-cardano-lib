@@ -17,7 +17,7 @@ Provider-Evidence: ../../providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.m
 | `libs/cpp/include/cardano/chain/era/conway.hpp` and `libs/cpp/include/cardano/chain/era/shared/models.hpp` | `LOCAL` | Yes | Existing Conway nominal owners and validated wire models |
 
 The provider authorizes wire shapes only. Collateral calculations, return requirements, exact
-rational arithmetic, and rejection rules below deliberately define Cardano Lib's repository-local
+rational arithmetic, and rejection rules below deliberately define XRAY Cardano Lib's repository-local
 checked-builder policy; they are not presented as provider-backed or complete phase-one ledger
 validation.
 

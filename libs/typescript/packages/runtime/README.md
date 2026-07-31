@@ -1,15 +1,15 @@
-# Cardano Lib
+# XRAY Cardano Lib
 
-The convenient all-in-one entry point for Cardano Lib. It exposes the commonly used core values,
+The convenient all-in-one entry point for XRAY Cardano Lib. It exposes the commonly used core values,
 cryptographic types, ledger models, addresses, transaction builders, era support, and metadata
-types from the domain packages through `@xray-network/cardano-lib`.
+types from the domain packages through `@xray-network/xray-cardano-lib`.
 
 The package is universal ESM for Node.js 20.19 or newer and modern browsers.
 
 ## Installation
 
 ```sh
-npm install @xray-network/cardano-lib
+npm install @xray-network/xray-cardano-lib
 ```
 
 ## Basic usage
@@ -20,7 +20,7 @@ import {
   NetworkInfo,
   PrivateKey,
   TransactionHash,
-} from "@xray-network/cardano-lib";
+} from "@xray-network/xray-cardano-lib";
 
 const key = PrivateKey.generate_ed25519();
 const address = Address.from_bech32(
@@ -36,7 +36,7 @@ key.dispose();
 
 ## Package role
 
-`@xray-network/cardano-lib` is a curated facade over the domain packages:
+`@xray-network/xray-cardano-lib` is a curated facade over the domain packages:
 
 | Domain | Owning package | Contents |
 | --- | --- | --- |

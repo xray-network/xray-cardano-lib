@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`cpp/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted lossless CBOR metadata, era validation, transaction, CIP-36, limit, error, and package baseline |
-| [`0001-cardano-cips`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Captured active CIP-21 interoperability rules and explicitly time-sensitive device appendix |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Captured active CIP-21 interoperability rules and explicitly time-sensitive device appendix |
 | `libs/cpp/include/cardano/core/cbor.hpp` and `libs/cpp/include/cardano/chain/era_models.hpp` | `LOCAL` | Yes | Existing preserved-wire and transaction owners used for read-only inspection |
 
 ## Objective

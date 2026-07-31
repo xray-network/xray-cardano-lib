@@ -1,4 +1,4 @@
-# Cardano Lib agent instructions
+# XRAY Cardano Lib agent instructions
 
 These instructions apply to the whole repository.
 

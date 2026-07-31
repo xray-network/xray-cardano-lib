@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import * as cardano from "@xray-network/cardano-lib";
+import * as cardano from "@xray-network/xray-cardano-lib";
 import * as multiEra from "@xray-network/cardano-chain/multi-era";
 import * as cip8 from "@xray-network/cardano-cip/cip8";
 

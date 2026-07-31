@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(
-  CardanoLib
+  XRAYCardanoLib
   VERSION 0.1.0
   DESCRIPTION "Independent C++23 Cardano wire, crypto, ledger, CIP, and Plutus library"
   LANGUAGES C CXX
@@ -43,7 +43,7 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-option(CARDANO_BUILD_TESTS "Build the Cardano Lib validation suite" OFF)
+option(CARDANO_BUILD_TESTS "Build the XRAY Cardano Lib validation suite" OFF)
 option(CARDANO_PROVIDER_TESTS "Run tests directly against captured provider evidence" OFF)
 option(CARDANO_WARNINGS_AS_ERRORS "Treat owned-source compiler warnings as errors" OFF)
 option(CARDANO_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
@@ -175,7 +175,7 @@ target_link_libraries(cardano_lib PUBLIC cardano_core cardano_crypto cardano_cha
 
 install(
   TARGETS cardano_core cardano_crypto cardano_chain cardano_cip cardano_plutus cardano_lib
-  EXPORT CardanoLibTargets
+  EXPORT XRAYCardanoLibTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -187,26 +187,26 @@ install(DIRECTORY examples/ DESTINATION "${CMAKE_INSTALL_DOCDIR}/examples")
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../../LICENSE" DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
 configure_package_config_file(
-  cmake/CardanoLibConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/CardanoLibConfig.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CardanoLib"
+  cmake/XRAYCardanoLibConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/XRAYCardanoLibConfig.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/XRAYCardanoLib"
 )
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/CardanoLibConfigVersion.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/XRAYCardanoLibConfigVersion.cmake"
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY SameMajorVersion
 )
 install(
-  EXPORT CardanoLibTargets
-  FILE CardanoLibTargets.cmake
+  EXPORT XRAYCardanoLibTargets
+  FILE XRAYCardanoLibTargets.cmake
   NAMESPACE cardano::
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CardanoLib"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/XRAYCardanoLib"
 )
 install(
   FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/CardanoLibConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/CardanoLibConfigVersion.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CardanoLib"
+    "${CMAKE_CURRENT_BINARY_DIR}/XRAYCardanoLibConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/XRAYCardanoLibConfigVersion.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/XRAYCardanoLib"
 )
 
 if(CARDANO_BUILD_TESTS)

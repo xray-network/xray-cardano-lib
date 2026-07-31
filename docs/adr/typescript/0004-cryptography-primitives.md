@@ -5,7 +5,7 @@
 
 ## Context
 
-Cardano Lib requires browser-native Ed25519, Cardano Ed25519-BIP32, hashing, encryption, UPLC
+XRAY Cardano Lib requires browser-native Ed25519, Cardano Ed25519-BIP32, hashing, encryption, UPLC
 secp256k1, and BLS12-381 operations. These primitives are security-sensitive, and UPLC operations
 are consensus-visible.
 

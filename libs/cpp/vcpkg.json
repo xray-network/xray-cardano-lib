@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "name": "cardano-lib-cpp",
+  "name": "xray-cardano-lib-cpp",
   "version-string": "0.1.0",
   "dependencies": [
     {
@@ -30,7 +30,7 @@
   ],
   "features": {
     "tests": {
-      "description": "Build Cardano Lib's C++ validation suite",
+      "description": "Build XRAY Cardano Lib's C++ validation suite",
       "dependencies": [
         {
           "name": "catch2",

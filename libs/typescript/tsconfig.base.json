@@ -12,7 +12,7 @@
     "moduleResolution": "NodeNext",
     "moduleDetection": "force",
     "paths": {
-      "@xray-network/cardano-lib": ["./runtime/src/index.ts"],
+      "@xray-network/xray-cardano-lib": ["./runtime/src/index.ts"],
       "@xray-network/cardano-chain": ["./chain/src/index.ts"],
       "@xray-network/cardano-chain/allegra": ["./chain/src/era/allegra/index.ts"],
       "@xray-network/cardano-chain/alonzo": ["./chain/src/era/alonzo/index.ts"],

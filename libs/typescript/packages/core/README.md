@@ -1,6 +1,6 @@
 # Cardano Core
 
-Browser-safe foundational types and codecs shared by the Cardano Lib packages.
+Browser-safe foundational types and codecs shared by the XRAY Cardano Lib packages.
 `@xray-network/cardano-core` provides byte utilities, lossless CBOR handling, ordered
 collections, numeric primitives, network identifiers, and consistent errors without depending on
 another workspace package.

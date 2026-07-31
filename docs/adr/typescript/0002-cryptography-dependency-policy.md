@@ -83,7 +83,7 @@ metadata and Plutus JSON, signatures, and transaction-builder seeds. Run the ext
 with:
 
 ```sh
-CARDANO_LIB_HARDENING_CASES=50000 node --test libs/typescript/packages/runtime/test/hardening.test.mjs
+XRAY_CARDANO_LIB_HARDENING_CASES=50000 node --test libs/typescript/packages/runtime/test/hardening.test.mjs
 ```
 
 The recorded extended run completed 50,000 malformed-CBOR cases without crashes, hangs, or
@@ -91,7 +91,7 @@ semantic failures.
 
 ## Independent review
 
-Automated tests and self-review are not an audit opinion. No independent Cardano Lib security
+Automated tests and self-review are not an audit opinion. No independent XRAY Cardano Lib security
 review has been commissioned. Before a stable security-sensitive release, an independent reviewer
 must inspect:
 

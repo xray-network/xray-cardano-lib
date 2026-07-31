@@ -9,7 +9,7 @@ import {
   TransactionUnspentOutput,
   TransactionWitnessSet,
   Value,
-} from "@xray-network/cardano-lib";
+} from "@xray-network/xray-cardano-lib";
 import { bytesToHex, hexToBytes } from "@xray-network/cardano-core";
 
 async function connectWallet(provider) {

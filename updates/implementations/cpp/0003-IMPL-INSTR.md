@@ -29,7 +29,7 @@ specified matrix, not a stable ABI or performance guarantee.
 | --- | --- | --- | --- | --- |
 | `C3-PLAT1` | Support the exact compiler/platform matrix below and reject missing language/library capabilities rather than unrelated OS version strings. | Retain the accepted macOS ARM64 configuration while adding source-compatible hosts. | Root CMake, presets, CI documentation | Configure/build/test jobs for every matrix row |
 | `C3-CMK1` | Remove Apple-only command paths and flags; express warnings, sanitizers, archives, and runtime differences through compiler capabilities. | No public C++ semantic change. | `CMakeLists.txt`, `cmake/`, test scripts | Configure tests plus compile/link/install on each host |
-| `C3-PKG1` | Install component-specific target/config files and discover only the requested component's transitive external dependencies. | Existing `find_package(CardanoLib CONFIG REQUIRED)` and aggregate `cardano::lib` continue to work. | Package config and install/export rules | Clean consumers for each component and aggregate |
+| `C3-PKG1` | Install component-specific target/config files and discover only the requested component's transitive external dependencies. | Existing `find_package(XRAYCardanoLib CONFIG REQUIRED)` and aggregate `cardano::lib` continue to work. | Package config and install/export rules | Clean consumers for each component and aggregate |
 | `C3-BEN1` | Add an opt-in deterministic benchmark executable and JSON report for block decode/preserve/canonical encode and UPLC decode/evaluate workloads. | Benchmarks are non-production, do not change test pass/fail semantics, and ship no provider artifact. | `benchmarks/`, benchmark CMake option/preset | Fixture-integrity, repeatability, schema, and smoke tests |
 | `C3-DOC1` | Document supported versus merely buildable hosts, dependency closures, benchmark protocol, and non-ABI status. | Preserve the `0.1.x` no-stable-ABI promise. | `libs/cpp/README.md`, `API_PARITY.md` | Documentation/inventory and installed-content gates |
 
@@ -57,7 +57,7 @@ bypass compile-feature probes.
    hardening without pretending ASan/UBSan parity. Do not weaken warnings-as-errors for owned code.
 3. Keep the target graph `core`; `crypto -> core`; `chain -> core, crypto`;
    `cip -> core, crypto, chain`; `plutus -> core, crypto, chain`; `lib -> all`. Install one target
-   file per component and have `CardanoLibConfig.cmake` load the requested component plus its
+   file per component and have `XRAYCardanoLibConfig.cmake` load the requested component plus its
    closure. With no components, load `lib`. A `core` consumer must not call `find_dependency` for
    Botan, sodium, secp256k1, blst, or JSON; any component whose closure includes `crypto` discovers
    precisely the exported static-link dependencies.

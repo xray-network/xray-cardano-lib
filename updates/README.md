@@ -1,4 +1,4 @@
-# Cardano Lib updates
+# XRAY Cardano Lib updates
 
 This directory is the permanent canonical ledger for implementation instructions, results,
 library lifecycle state, and shared provider evidence.

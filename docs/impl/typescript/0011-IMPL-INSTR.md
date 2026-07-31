@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`typescript/0004`](./0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted Byron-through-Conway models, lossless CBOR, and transaction ownership |
-| [`0001-cardano-cips`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable active CIP-0021 transaction restrictions |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable active CIP-0021 transaction restrictions |
 | Captured `CIP-0021/README.md` | `PROVIDER` | Yes | Exact deterministic restrictions and explicitly time-sensitive appendix boundary |
 | `libs/typescript/packages/{core,chain,cip,runtime}/` | `LOCAL` | Yes | Existing lossless CBOR nodes, transaction owner, package exports, and tests |
 

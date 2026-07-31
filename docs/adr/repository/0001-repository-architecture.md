@@ -6,7 +6,7 @@
 
 ## Context
 
-Cardano Lib is a polyglot repository. Each language needs independent source and build ownership,
+XRAY Cardano Lib is a polyglot repository. Each language needs independent source and build ownership,
 while protocol evidence and implementation history must remain reviewable across languages.
 
 The repository therefore separates executable library workspaces, canonical implementation

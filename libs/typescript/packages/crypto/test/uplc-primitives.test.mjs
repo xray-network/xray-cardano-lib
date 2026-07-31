@@ -26,7 +26,7 @@ test("UPLC hash primitives match authoritative empty-message vectors", () => {
 
 test("UPLC secp256k1 verification accepts compact authoritative encodings", () => {
   const secret = Uint8Array.from({ length: 32 }, (_, index) => index + 1);
-  const digest = sha2_256(new TextEncoder().encode("cardano-lib UPLC"));
+  const digest = sha2_256(new TextEncoder().encode("xray-cardano-lib UPLC"));
   const publicKey = secp256k1.getPublicKey(secret, true);
   const ecdsa = secp256k1.sign(digest, secret, { prehash: false, format: "compact" });
   assert.equal(verifySecp256k1Ecdsa(publicKey, ecdsa, digest), true);

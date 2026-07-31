@@ -44,7 +44,7 @@ const packageRules = {
       "@xray-network/cardano-crypto": "0.1.0",
       "@xray-network/cardano-plutus": "0.1.0",
     },
-    name: "@xray-network/cardano-lib",
+    name: "@xray-network/xray-cardano-lib",
   },
   plutus: {
     dependencies: {
@@ -97,7 +97,7 @@ function importedNodeBuiltins(source) {
   return imports;
 }
 
-test("all Cardano Lib packages expose the same universal ESM shape", async () => {
+test("all XRAY Cardano Lib packages expose the same universal ESM shape", async () => {
   const packageDirectories = Object.keys(packageRules).sort();
   assert.deepEqual(packageDirectories, Object.keys(packageRules).sort());
 

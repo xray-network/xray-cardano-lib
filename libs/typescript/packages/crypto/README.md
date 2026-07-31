@@ -1,6 +1,6 @@
 # `@xray-network/cardano-crypto`
 
-Native ESM cryptography and Cardano key types for Cardano Lib. The package runs locally in Node.js
+Native ESM cryptography and Cardano key types for XRAY Cardano Lib. The package runs locally in Node.js
 and modern browsers.
 
 It provides:
@@ -27,7 +27,7 @@ Crypto `getRandomValues` API.
 ```ts
 import { PrivateKey } from "@xray-network/cardano-crypto";
 
-const message = new TextEncoder().encode("Cardano Lib");
+const message = new TextEncoder().encode("XRAY Cardano Lib");
 const privateKey = PrivateKey.generate_ed25519();
 const publicKey = privateKey.to_public();
 const signature = privateKey.sign(message);
@@ -209,5 +209,5 @@ installed-consumer behavior.
 
 ## License
 
-Cardano Lib is distributed under the MIT license. See [LICENSE](./LICENSE). Runtime cryptography
+XRAY Cardano Lib is distributed under the MIT license. See [LICENSE](./LICENSE). Runtime cryptography
 dependencies retain their own licenses and notices.

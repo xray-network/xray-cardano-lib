@@ -6,7 +6,7 @@ Provider-Version: v1
 ## Purpose
 
 Capture the official Plutus implementation, ledger API, and conformance suite as immutable
-evidence for a browser-native, Cardano Lib-owned TypeScript implementation of Untyped Plutus Core.
+evidence for a browser-native, XRAY Cardano Lib-owned TypeScript implementation of Untyped Plutus Core.
 Capture the official Cardano Ledger implementation separately as the authority for transaction
 script collection, era-specific script contexts, and execution-unit estimation. The bounded public
 surface includes typed Data, UPLC AST values, text and Flat parsing/encoding, cost models,
@@ -232,7 +232,7 @@ filter, or submodule.
 - Preserve protocol/language availability, successful-return rules, the V1/V2 historical script
   CBOR-remainder compatibility exception, V2+ constant wire-size checks, and protocol-11 universe
   header and constructor-field limits exactly.
-- Reuse Cardano Lib's lossless CBOR, Plutus Data, transactions, scripts, cost models, redeemers,
+- Reuse XRAY Cardano Lib's lossless CBOR, Plutus Data, transactions, scripts, cost models, redeemers,
   hashes, and builder owners. Do not create competing public nominal ledger types.
 - Keep all runtime code browser-safe TypeScript. Additional SHA-2, Keccak, RIPEMD, secp256k1, and
   BLS12-381 operations belong to the crypto package and follow ADR 0004.
@@ -247,4 +247,4 @@ filter, or submodule.
 - Upstream Haskell, Rust, native code, WASM, generated JavaScript, bindings, binaries, or runtime
   data loading
 - Full ledger phase-one validation, balancing, fee selection, and transaction construction
-- Generic Cardano CBOR, ledger, Data, key, hash, or signature wrappers already owned by Cardano Lib
+- Generic Cardano CBOR, ledger, Data, key, hash, or signature wrappers already owned by XRAY Cardano Lib

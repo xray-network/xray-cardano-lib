@@ -13,7 +13,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | --- | --- | --- | --- |
 | [`typescript/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted key/address compatibility and package identities |
 | [`typescript/0004`](./0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted Conway `Credential` and `GovActionId` owners |
-| [`0001-cardano-cips`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0005, 0016, 0019, 0105, 0129, and 1852 evidence |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0005, 0016, 0019, 0105, 0129, and 1852 evidence |
 | Captured CIP-0019 ABNF and Byron CDDL | `PROVIDER` | Yes | Strict address text/binary boundaries |
 | Captured CIP-0105 vector index and four vector files | `PROVIDER` | Yes | Exact governance derivation, key, hash, script, and identifier vectors |
 | `libs/typescript/packages/{core,crypto,chain,cip,runtime}/` | `LOCAL` | Yes | Existing Bech32, key, address, credential, and facade owners |

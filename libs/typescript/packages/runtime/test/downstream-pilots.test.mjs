@@ -4,7 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import * as cardano from "@xray-network/cardano-lib";
+import * as cardano from "@xray-network/xray-cardano-lib";
 import { bytesToHex, hexToBytes } from "@xray-network/cardano-core";
 import { MultiEraBlock } from "@xray-network/cardano-chain/multi-era";
 

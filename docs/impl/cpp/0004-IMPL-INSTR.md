@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`cpp/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted crypto, asset-name, Bech32, CIP component, ownership, and packaging baseline |
-| [`0001-cardano-cips`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Captured CIP-14 algorithm, HRP, size rules, and eight normative vectors |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Captured CIP-14 algorithm, HRP, size rules, and eight normative vectors |
 | `libs/cpp/include/cardano/crypto/primitives.hpp` and `libs/cpp/include/cardano/chain/builder.hpp` | `LOCAL` | Yes | Existing primitive and `ScriptHash`/`AssetName` owners to reuse |
 
 ## Objective

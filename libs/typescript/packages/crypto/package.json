@@ -1,7 +1,7 @@
 {
   "name": "@xray-network/cardano-crypto",
   "version": "0.1.0",
-  "description": "Native ESM cryptography and Cardano key types for Cardano Lib",
+  "description": "Native ESM cryptography and Cardano key types for XRAY Cardano Lib",
   "publishConfig": {
     "access": "public"
   },

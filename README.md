@@ -1,6 +1,6 @@
-# Cardano Lib
+# XRAY Cardano Lib
 
-Cardano Lib is a repository for Cardano protocol and application libraries. It combines modular
+XRAY Cardano Lib is a repository for Cardano protocol and application libraries. It combines modular
 language ownership with captured provider evidence and auditable implementation histories.
 
 The project emphasizes lossless data handling, explicit package boundaries, browser-compatible

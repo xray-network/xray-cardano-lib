@@ -16,7 +16,7 @@ Provider-Evidence: NONE
 | `libs/typescript/packages/chain/src/builder/transaction.ts` | `LOCAL` | Yes | Existing transaction-builder state, selection, fee, and collateral behavior |
 | `libs/typescript/packages/chain/test/` and `libs/typescript/packages/runtime/test/` | `LOCAL` | Yes | Compatibility, package-identity, and regression baseline |
 
-This `LOCAL` instruction defines Cardano Lib's checked-builder safety policy from the existing
+This `LOCAL` instruction defines XRAY Cardano Lib's checked-builder safety policy from the existing
 builder configuration and behavior. In particular, its collateral formula, return requirements,
 and rejection rules are repository-local construction guarantees; they are not presented as a
 provider-backed or complete phase-one ledger-validation contract.
