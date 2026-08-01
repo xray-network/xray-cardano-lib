@@ -46,6 +46,16 @@ export function blake2b256(data: Uint8Array): Uint8Array {
   return Uint8Array.from(blake2b(data, { dkLen: 32 }));
 }
 
+export function blake2b512(data: Uint8Array, personalization?: Uint8Array): Uint8Array {
+  if (personalization !== undefined && personalization.length !== 16) {
+    throw new RangeError("Blake2b personalization must contain 16 bytes");
+  }
+  return Uint8Array.from(blake2b(
+    data,
+    personalization === undefined ? { dkLen: 64 } : { dkLen: 64, personalization },
+  ));
+}
+
 export function sha3_256(data: Uint8Array): Uint8Array {
   return Uint8Array.from(nobleSha3_256(data));
 }

@@ -24,6 +24,8 @@ export {
   CIP36RegistrationWitness,
   NonEmptyCIP36DelegationList,
 } from "@xray-network/xray-cardano-lib-cip/cip36";
+export { CIP4 } from "@xray-network/xray-cardano-lib-cip/cip4";
+export type { CIP4Checksum } from "@xray-network/xray-cardano-lib-cip/cip4";
 export {
   AlgorithmId,
   CIP8Message,

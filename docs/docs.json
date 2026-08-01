@@ -117,6 +117,13 @@
                   "impl/typescript/0015-IMPL-INSTR",
                   "impl/typescript/0015-IMPL-RESULT"
                 ]
+              },
+              {
+                "group": "0016 — CIP-4 wallet checksum facade",
+                "pages": [
+                  "impl/typescript/0016-IMPL-INSTR",
+                  "impl/typescript/0016-IMPL-RESULT"
+                ]
               }
             ]
           },

@@ -28,9 +28,8 @@ const result = evaluateProgram(
 ```
 
 The root entry point exports the same UPLC API together with `Data`, `applyParamsToScript`, and
-`evaluatePhaseTwoRaw`. The legacy `apply_params_to_script` and `eval_phase_two_raw` names remain
-as deprecated compatibility aliases. Generic CEK evaluation is explicitly budgeted and does not
-perform ledger phase-one validation.
+`evaluatePhaseTwoRaw`. Generic CEK evaluation is explicitly budgeted and does not perform ledger
+phase-one validation.
 
 ## Typed Data
 

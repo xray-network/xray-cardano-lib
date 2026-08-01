@@ -13,11 +13,9 @@ import {
 } from "@xray-network/xray-cardano-lib-crypto";
 import {
   applyParamsToScript,
-  apply_params_to_script,
   decodeFlatProgram,
   encodeFlatProgram,
   evaluatePhaseTwoRaw,
-  eval_phase_two_raw,
   evaluateProgram,
   parseUplcText,
 } from "@xray-network/xray-cardano-lib-plutus";
@@ -27,9 +25,7 @@ const fromHex = (hex) => Uint8Array.from(hex.match(/../g)?.map((value) => Number
 const toHex = (bytes) => Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
 const identityScript = fromHex("4d01000033222220051200120011");
 
-test("camelCase phase-two APIs retain the snake_case compatibility bindings", () => {
-  assert.strictEqual(applyParamsToScript, apply_params_to_script);
-  assert.strictEqual(evaluatePhaseTwoRaw, eval_phase_two_raw);
+test("camelCase phase-two APIs are available from the Plutus package", () => {
   assert.equal(toHex(applyParamsToScript(fromHex("80"), identityScript)), toHex(identityScript));
 });
 
@@ -52,49 +48,49 @@ test("public UPLC APIs expose text parsing, Flat codecs, and budgeted evaluation
   assert.equal(result.budget.memory > 0n, true);
 });
 
-test("apply_params_to_script preserves and canonicalizes an empty application", () => {
-  const result = apply_params_to_script(fromHex("80"), identityScript);
+test("applyParamsToScript preserves and canonicalizes an empty application", () => {
+  const result = applyParamsToScript(fromHex("80"), identityScript);
   assert.equal(toHex(result), toHex(identityScript));
   assert.notEqual(result, identityScript);
 });
 
-test("apply_params_to_script applies Data constants left-to-right", () => {
+test("applyParamsToScript applies Data constants left-to-right", () => {
   assert.equal(
-    toHex(apply_params_to_script(fromHex("81182a"), identityScript)),
+    toHex(applyParamsToScript(fromHex("81182a"), identityScript)),
     "54010000333222220051200120014c0102182a0001",
   );
   assert.equal(
-    toHex(apply_params_to_script(fromHex("820102"), identityScript)),
+    toHex(applyParamsToScript(fromHex("820102"), identityScript)),
     "58180100003333222220051200120014c10101004c0101020001",
   );
 });
 
-test("apply_params_to_script rejects non-arrays, free variables, and double wrapping", () => {
+test("applyParamsToScript rejects non-arrays, free variables, and double wrapping", () => {
   assert.throws(
-    () => apply_params_to_script(fromHex("01"), identityScript),
+    () => applyParamsToScript(fromHex("01"), identityScript),
     (error) => error instanceof DeserializeError && error.code === "DESERIALIZE",
   );
   assert.throws(
-    () => apply_params_to_script(fromHex("80"), fromHex("4443010001")),
+    () => applyParamsToScript(fromHex("80"), fromHex("4443010001")),
     (error) => error instanceof DeserializeError,
   );
   assert.throws(
-    () => apply_params_to_script(fromHex("80"), fromHex("4e4d01000033222220051200120011")),
+    () => applyParamsToScript(fromHex("80"), fromHex("4e4d01000033222220051200120011")),
     (error) => error instanceof DeserializeError,
   );
 });
 
-test("eval_phase_two_raw accepts a structurally valid transaction without redeemers", () => {
+test("evaluatePhaseTwoRaw accepts a structurally valid transaction without redeemers", () => {
   const tx = fromHex("84a0a0f5f6");
   assert.deepEqual(
-    eval_phase_two_raw(tx, [], fromHex("a0"), [10_000_000n, 10_000_000n], [0n, 0n, 1_000n], 9, true),
+    evaluatePhaseTwoRaw(tx, [], fromHex("a0"), [10_000_000n, 10_000_000n], [0n, 0n, 1_000n], 9, true),
     [],
   );
 });
 
-test("eval_phase_two_raw rejects unsupported protocol majors", () => {
+test("evaluatePhaseTwoRaw rejects unsupported protocol majors", () => {
   assert.throws(
-    () => eval_phase_two_raw(
+    () => evaluatePhaseTwoRaw(
       fromHex("84a0a0f5f6"),
       [],
       fromHex("a0"),
@@ -107,7 +103,7 @@ test("eval_phase_two_raw rejects unsupported protocol majors", () => {
   );
 });
 
-test("eval_phase_two_raw resolves an Alonzo spending script and rewrites ExUnits", async () => {
+test("evaluatePhaseTwoRaw resolves an Alonzo spending script and rewrites ExUnits", async () => {
   const { encodeProgramEnvelope } = await import("../dist/esm/uplc/flat.js");
   const unit = { kind: "constant", constant: { type: { kind: "unit" }, value: null } };
   const script = encodeProgramEnvelope({
@@ -147,7 +143,7 @@ test("eval_phase_two_raw resolves an Alonzo spending script and rewrites ExUnits
   const costModels = map([[unsigned(0n), array(parameters.map(unsigned))]]);
 
   assert.throws(
-    () => eval_phase_two_raw(
+    () => evaluatePhaseTwoRaw(
       encodeCbor(transaction),
       [[inputBytes, encodeCbor(output)]],
       encodeCbor(map([])),
@@ -159,7 +155,7 @@ test("eval_phase_two_raw resolves an Alonzo spending script and rewrites ExUnits
     /missing Plutus V1 cost model/u,
   );
 
-  const [result] = eval_phase_two_raw(
+  const [result] = evaluatePhaseTwoRaw(
     encodeCbor(transaction),
     [[inputBytes, encodeCbor(output)]],
     encodeCbor(costModels),
@@ -180,7 +176,7 @@ test("eval_phase_two_raw resolves an Alonzo spending script and rewrites ExUnits
   );
 });
 
-test("eval_phase_two_raw selects Babbage V2 and Conway V3 argument conventions", async () => {
+test("evaluatePhaseTwoRaw selects Babbage V2 and Conway V3 argument conventions", async () => {
   const { encodeProgramEnvelope } = await import("../dist/esm/uplc/flat.js");
   const unit = { kind: "constant", constant: { type: { kind: "unit" }, value: null } };
   const cases = [
@@ -216,7 +212,7 @@ test("eval_phase_two_raw selects Babbage V2 and Conway V3 argument conventions",
       [unsigned(5n), array([redeemer])],
     ]);
     const parameters = Array.from({ length: language === 2 ? 350 : 332 }, () => 1n);
-    const [result] = eval_phase_two_raw(
+    const [result] = evaluatePhaseTwoRaw(
       encodeCbor(array([body, witnesses, { kind: "boolean", value: true }, { kind: "null" }])),
       [[encodeCbor(input), encodeCbor(output)]],
       encodeCbor(map([[unsigned(BigInt(language)), array(parameters.map(unsigned))]])),
@@ -250,7 +246,7 @@ test("eval_phase_two_raw selects Babbage V2 and Conway V3 argument conventions",
         [unsigned(5n), array([redeemer])],
       ]);
       assert.throws(
-        () => eval_phase_two_raw(
+        () => evaluatePhaseTwoRaw(
           encodeCbor(array([
             body,
             nonUnitWitnesses,
@@ -270,7 +266,7 @@ test("eval_phase_two_raw selects Babbage V2 and Conway V3 argument conventions",
   }
 });
 
-test("eval_phase_two_raw collection checks reject extra pointers and missing UTxOs", () => {
+test("evaluatePhaseTwoRaw collection checks reject extra pointers and missing UTxOs", () => {
   const input = array([bytes(new Uint8Array(32)), unsigned(0n)]);
   const body = map([
     [unsigned(0n), array([input])],
@@ -291,7 +287,7 @@ test("eval_phase_two_raw collection checks reject extra pointers and missing UTx
   ]));
 
   assert.throws(
-    () => eval_phase_two_raw(
+    () => evaluatePhaseTwoRaw(
       transaction,
       [],
       encodeCbor(map([])),
@@ -303,7 +299,7 @@ test("eval_phase_two_raw collection checks reject extra pointers and missing UTx
     /extra redeemer 0:0/u,
   );
   assert.throws(
-    () => eval_phase_two_raw(
+    () => evaluatePhaseTwoRaw(
       transaction,
       [],
       encodeCbor(map([])),

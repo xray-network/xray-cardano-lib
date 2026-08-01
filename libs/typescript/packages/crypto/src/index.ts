@@ -35,6 +35,7 @@ export {
 export {
   blake2b224,
   blake2b256,
+  blake2b512,
   bls12_381_add,
   bls12_381_compress,
   bls12_381_equal,

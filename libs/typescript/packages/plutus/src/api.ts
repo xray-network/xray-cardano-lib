@@ -91,12 +91,6 @@ export function evaluatePhaseTwoRaw(
   ] as const)));
 }
 
-/** @deprecated Use applyParamsToScript. */
-export const apply_params_to_script = applyParamsToScript;
-
-/** @deprecated Use evaluatePhaseTwoRaw. */
-export const eval_phase_two_raw = evaluatePhaseTwoRaw;
-
 function assertStandaloneLength(name: string, value: Uint8Array): void {
   if (value.length > MAX_STANDALONE_BYTES) {
     throw new CardanoBoundsError(name, 0n, BigInt(MAX_STANDALONE_BYTES), BigInt(value.length));

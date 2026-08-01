@@ -57,6 +57,8 @@ export {
   CIP36RegistrationWitness,
   NonEmptyCIP36DelegationList,
 } from "./cip/index.js";
+export { CIP4 } from "./cip/index.js";
+export type { CIP4Checksum } from "./cip/index.js";
 export {
   AlgorithmId,
   CIP8Message,
@@ -89,7 +91,6 @@ export {
   Constr,
   Data,
   applyParamsToScript,
-  apply_params_to_script,
   builtinCost,
   builtinTag,
   dataConstant,
@@ -102,7 +103,6 @@ export {
   encodePlutusData,
   encodeProgramEnvelope,
   evaluatePhaseTwoRaw,
-  eval_phase_two_raw,
   evaluateProgram,
   makeBuiltinCostModel,
   parseUplcText,

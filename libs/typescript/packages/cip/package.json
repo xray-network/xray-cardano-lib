@@ -38,6 +38,12 @@
       "import": "./dist/esm/cip36/index.js",
       "default": "./dist/esm/cip36/index.js"
     },
+    "./cip4": {
+      "types": "./dist/esm/cip4/index.d.ts",
+      "browser": "./dist/esm/cip4/index.js",
+      "import": "./dist/esm/cip4/index.js",
+      "default": "./dist/esm/cip4/index.js"
+    },
     "./cip8": {
       "types": "./dist/esm/cip8/index.d.ts",
       "browser": "./dist/esm/cip8/index.js",
