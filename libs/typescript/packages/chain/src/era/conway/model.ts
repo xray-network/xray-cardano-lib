@@ -13,6 +13,7 @@ import {
 import type { CborValue } from "@xray-network/xray-cardano-lib-core";
 import { AnchorDocHash, DatumHash, Ed25519KeyHash, ScriptHash } from "@xray-network/xray-cardano-lib-crypto";
 import { Address } from "../../address/index.js";
+import type { CostModelsJSON } from "../shared/json-types.js";
 import { validateConwayModel } from "./validation.js";
 
 export type ConwayWireShape = "alias" | "array" | "map" | "tag" | "choice" | "external" | "group";
@@ -369,9 +370,61 @@ export class MapU64ToArrI64 extends ConwayMap<bigint,BigInt64Array> {
 }
 
 export class CostModels extends ConwayData {
-  public static new(inner: MapU64ToArrI64): CostModels { return new CostModels(costModelsNode(inner)); }
+  public static new(inner: MapU64ToArrI64): CostModels {
+    const node = costModelsNode(inner);
+    CostModels.validateNode(node);
+    return new CostModels(node);
+  }
+  public static override from_json<T extends ConwayData>(this: ConwayConstructor<T>, json: string): T {
+    const value: unknown = JSON.parse(json);
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+      throw new TypeError("CostModels JSON must be an object");
+    }
+    const inner = MapU64ToArrI64.new();
+    for (const [languageText, parameters] of Object.entries(value)) {
+      if (!/^\d+$/u.test(languageText)) {
+        throw new TypeError("CostModels JSON keys must be numeric language ids");
+      }
+      const language = BigInt(languageText);
+      if (language > 255n) throw new RangeError("CostModels language id must be in 0..255");
+      if (inner.get(language) !== undefined) {
+        throw new TypeError("CostModels JSON contains duplicate language ids");
+      }
+      if (!Array.isArray(parameters)) {
+        throw new TypeError("CostModels JSON parameters must be arrays");
+      }
+      const costs = parameters.map((parameter) => {
+        if (!Number.isSafeInteger(parameter)) {
+          throw new TypeError("CostModels JSON parameters must be safe integers");
+        }
+        const cost = BigInt(parameter);
+        if (cost < INT64_MIN || cost > INT64_MAX) {
+          throw new RangeError("CostModels parameters must fit int64");
+        }
+        return cost;
+      });
+      inner.insert(language, BigInt64Array.from(costs));
+    }
+    const node = costModelsNode(inner);
+    this.validateNode(node);
+    return new this(node);
+  }
   public get(): MapU64ToArrI64 { const node=this.cborNode();if(node.kind!=="map")throw new TypeError("invalid CostModels");const out=MapU64ToArrI64.new();for(const [key,value] of node.entries){if(key.kind!=="unsigned"||value.kind!=="array")throw new TypeError("invalid cost model");out.insert(key.value,BigInt64Array.from(value.values.map((item)=>{if(item.kind!=="unsigned"&&item.kind!=="negative")throw new TypeError("invalid cost");return item.value;})));}return out; }
   public language_views_encoding(): Uint8Array { const models=this.get();const entries:Array<readonly[CborValue,CborValue]>=[];for(const language of models.keys()){const costs=models.get(language)??new BigInt64Array();if(language===0n){const embedded: CborValue={kind:"array",values:[...costs].map(integerNode),encoding:{kind:"indefinite"}};entries.push([{kind:"bytes",value:Uint8Array.of(0),encoding:{kind:"definite",width:0}},{kind:"bytes",value:encodeCbor(embedded),encoding:{kind:"definite",width:0}}]);}else entries.push([uintNode(language),{kind:"array",values:[...costs].map(integerNode),encoding:{kind:"definite",width:0}}]);}return encodeCbor({kind:"map",entries,encoding:{kind:"definite",width:0}},{mode:"canonical"}); }
+  public override to_js_value(): CostModelsJSON {
+    const value: CostModelsJSON = {};
+    const models = this.get();
+    for (const language of models.keys()) {
+      const parameters = models.get(language) ?? new BigInt64Array();
+      value[language.toString()] = [...parameters].map((parameter) => {
+        if (parameter < BigInt(Number.MIN_SAFE_INTEGER) || parameter > BigInt(Number.MAX_SAFE_INTEGER)) {
+          throw new RangeError("CostModels parameters must be safe integers for JSON serialization");
+        }
+        return Number(parameter);
+      });
+    }
+    return value;
+  }
 }
 function costModelsNode(inner: MapU64ToArrI64): CborValue { return {kind:"map",entries:inner.keys().map((key)=>[uintNode(key),{kind:"array",values:[...(inner.get(key)??new BigInt64Array())].map(integerNode),encoding:{kind:"definite",width:0}}]),encoding:{kind:"definite",width:0}}; }
 

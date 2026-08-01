@@ -110,6 +110,13 @@
                   "impl/typescript/0014-IMPL-INSTR",
                   "impl/typescript/0014-IMPL-RESULT"
                 ]
+              },
+              {
+                "group": "0015 — CostModels JSON parsing and validation",
+                "pages": [
+                  "impl/typescript/0015-IMPL-INSTR",
+                  "impl/typescript/0015-IMPL-RESULT"
+                ]
               }
             ]
           },
