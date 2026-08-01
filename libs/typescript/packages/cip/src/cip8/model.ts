@@ -5,8 +5,8 @@ import {
   decodeCbor,
   encodeCbor,
   hexToBytes,
-} from "@xray-network/cardano-core";
-import type { CborValue } from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
 
 import {
   decodeUserFacingMessage,

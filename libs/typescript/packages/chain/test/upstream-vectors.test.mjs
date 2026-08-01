@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 const workspaceRoot = fileURLToPath(new URL("../../../../../", import.meta.url));
 const fixtureRoot = path.join(
   workspaceRoot,
+  ".xray",
   "updates",
   "providers",
   "cardano-multiplatform-lib",
@@ -207,7 +208,7 @@ test("upstream Cardano vectors retain exact provenance and checksums", async () 
       .filter(Boolean)
       .sort(),
     [
-      "/updates/providers/*/*/artifacts/** -text",
+      "/.xray/updates/providers/*/*/artifacts/** -text",
     ],
     "root Git attributes must protect imported bytes from line-ending conversion",
   );

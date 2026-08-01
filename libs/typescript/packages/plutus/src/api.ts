@@ -4,7 +4,7 @@ import {
   decodeCbor,
   encodeCbor,
   type CborValue,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import { evaluateRaw } from "./ledger/evaluate.js";
 import { dataConstant, type UplcTerm } from "./uplc/ast.js";
 import {
@@ -30,7 +30,7 @@ export type PhaseTwoRawEvaluation = readonly [
   evaluation: PhaseTwoEvaluation,
 ];
 
-export function apply_params_to_script(
+export function applyParamsToScript(
   paramsBytes: Uint8Array,
   plutusScriptBytes: Uint8Array,
 ): Uint8Array {
@@ -60,7 +60,7 @@ export function apply_params_to_script(
   return Uint8Array.from(encodeProgramEnvelope({ version: program.version, term }));
 }
 
-export function eval_phase_two_raw(
+export function evaluatePhaseTwoRaw(
   txBytes: Uint8Array,
   utxosBytes: readonly (readonly [inputBytes: Uint8Array, outputBytes: Uint8Array])[],
   costModelsBytes: Uint8Array,

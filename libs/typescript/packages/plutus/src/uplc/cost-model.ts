@@ -1,4 +1,4 @@
-import { INT64_MAX } from "@xray-network/cardano-core";
+import { INT64_MAX } from "@xray-network/xray-cardano-lib-core";
 import {
   COST_MODEL_PARAMETER_NAMES,
   DEFAULT_BUILTIN_MODELS,

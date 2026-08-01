@@ -2,7 +2,7 @@
 
 This file maps the frozen C++ 0001 instruction to independently owned C++ bindings and validation.
 It is completed alongside the implementation. The canonical implementation status remains in
-`updates/implementations/cpp/STATUS.md`.
+`.xray/updates/implementations/cpp/STATUS.md`.
 
 | Change | Owner | Current mapping | Validation |
 | --- | --- | --- | --- |

@@ -53,6 +53,10 @@ export interface BooleanSchema extends SchemaType<boolean> {
   readonly dataType: "boolean";
 }
 
+export interface VoidSchema extends SchemaType<undefined> {
+  readonly dataType: "void";
+}
+
 export interface AnySchema extends SchemaType<PlutusDataValue> {
   readonly dataType: "any";
 }
@@ -118,6 +122,7 @@ export type DataSchema =
   | IntegerSchema
   | BytesSchema
   | BooleanSchema
+  | VoidSchema
   | AnySchema
   | ArraySchema
   | TupleSchema

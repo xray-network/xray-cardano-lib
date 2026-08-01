@@ -1,7 +1,7 @@
 import {
   decodeCbor,
   type CborValue,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import {
   anyCbor,
   arrayOf,

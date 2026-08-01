@@ -2,9 +2,9 @@ import {
   bytesToHex,
   copyBytes,
   hexToBytes,
-} from "@xray-network/cardano-core";
-import { decodeBech32, encodeBech32 } from "@xray-network/cardano-core/bech32";
-import { Ed25519KeyHash, ScriptHash } from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-core";
+import { decodeBech32, encodeBech32 } from "@xray-network/xray-cardano-lib-core/bech32";
+import { Ed25519KeyHash, ScriptHash } from "@xray-network/xray-cardano-lib-crypto";
 import { Credential } from "../era/conway/model.js";
 import { ByronAddress } from "../era/byron/address.js";
 

@@ -4,7 +4,7 @@ endif()
 
 file(
   READ
-  "${CARDANO_REPOSITORY_ROOT}/updates/implementations/cpp/0001-IMPL-INSTR.md"
+  "${CARDANO_REPOSITORY_ROOT}/.xray/updates/implementations/cpp/0001-IMPL-INSTR.md"
   CARDANO_INSTRUCTION
 )
 file(

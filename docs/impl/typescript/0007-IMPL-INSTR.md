@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`typescript/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted package identities, CML compatibility baseline, and browser boundary |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0014 definition and eight official vectors |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0014 definition and eight official vectors |
 | `artifacts/upstream/CIP-0014/README.md` in the declared snapshot | `PROVIDER` | Yes | Exact digest, concatenation, HRP, and vector semantics |
 | `libs/typescript/packages/crypto/`, `chain/`, `cip/`, and `runtime/` | `LOCAL` | Yes | Existing hash, `ScriptHash`, `AssetName`, CIP, and aggregate owners |
 
@@ -42,8 +42,8 @@ policy and asset-name owners and adds only the missing Cardano-owned Blake2b-160
 - Expose `to_raw_bytes()` as a defensive copy and equality by digest bytes. Do not claim that a
   fingerprint is collision-free or reversible.
 - Do not introduce new policy-ID or asset-name nominal types. `AssetFingerprint` has one owner:
-  `@xray-network/cardano-cip/cip14`.
-- Add `./cip14` to `@xray-network/cardano-cip`; export namespace `cip14` from its root; re-export
+  `@xray-network/xray-cardano-lib-cip/cip14`.
+- Add `./cip14` to `@xray-network/xray-cardano-lib-cip`; export namespace `cip14` from its root; re-export
   the exact same binding through the runtime CIP facade and aggregate runtime.
 
 ## Implementation steps

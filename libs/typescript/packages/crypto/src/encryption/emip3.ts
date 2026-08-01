@@ -1,4 +1,4 @@
-import { bytesToHex, hexToBytes } from "@xray-network/cardano-core";
+import { bytesToHex, hexToBytes } from "@xray-network/xray-cardano-lib-core";
 import {
   chacha20Poly1305Decrypt,
   chacha20Poly1305Encrypt,

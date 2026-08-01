@@ -1,8 +1,8 @@
 import {
   CardanoBoundsError,
   CardanoError,
-} from "@xray-network/cardano-core";
-import type { SecureRandomSource } from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
+import type { SecureRandomSource } from "@xray-network/xray-cardano-lib-core";
 
 export function systemSecureRandomSource(): SecureRandomSource {
   const webCrypto = globalThis.crypto;

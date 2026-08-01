@@ -1,4 +1,4 @@
-import { assertByteLength, copyBytes } from "@xray-network/cardano-core";
+import { assertByteLength, copyBytes } from "@xray-network/xray-cardano-lib-core";
 import { extendedPublicKey, extendedSign } from "../primitives/crypto.js";
 
 interface LegacyState {

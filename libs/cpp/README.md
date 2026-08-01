@@ -1,8 +1,11 @@
 # XRAY Cardano Lib for C++
 
-This directory is an independent C++23 workspace for Cardano wire formats, cryptography, ledger
-models, CIPs, and Plutus evaluation. It does not build, load, or depend on the TypeScript
-workspace.
+Status: Concept — not maintained or supported.
+
+This directory is retained as a C++23 concept for Cardano wire formats, cryptography, ledger
+models, CIPs, and Plutus evaluation. It is available for experimentation and design exploration,
+but it is not kept in feature parity with the maintained TypeScript implementation. It does not
+build, load, or depend on the TypeScript workspace.
 
 The public component targets are `cardano::core`, `cardano::crypto`, `cardano::chain`,
 `cardano::cip`, `cardano::plutus`, and aggregate `cardano::lib`. Dependencies are resolved from the

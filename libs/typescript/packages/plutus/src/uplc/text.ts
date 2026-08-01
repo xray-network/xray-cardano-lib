@@ -1,7 +1,7 @@
-import type { CborValue } from "@xray-network/cardano-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
 import {
   bls12_381_uncompress,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import type {
   UplcConstant,
   UplcProgram,

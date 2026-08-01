@@ -10,7 +10,7 @@ import {
   TransactionWitnessSet,
   Value,
 } from "@xray-network/xray-cardano-lib";
-import { bytesToHex, hexToBytes } from "@xray-network/cardano-core";
+import { bytesToHex, hexToBytes } from "@xray-network/xray-cardano-lib-core";
 
 async function connectWallet(provider) {
   const wallet = await provider.enable();

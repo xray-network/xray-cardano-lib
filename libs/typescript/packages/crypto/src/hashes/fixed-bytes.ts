@@ -4,11 +4,11 @@ import {
   bytesToHex,
   copyBytes,
   hexToBytes,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import {
   decodeBech32 as decodeBech32Value,
   encodeBech32 as encodeBech32Value,
-} from "@xray-network/cardano-core/bech32";
+} from "@xray-network/xray-cardano-lib-core/bech32";
 
 export function encodeBech32(prefix: string, bytes: Uint8Array): string { return encodeBech32Value(prefix,bytes); }
 export function decodeBech32WithPrefix(value: string): { readonly prefix:string;readonly bytes:Uint8Array } { return decodeBech32Value(value); }

@@ -1,5 +1,5 @@
 {
-  "name": "@xray-network/cardano-cip",
+  "name": "@xray-network/xray-cardano-lib-cip",
   "version": "0.1.0",
   "description": "Native ESM implementations of Cardano Improvement Proposals",
   "publishConfig": {
@@ -38,6 +38,12 @@
       "import": "./dist/esm/cip36/index.js",
       "default": "./dist/esm/cip36/index.js"
     },
+    "./cip4": {
+      "types": "./dist/esm/cip4/index.d.ts",
+      "browser": "./dist/esm/cip4/index.js",
+      "import": "./dist/esm/cip4/index.js",
+      "default": "./dist/esm/cip4/index.js"
+    },
     "./cip8": {
       "types": "./dist/esm/cip8/index.d.ts",
       "browser": "./dist/esm/cip8/index.js",
@@ -46,9 +52,9 @@
     }
   },
   "dependencies": {
-    "@xray-network/cardano-chain": "0.1.0",
-    "@xray-network/cardano-core": "0.1.0",
-    "@xray-network/cardano-crypto": "0.1.0"
+    "@xray-network/xray-cardano-lib-chain": "0.1.0",
+    "@xray-network/xray-cardano-lib-core": "0.1.0",
+    "@xray-network/xray-cardano-lib-crypto": "0.1.0"
   },
   "engines": {
     "node": ">=20.19.0"

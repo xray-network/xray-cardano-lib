@@ -1,5 +1,5 @@
 {
-  "name": "@xray-network/cardano-workspace",
+  "name": "@xray-network/xray-cardano-lib-workspace",
   "version": "0.1.0",
   "private": true,
   "description": "Native TypeScript libraries for Cardano",

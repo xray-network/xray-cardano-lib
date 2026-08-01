@@ -11,14 +11,14 @@ Provider-Evidence: ../../providers/cardano-multiplatform-lib/0001-cardano-multip
 
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
-| [`typescript/0001`](https://github.com/xray-network/cardano-lib/blob/main/updates/implementations/typescript/0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Frozen CML evidence ownership, historical-vector outcomes, and portable compatibility contract |
-| [`typescript/0002`](https://github.com/xray-network/cardano-lib/blob/main/updates/implementations/typescript/0002-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | CIP-8 COSE, signing, hashing, and user-facing encoding contract |
-| [`typescript/0003`](https://github.com/xray-network/cardano-lib/blob/main/updates/implementations/typescript/0003-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | UPLC, phase-two valuation, cost-model, context, and additional cryptography contract |
-| [`typescript/0004`](https://github.com/xray-network/cardano-lib/blob/main/updates/implementations/typescript/0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Official era validation and documented historical compatibility contract |
-| [`0001-cardano-multiplatform-lib`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/SNAPSHOT.md) | `PROVIDER` | Yes | Frozen CDDL comparison corpus, genesis vectors, and historical block vectors |
-| [`0001-message-signing`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/message-signing/0001-message-signing/SNAPSHOT.md) | `PROVIDER` | Yes | CIP-8 wire and signing evidence |
-| [`0001-uplc`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/uplc/0001-uplc/SNAPSHOT.md) | `PROVIDER` | Yes | Official UPLC, conformance, cost-model, cryptography, and phase-two evidence |
-| [`0001-cardano-ledger`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) | `PROVIDER` | Yes | Official Byron-through-Conway ledger grammar |
+| [`typescript/0001`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/implementations/typescript/0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Frozen CML evidence ownership, historical-vector outcomes, and portable compatibility contract |
+| [`typescript/0002`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/implementations/typescript/0002-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | CIP-8 COSE, signing, hashing, and user-facing encoding contract |
+| [`typescript/0003`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/implementations/typescript/0003-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | UPLC, phase-two valuation, cost-model, context, and additional cryptography contract |
+| [`typescript/0004`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/implementations/typescript/0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Official era validation and documented historical compatibility contract |
+| [`0001-cardano-multiplatform-lib`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/SNAPSHOT.md) | `PROVIDER` | Yes | Frozen CDDL comparison corpus, genesis vectors, and historical block vectors |
+| [`0001-message-signing`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/message-signing/0001-message-signing/SNAPSHOT.md) | `PROVIDER` | Yes | CIP-8 wire and signing evidence |
+| [`0001-uplc`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/uplc/0001-uplc/SNAPSHOT.md) | `PROVIDER` | Yes | Official UPLC, conformance, cost-model, cryptography, and phase-two evidence |
+| [`0001-cardano-ledger`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) | `PROVIDER` | Yes | Official Byron-through-Conway ledger grammar |
 | `docs/adr/repository/0001-repository-architecture.md` | `LOCAL` | Yes | Independent workspace, package ownership, evidence, lifecycle, and documentation rules |
 
 ## Objective

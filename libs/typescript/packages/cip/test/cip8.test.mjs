@@ -26,7 +26,7 @@ import {
   SigStructure,
   SignedMessage,
   SignedMessageKind,
-} from "@xray-network/cardano-cip/cip8";
+} from "@xray-network/xray-cardano-lib-cip/cip8";
 import {
   CBOR_INT_MAX,
   CBOR_INT_MIN,
@@ -34,11 +34,11 @@ import {
   decodeCbor,
   encodeCbor,
   hexToBytes,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import {
   PrivateKey,
   blake2b224,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 
 function intLabel(value) {
   return Label.new_int(Int.new(value));

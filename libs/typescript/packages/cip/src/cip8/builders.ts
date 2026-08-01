@@ -1,9 +1,9 @@
 import {
   assertByteLength,
   copyBytes,
-} from "@xray-network/cardano-core";
-import type { CborValue } from "@xray-network/cardano-core";
-import { blake2b224 } from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
+import { blake2b224 } from "@xray-network/xray-cardano-lib-crypto";
 
 import {
   AlgorithmId,

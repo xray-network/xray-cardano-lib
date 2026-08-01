@@ -9,7 +9,7 @@ import {
   sha2_256,
   verifySecp256k1Ecdsa,
   verifySecp256k1Schnorr,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import {
   schnorr,
   secp256k1,

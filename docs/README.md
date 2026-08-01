@@ -6,22 +6,21 @@ description: Architecture decisions for the XRAY Cardano Lib polyglot repository
 # XRAY Cardano Lib documentation
 
 Architecture decisions are grouped by their scope. Canonical implementation records live below
-`updates/implementations/`, while their workflow templates remain at the root of `updates/`.
-Shared provider evidence lives below `updates/providers/`, and any implementation may consume it
-through declared inputs.
+`.xray/updates/implementations/`, while their workflow templates live below
+`.xray/updates/templates/` and aggregate lifecycle state lives in
+`.xray/updates/XRAY-UPDATES-STATUS.md`. Shared provider evidence lives below
+`.xray/updates/providers/`, and any implementation may consume it through declared inputs.
 
-Mintlify-readable copies of numbered implementation instructions and results live below
-`docs/impl/<language>/`. Canonical records remain below
-`updates/implementations/<language>/`; statuses, providers, artifacts, and templates are not
-copied into the documentation tree.
+The Mintlify-readable aggregate status copy lives at `docs/impl/XRAY-UPDATES-STATUS.md`, and copies
+of numbered implementation instructions and results live below `docs/impl/<target>/`. Canonical
+records remain below `.xray/updates/`; providers, artifacts, and templates are not copied into the
+documentation tree.
 
 ## Repository decisions
 
 | ADR | Decision | Status |
 |---|---|---|
-| [0001](adr/repository/0001-repository-architecture.md) | Repository architecture and implementation records | Accepted; layout superseded |
-| [0002](adr/repository/0002-shared-update-ledger.md) | Shared update ledger and provider evidence | Accepted |
-| [0003](adr/repository/0003-project-identity.md) | XRAY Cardano Lib project identity | Accepted |
+| [0001](adr/repository/0001-xray-updates-standard.md) | XRAY Updates v1 installation | Accepted |
 
 ## TypeScript decisions
 

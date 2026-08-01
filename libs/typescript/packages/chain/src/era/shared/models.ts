@@ -8,9 +8,9 @@ import {
   decodeCbor,
   encodeCbor,
   hexToBytes,
-} from "@xray-network/cardano-core";
-import type { CborHeadWidth, CborLengthEncoding, CborValue } from "@xray-network/cardano-core";
-import { Ed25519KeyHash, ScriptHash, TransactionHash, blake2b224 } from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-core";
+import type { CborHeadWidth, CborLengthEncoding, CborValue } from "@xray-network/xray-cardano-lib-core";
+import { Ed25519KeyHash, ScriptHash, TransactionHash, blake2b224 } from "@xray-network/xray-cardano-lib-crypto";
 import type { NativeScriptJSON, PlutusDataJSON, TransactionInputJSON } from "./json-types.js";
 import { Ed25519KeyHashList } from "../conway/model.js";
 

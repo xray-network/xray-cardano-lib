@@ -1,4 +1,4 @@
-# `@xray-network/cardano-crypto`
+# `@xray-network/xray-cardano-lib-crypto`
 
 Native ESM cryptography and Cardano key types for XRAY Cardano Lib. The package runs locally in Node.js
 and modern browsers.
@@ -16,7 +16,7 @@ It provides:
 ## Install
 
 ```sh
-npm install @xray-network/cardano-crypto
+npm install @xray-network/xray-cardano-lib-crypto
 ```
 
 The package is ESM-only and requires Node.js 20.19 or newer, or a browser/runtime with the Web
@@ -25,7 +25,7 @@ Crypto `getRandomValues` API.
 ## Sign and verify
 
 ```ts
-import { PrivateKey } from "@xray-network/cardano-crypto";
+import { PrivateKey } from "@xray-network/xray-cardano-lib-crypto";
 
 const message = new TextEncoder().encode("XRAY Cardano Lib");
 const privateKey = PrivateKey.generate_ed25519();
@@ -53,7 +53,7 @@ use the public secure system source.
 words.
 
 ```ts
-import { Bip32PrivateKey } from "@xray-network/cardano-crypto";
+import { Bip32PrivateKey } from "@xray-network/xray-cardano-lib-crypto";
 
 const entropy = Uint8Array.from([
   0xdf, 0x9e, 0xd2, 0x5e, 0xd1, 0x46, 0xbf, 0x43,
@@ -83,7 +83,7 @@ Hardened derivation requires a private key. `Bip32PublicKey.derive` rejects hard
 import {
   TransactionHash,
   blake2b256,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 
 const transactionBody = Uint8Array.of(0xa0);
 const hash = TransactionHash.from_raw_bytes(blake2b256(transactionBody));
@@ -103,7 +103,7 @@ import {
   emip3_decrypt_with_password,
   emip3_encrypt_with_password,
   secureRandomBytes,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 
 const toHex = (bytes: Uint8Array): string =>
   [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -124,7 +124,7 @@ for format compatibility; they are not a recommendation for a new password-stora
 
 ## Public API
 
-The supported package entry point is `@xray-network/cardano-crypto`.
+The supported package entry point is `@xray-network/xray-cardano-lib-crypto`.
 
 | Area | Public values |
 |---|---|

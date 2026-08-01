@@ -1,4 +1,4 @@
-import { decodeCbor, type CborValue } from "@xray-network/cardano-core";
+import { decodeCbor, type CborValue } from "@xray-network/xray-cardano-lib-core";
 import {
   HistoricalData as HistoricalCodecData,
   HistoricalList as HistoricalCodecList,

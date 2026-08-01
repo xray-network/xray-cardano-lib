@@ -1,10 +1,10 @@
-import { ProtocolMagic } from "@xray-network/cardano-core";
+import { ProtocolMagic } from "@xray-network/xray-cardano-lib-core";
 import {
   BlockHeaderHash,
   Ed25519KeyHash,
   PublicKey,
   blake2b256,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import { LinearFee } from "../../ledger/operations.js";
 import {
   base64,

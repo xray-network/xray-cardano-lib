@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { decodeCbor, encodeCbor } from "../../core/dist/esm/index.js";
 import { __setCoinSelectionRandomSourceForTests } from "../dist/esm/builder/transaction.js";
-import { eval_phase_two_raw } from "../../plutus/dist/esm/api.js";
+import { evaluatePhaseTwoRaw } from "../../plutus/dist/esm/api.js";
 import {
   Bip32PrivateKey,
   PrivateKey,
@@ -290,7 +290,7 @@ test("test_contract and UPLC-valued execution-unit flow", () => {
     entries: [[uintNode(0n), { kind: "array", values: parameters, encoding: { kind: "definite", width: 0 } }]],
     encoding: { kind: "definite", width: 0 },
   });
-  const [[redeemerBytes, result]] = eval_phase_two_raw(
+  const [[redeemerBytes, result]] = evaluatePhaseTwoRaw(
     evaluation.draft_tx().to_cbor_bytes(),
     [[sourceInput.to_cbor_bytes(), sourceOutput.to_cbor_bytes()]],
     costModels,

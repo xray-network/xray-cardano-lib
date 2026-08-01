@@ -14,9 +14,9 @@ import {
   CIP25String64,
   CIP25Version,
   PolicyId,
-} from "@xray-network/cardano-cip/cip25";
-import { TransactionMetadatum } from "@xray-network/cardano-chain";
-import { decodeCbor } from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-cip/cip25";
+import { TransactionMetadatum } from "@xray-network/xray-cardano-lib-chain";
+import { decodeCbor } from "@xray-network/xray-cardano-lib-core";
 
 const policy = PolicyId.from_raw_bytes(Uint8Array.from({ length: 28 }, (_, index) => index + 1));
 const asset = AssetName.from_raw_bytes(Uint8Array.of(0xca, 0xfe, 0xd0, 0x0d));

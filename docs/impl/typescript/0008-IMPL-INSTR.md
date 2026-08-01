@@ -13,7 +13,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | --- | --- | --- | --- |
 | [`typescript/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted key/address compatibility and package identities |
 | [`typescript/0004`](./0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted Conway `Credential` and `GovActionId` owners |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0005, 0016, 0019, 0105, 0129, and 1852 evidence |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0005, 0016, 0019, 0105, 0129, and 1852 evidence |
 | Captured CIP-0019 ABNF and Byron CDDL | `PROVIDER` | Yes | Strict address text/binary boundaries |
 | Captured CIP-0105 vector index and four vector files | `PROVIDER` | Yes | Exact governance derivation, key, hash, script, and identifier vectors |
 | `libs/typescript/packages/{core,crypto,chain,cip,runtime}/` | `LOCAL` | Yes | Existing Bech32, key, address, credential, and facade owners |
@@ -70,7 +70,7 @@ visibly provisional focused surface.
 ### C003: provisional CIP-0129 identifiers
 
 - Own `ProvisionalGovernanceCredentialId` and `ProvisionalGovernanceActionId` only under
-  `@xray-network/cardano-cip/cip129`. Add the explicit `./cip129` export, but do not add these
+  `@xray-network/xray-cardano-lib-cip/cip129`. Add the explicit `./cip129` export, but do not add these
   proposal types to the stable CIP root or aggregate runtime.
 - A credential ID is exactly 29 bytes: one header plus the existing 28-byte key/script hash.
   Header high nibbles are CC hot `0`, CC cold `1`, and DRep `2`; low nibbles are key hash `2` and

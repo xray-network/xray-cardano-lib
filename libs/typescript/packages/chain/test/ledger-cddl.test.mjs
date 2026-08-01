@@ -3,20 +3,20 @@ import test from "node:test";
 
 import {
   encodeCbor,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import {
   AllegraTransactionBody,
-} from "@xray-network/cardano-chain/allegra";
+} from "@xray-network/xray-cardano-lib-chain/allegra";
 import {
   AlonzoTransactionBody,
-} from "@xray-network/cardano-chain/alonzo";
+} from "@xray-network/xray-cardano-lib-chain/alonzo";
 import {
   BabbageTransactionBody,
-} from "@xray-network/cardano-chain/babbage";
+} from "@xray-network/xray-cardano-lib-chain/babbage";
 import {
   ByronBlock,
   ByronTxInRegular,
-} from "@xray-network/cardano-chain/byron";
+} from "@xray-network/xray-cardano-lib-chain/byron";
 import {
   Certificate,
   ExUnits,
@@ -26,16 +26,16 @@ import {
   ProtocolVersion,
   TransactionBody,
   UnitInterval,
-} from "@xray-network/cardano-chain/conway";
+} from "@xray-network/xray-cardano-lib-chain/conway";
 import {
   MaryTransactionBody,
-} from "@xray-network/cardano-chain/mary";
+} from "@xray-network/xray-cardano-lib-chain/mary";
 import {
   MultiEraBlock,
-} from "@xray-network/cardano-chain/multi-era";
+} from "@xray-network/xray-cardano-lib-chain/multi-era";
 import {
   ShelleyTransactionBody,
-} from "@xray-network/cardano-chain/shelley";
+} from "@xray-network/xray-cardano-lib-chain/shelley";
 
 const uint = (value) => ({ kind: "unsigned", value, encoding: { width: 0 } });
 const bytes = (value) => ({

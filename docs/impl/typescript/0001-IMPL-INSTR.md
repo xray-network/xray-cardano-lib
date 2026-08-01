@@ -11,7 +11,7 @@ Provider-Evidence: ../../providers/cardano-multiplatform-lib/0001-cardano-multip
 
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
-| [`0001-cardano-multiplatform-lib`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/SNAPSHOT.md) | `PROVIDER` | Yes | Frozen CDDL, historical vectors, provenance, and licensing |
+| [`0001-cardano-multiplatform-lib`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/SNAPSHOT.md) | `PROVIDER` | Yes | Frozen CDDL, historical vectors, provenance, and licensing |
 
 ## Objective
 

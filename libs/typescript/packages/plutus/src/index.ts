@@ -1,6 +1,6 @@
 export {
-  apply_params_to_script,
-  eval_phase_two_raw,
+  applyParamsToScript,
+  evaluatePhaseTwoRaw,
 } from "./api.js";
 export type {
   PhaseTwoEvaluation,

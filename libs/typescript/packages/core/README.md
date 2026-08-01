@@ -1,7 +1,7 @@
 # Cardano Core
 
 Browser-safe foundational types and codecs shared by the XRAY Cardano Lib packages.
-`@xray-network/cardano-core` provides byte utilities, lossless CBOR handling, ordered
+`@xray-network/xray-cardano-lib-core` provides byte utilities, lossless CBOR handling, ordered
 collections, numeric primitives, network identifiers, and consistent errors without depending on
 another workspace package.
 
@@ -10,7 +10,7 @@ The package is universal ESM for Node.js 20.19 or newer and modern browsers.
 ## Installation
 
 ```sh
-npm install @xray-network/cardano-core
+npm install @xray-network/xray-cardano-lib-core
 ```
 
 ## Basic usage
@@ -23,7 +23,7 @@ import {
   bytesToHex,
   decodeCbor,
   encodeCbor,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 
 const integer = Int.new(42n);
 const encoded = integer.to_cbor_bytes();
@@ -38,7 +38,7 @@ Bech32 is intentionally available through its focused entry point:
 import {
   decodeBech32,
   encodeBech32,
-} from "@xray-network/cardano-core/bech32";
+} from "@xray-network/xray-cardano-lib-core/bech32";
 
 const encoded = encodeBech32("example", Uint8Array.of(1, 2, 3));
 const { prefix, bytes } = decodeBech32(encoded);
@@ -70,8 +70,8 @@ Cardano data.
 
 | Entry point | Contents |
 | --- | --- |
-| `@xray-network/cardano-core` | Bytes, CBOR, collections, errors, numbers, network values, and shared conventions |
-| `@xray-network/cardano-core/bech32` | Bech32 encoder and decoder |
+| `@xray-network/xray-cardano-lib-core` | Bytes, CBOR, collections, errors, numbers, network values, and shared conventions |
+| `@xray-network/xray-cardano-lib-core/bech32` | Bech32 encoder and decoder |
 
 ## Source layout
 

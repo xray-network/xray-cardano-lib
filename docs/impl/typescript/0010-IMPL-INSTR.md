@@ -13,7 +13,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | --- | --- | --- | --- |
 | [`typescript/0003`](./0003-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted typed Plutus Data owner and immutable Data behavior |
 | [`typescript/0004`](./0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted `ScriptHash`, `AssetName`, value, and Conway wire owners |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0067/0068 specifications, registry, and registry schema |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0067/0068 specifications, registry, and registry schema |
 | Captured `CIP-0067/README.md`, `registry.json`, and `registry.schema.json` | `PROVIDER` | Yes | Label bits, CRC-8 vectors, proposal status, and registered values |
 | Captured `CIP-0068/README.md` | `PROVIDER` | Yes | Active token relationships, versioned datum shapes, and metadata rules |
 | `libs/typescript/packages/{cip,chain,plutus,runtime}/` | `LOCAL` | Yes | Existing package, asset, Data, export, browser, and test boundaries |
@@ -37,7 +37,7 @@ chain lookup or URI fetching.
 - Export `encode_asset_name_label(label): Uint8Array`,
   `decode_asset_name_label(bytes): number`, and
   `split_labeled_asset_name(assetName): { label, content }` from
-  `@xray-network/cardano-cip/cip67`; joining must return the existing `AssetName` binding.
+  `@xray-network/xray-cardano-lib-cip/cip67`; joining must return the existing `AssetName` binding.
 - Encode four bytes as `[0000 | 16-bit big-endian label | CRC-8 | 0000]`. CRC-8 uses polynomial
   `0x07`, initial value 0, no reflection, and final XOR 0 over the two padded label bytes.
 - Require integer labels `0..65535`, both zero bracket nibbles, a matching checksum, exactly four
@@ -52,7 +52,7 @@ chain lookup or URI fetching.
 ## C002: active CIP-0068 contract
 
 - Export `CIP68TokenClass` values `NFT=222`, `FT=333`, and `RFT=444`, plus the reference label
-  constant 100, under `@xray-network/cardano-cip/cip68`.
+  constant 100, under `@xray-network/xray-cardano-lib-cip/cip68`.
 - Add pure helpers to construct user/reference `AssetName`s from content and to validate a pair.
   User and reference assets must use the same existing `ScriptHash` policy, have labels
   222/333/444 and 100 respectively, and have byte-identical unlabeled content.

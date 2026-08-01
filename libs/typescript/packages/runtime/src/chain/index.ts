@@ -1,1 +1,1 @@
-export * from "@xray-network/cardano-chain";
+export * from "@xray-network/xray-cardano-lib-chain";

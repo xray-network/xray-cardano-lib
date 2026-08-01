@@ -5,8 +5,8 @@ import {
   encodeCbor,
   hexToBytes,
   type CborValue,
-} from "@xray-network/cardano-core";
-import { decodeBech32, encodeBech32 } from "@xray-network/cardano-core/bech32";
+} from "@xray-network/xray-cardano-lib-core";
+import { decodeBech32, encodeBech32 } from "@xray-network/xray-cardano-lib-core/bech32";
 
 type HistoricalConstructor<T extends HistoricalData = HistoricalData> = {
   new (node: CborValue): T;

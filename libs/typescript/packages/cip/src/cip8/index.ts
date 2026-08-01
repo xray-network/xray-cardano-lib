@@ -3,6 +3,8 @@ export {
   COSESignBuilder,
   EdDSA25519Key,
 } from "./builders.js";
+export { CIP8Message } from "./message.js";
+export type { CIP8MessageEnvelope } from "./message.js";
 export {
   AlgorithmId,
   COSEKey,
@@ -26,8 +28,8 @@ export {
   SignedMessage,
   SignedMessageKind,
 } from "./model.js";
-export { Int } from "@xray-network/cardano-core";
+export { Int } from "@xray-network/xray-cardano-lib-core";
 export {
   Ed25519Signature,
   PublicKey,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";

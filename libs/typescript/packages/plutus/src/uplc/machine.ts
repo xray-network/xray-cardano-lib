@@ -3,7 +3,7 @@ import {
   INT64_MAX,
   bytesEqual,
   type CborValue,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import {
   blake2b224,
   blake2b256,
@@ -24,7 +24,7 @@ import {
   verifyEd25519Uplc,
   verifySecp256k1EcdsaUplc,
   verifySecp256k1SchnorrUplc,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import type { UplcConstant, UplcProgram, UplcTerm, UplcType } from "./ast.js";
 import {
   builtinCost,

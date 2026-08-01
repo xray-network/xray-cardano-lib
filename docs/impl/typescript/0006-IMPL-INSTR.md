@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.m
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`typescript/0004`](./0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted Conway wire models, package ownership, and lossless-codec contract |
-| [`0001-cardano-ledger`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) | `PROVIDER` | Yes | Official Conway certificate and governance CDDL |
+| [`0001-cardano-ledger`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) | `PROVIDER` | Yes | Official Conway certificate and governance CDDL |
 | `libs/typescript/packages/chain/src/era/conway/` and `libs/typescript/packages/chain/src/builder/transaction.ts` | `LOCAL` | Yes | Existing nominal owners and builder consumers |
 
 ## Objective
@@ -81,7 +81,7 @@ variant class a strongly typed `new(...)` signature and named field getters. Giv
    logic cannot diverge.
 4. Update certificate, proposal, and vote builders to consume the typed APIs without changing
    encoded bodies.
-5. Export each binding from `@xray-network/cardano-chain/conway`, the chain root, and the runtime
+5. Export each binding from `@xray-network/xray-cardano-lib-chain/conway`, the chain root, and the runtime
    facade as the same identity.
 6. Add exhaustive positive and malformed coverage, then run the workspace gate.
 

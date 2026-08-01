@@ -9,50 +9,50 @@ const typescriptRoot = fileURLToPath(new URL("../../", import.meta.url));
 const packageRules = {
   chain: {
     dependencies: {
-      "@xray-network/cardano-core": "0.1.0",
-      "@xray-network/cardano-crypto": "0.1.0",
+      "@xray-network/xray-cardano-lib-core": "0.1.0",
+      "@xray-network/xray-cardano-lib-crypto": "0.1.0",
     },
-    name: "@xray-network/cardano-chain",
+    name: "@xray-network/xray-cardano-lib-chain",
   },
   cip: {
     dependencies: {
-      "@xray-network/cardano-chain": "0.1.0",
-      "@xray-network/cardano-core": "0.1.0",
-      "@xray-network/cardano-crypto": "0.1.0",
+      "@xray-network/xray-cardano-lib-chain": "0.1.0",
+      "@xray-network/xray-cardano-lib-core": "0.1.0",
+      "@xray-network/xray-cardano-lib-crypto": "0.1.0",
     },
-    name: "@xray-network/cardano-cip",
-    subpaths: ["./cip25", "./cip36", "./cip8"],
+    name: "@xray-network/xray-cardano-lib-cip",
+    subpaths: ["./cip25", "./cip36", "./cip4", "./cip8"],
   },
   core: {
     dependencies: {},
-    name: "@xray-network/cardano-core",
+    name: "@xray-network/xray-cardano-lib-core",
   },
   crypto: {
     dependencies: {
       "@noble/ciphers": "2.2.0",
       "@noble/curves": "2.2.0",
       "@noble/hashes": "2.2.0",
-      "@xray-network/cardano-core": "0.1.0",
+      "@xray-network/xray-cardano-lib-core": "0.1.0",
     },
-    name: "@xray-network/cardano-crypto",
+    name: "@xray-network/xray-cardano-lib-crypto",
   },
   runtime: {
     dependencies: {
-      "@xray-network/cardano-chain": "0.1.0",
-      "@xray-network/cardano-cip": "0.1.0",
-      "@xray-network/cardano-core": "0.1.0",
-      "@xray-network/cardano-crypto": "0.1.0",
-      "@xray-network/cardano-plutus": "0.1.0",
+      "@xray-network/xray-cardano-lib-chain": "0.1.0",
+      "@xray-network/xray-cardano-lib-cip": "0.1.0",
+      "@xray-network/xray-cardano-lib-core": "0.1.0",
+      "@xray-network/xray-cardano-lib-crypto": "0.1.0",
+      "@xray-network/xray-cardano-lib-plutus": "0.1.0",
     },
     name: "@xray-network/xray-cardano-lib",
   },
   plutus: {
     dependencies: {
-      "@xray-network/cardano-chain": "0.1.0",
-      "@xray-network/cardano-core": "0.1.0",
-      "@xray-network/cardano-crypto": "0.1.0",
+      "@xray-network/xray-cardano-lib-chain": "0.1.0",
+      "@xray-network/xray-cardano-lib-core": "0.1.0",
+      "@xray-network/xray-cardano-lib-crypto": "0.1.0",
     },
-    name: "@xray-network/cardano-plutus",
+    name: "@xray-network/xray-cardano-lib-plutus",
     subpaths: ["./data", "./uplc"],
   },
 };

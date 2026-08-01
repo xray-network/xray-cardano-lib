@@ -3,13 +3,13 @@
 Native TypeScript ledger models, address codecs, transaction construction, and era-aware block
 decoding for Cardano.
 
-`@xray-network/cardano-chain` is universal ESM for Node.js and modern browsers. Its runtime uses
+`@xray-network/xray-cardano-lib-chain` is universal ESM for Node.js and modern browsers. Its runtime uses
 `Uint8Array`, `bigint`, and Web Platform APIs directly.
 
 ## Installation
 
 ```sh
-npm install @xray-network/cardano-chain
+npm install @xray-network/xray-cardano-lib-chain
 ```
 
 Node.js 20.19 or newer is required.
@@ -17,7 +17,7 @@ Node.js 20.19 or newer is required.
 ## Basic usage
 
 ```ts
-import { Address, NetworkInfo } from "@xray-network/cardano-chain";
+import { Address, NetworkInfo } from "@xray-network/xray-cardano-lib-chain";
 
 const address = Address.from_bech32(
   "addr1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8sxy9w7g",
@@ -36,19 +36,19 @@ Import from an era entry point when an application only needs that era's runtime
 
 | Entry point | Contents |
 | --- | --- |
-| `@xray-network/cardano-chain/byron` | Byron encoding, addresses, transactions, witnesses, blocks, and genesis parsing |
-| `@xray-network/cardano-chain/shelley` | Shelley blocks, transactions, certificates, and genesis parsing |
-| `@xray-network/cardano-chain/allegra` | Allegra blocks, validity intervals, and auxiliary data |
-| `@xray-network/cardano-chain/mary` | Mary blocks, transactions, and multi-asset outputs |
-| `@xray-network/cardano-chain/alonzo` | Alonzo blocks, scripts, redeemers, and protocol parameters |
-| `@xray-network/cardano-chain/babbage` | Babbage blocks, reference inputs, inline data, and reference scripts |
-| `@xray-network/cardano-chain/conway` | Conway ledger and governance models |
-| `@xray-network/cardano-chain/multi-era` | Era detection and a common view across all supported eras |
+| `@xray-network/xray-cardano-lib-chain/byron` | Byron encoding, addresses, transactions, witnesses, blocks, and genesis parsing |
+| `@xray-network/xray-cardano-lib-chain/shelley` | Shelley blocks, transactions, certificates, and genesis parsing |
+| `@xray-network/xray-cardano-lib-chain/allegra` | Allegra blocks, validity intervals, and auxiliary data |
+| `@xray-network/xray-cardano-lib-chain/mary` | Mary blocks, transactions, and multi-asset outputs |
+| `@xray-network/xray-cardano-lib-chain/alonzo` | Alonzo blocks, scripts, redeemers, and protocol parameters |
+| `@xray-network/xray-cardano-lib-chain/babbage` | Babbage blocks, reference inputs, inline data, and reference scripts |
+| `@xray-network/xray-cardano-lib-chain/conway` | Conway ledger and governance models |
+| `@xray-network/xray-cardano-lib-chain/multi-era` | Era detection and a common view across all supported eras |
 
 For example, an indexer can decode the explicit network envelope without selecting an era first:
 
 ```ts
-import { MultiEraBlock } from "@xray-network/cardano-chain/multi-era";
+import { MultiEraBlock } from "@xray-network/xray-cardano-lib-chain/multi-era";
 
 export function inspectBlock(bytes: Uint8Array) {
   const block = MultiEraBlock.from_explicit_network_cbor_bytes(bytes);

@@ -5,8 +5,8 @@ import {
   CardanoBoundsError,
   bytesEqual,
   copyBytes,
-} from "@xray-network/cardano-core";
-import { secureRandomBytes } from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-core";
+import { secureRandomBytes } from "@xray-network/xray-cardano-lib-crypto";
 
 test("byte helpers use Uint8Array and defensive copies", () => {
   const original = Uint8Array.of(1, 2, 3);

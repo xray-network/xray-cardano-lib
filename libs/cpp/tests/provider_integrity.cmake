@@ -40,7 +40,7 @@ function(check_sha256_inventory sums_file expected_count)
   endforeach()
 endfunction()
 
-set(provider_root "${CARDANO_REPOSITORY_ROOT}/updates/providers")
+set(provider_root "${CARDANO_REPOSITORY_ROOT}/.xray/updates/providers")
 
 check_sha256_inventory(
   "${provider_root}/message-signing/0001-message-signing/artifacts/SHA256SUMS"

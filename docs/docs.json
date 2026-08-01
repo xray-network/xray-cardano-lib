@@ -17,6 +17,19 @@
       {
         "group": "Implementation updates",
         "pages": [
+          "impl/XRAY-UPDATES-STATUS",
+          {
+            "group": "Repository",
+            "pages": [
+              {
+                "group": "0001 — Install XRAY Updates",
+                "pages": [
+                  "impl/repository/0001-IMPL-INSTR",
+                  "impl/repository/0001-IMPL-RESULT"
+                ]
+              }
+            ]
+          },
           {
             "group": "TypeScript",
             "pages": [
@@ -95,6 +108,34 @@
                 "pages": [
                   "impl/typescript/0012-IMPL-INSTR",
                   "impl/typescript/0012-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0013 — Typed Plutus void and aggregate exports",
+                "pages": [
+                  "impl/typescript/0013-IMPL-INSTR",
+                  "impl/typescript/0013-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0014 — CIP8Message facade",
+                "pages": [
+                  "impl/typescript/0014-IMPL-INSTR",
+                  "impl/typescript/0014-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0015 — CostModels JSON parsing and validation",
+                "pages": [
+                  "impl/typescript/0015-IMPL-INSTR",
+                  "impl/typescript/0015-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0016 — CIP-4 wallet checksum facade",
+                "pages": [
+                  "impl/typescript/0016-IMPL-INSTR",
+                  "impl/typescript/0016-IMPL-RESULT"
                 ]
               }
             ]
@@ -175,9 +216,7 @@
           {
             "group": "Repository",
             "pages": [
-              "adr/repository/0001-repository-architecture",
-              "adr/repository/0002-shared-update-ledger",
-              "adr/repository/0003-project-identity"
+              "adr/repository/0001-xray-updates-standard"
             ]
           },
           {

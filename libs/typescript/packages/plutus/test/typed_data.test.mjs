@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   Constr,
   Data,
-} from "@xray-network/cardano-plutus/data";
+} from "@xray-network/xray-cardano-lib-plutus/data";
 
 test("native Data codec round-trips every Plutus data variant", () => {
   const value = new Constr(3, [
@@ -59,6 +59,22 @@ test("native Data schemas cast objects, enums, nullable values, and collections"
   const balances = Data.Map(Data.Bytes(), Data.Integer(), { minItems: 1 });
   const map = new Map([["aa", 1n]]);
   assert.deepEqual(Data.from(Data.to(map, balances), balances), map);
+});
+
+test("native Data Void schema round-trips only the exact void constructor", () => {
+  const schema = Data.Void();
+
+  assert.equal(Data.to(undefined, schema), "d87980");
+  assert.equal(Data.from("d87980", schema), undefined);
+  assert.equal(Data.void(), "d87980");
+
+  for (const value of [null, false, 0n, "", [], new Constr(0, [])]) {
+    assert.throws(() => Data.to(value, schema), /Expected undefined/u);
+  }
+  for (const cbor of ["80", "d87a80", "d8798101"]) {
+    assert.throws(() => Data.from(cbor, schema), /Expected void constructor/u);
+  }
+  assert.throws(() => Data.from("d879", schema));
 });
 
 test("native Data JSON conversion is browser-safe and preserves large integers", () => {

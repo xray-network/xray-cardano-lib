@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`typescript/0004`](./0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted Byron-through-Conway models, lossless CBOR, and transaction ownership |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable active CIP-0021 transaction restrictions |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable active CIP-0021 transaction restrictions |
 | Captured `CIP-0021/README.md` | `PROVIDER` | Yes | Exact deterministic restrictions and explicitly time-sensitive appendix boundary |
 | `libs/typescript/packages/{core,chain,cip,runtime}/` | `LOCAL` | Yes | Existing lossless CBOR nodes, transaction owner, package exports, and tests |
 
@@ -34,7 +34,7 @@ for any device or firmware version.
 
 - Export
   `diagnose_cip21_transaction(transaction, options?): readonly CIP21Violation[]` from
-  `@xray-network/cardano-cip/cip21`.
+  `@xray-network/xray-cardano-lib-cip/cip21`.
 - Accept the existing lossless Conway `Transaction` binding. Never create a competing transaction,
   certificate, output, or witness type.
 - `CIP21Violation` is deeply immutable and contains stable `code`, structural JSON-pointer `path`,

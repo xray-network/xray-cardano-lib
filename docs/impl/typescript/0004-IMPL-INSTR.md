@@ -11,8 +11,8 @@ Provider-Evidence: ../../providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.m
 
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
-| [`0001-cardano-ledger`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) | `PROVIDER` | Yes | Official Byron-through-Conway ledger grammar |
-| [`0001-cardano-multiplatform-lib`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/SNAPSHOT.md) | `PROVIDER` | Yes | Frozen public compatibility and historical vectors |
+| [`0001-cardano-ledger`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) | `PROVIDER` | Yes | Official Byron-through-Conway ledger grammar |
+| [`0001-cardano-multiplatform-lib`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/SNAPSHOT.md) | `PROVIDER` | Yes | Frozen public compatibility and historical vectors |
 | [`typescript/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Existing TypeScript CML baseline |
 | [`typescript/0003`](./0003-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Existing TypeScript Plutus ownership boundary |
 

@@ -2,16 +2,16 @@ import {
   AssetName,
   Metadata,
   TransactionMetadatum,
-} from "@xray-network/cardano-chain";
+} from "@xray-network/xray-cardano-lib-chain";
 import {
   UINT64_MAX,
   bytesToHex,
   decodeCbor,
   encodeCbor,
   hexToBytes,
-} from "@xray-network/cardano-core";
-import type { CborValue } from "@xray-network/cardano-core";
-import { ScriptHash } from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
+import { ScriptHash } from "@xray-network/xray-cardano-lib-crypto";
 
 const METADATA_LABEL = 721n;
 const utf8 = new TextEncoder();
@@ -274,5 +274,5 @@ function groupedEntries(values: readonly NftEntry[]): Array<readonly [ScriptHash
   return [...groups.values()].sort((left, right) => left.policy.to_hex().localeCompare(right.policy.to_hex())).map((group) => [group.policy, group.values.sort((left, right) => left.asset.to_hex().localeCompare(right.asset.to_hex()))]);
 }
 
-export { AssetName, Metadata, TransactionMetadatum } from "@xray-network/cardano-chain";
-export { ScriptHash as PolicyId } from "@xray-network/cardano-crypto";
+export { AssetName, Metadata, TransactionMetadatum } from "@xray-network/xray-cardano-lib-chain";
+export { ScriptHash as PolicyId } from "@xray-network/xray-cardano-lib-crypto";

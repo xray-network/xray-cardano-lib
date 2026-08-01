@@ -12,8 +12,8 @@ Provider-Evidence: ../../providers/cardano-multiplatform-lib/0001-cardano-multip
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`cpp/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted workspace, component graph, package, historical-block, UPLC, and completion baseline |
-| [`0001-cardano-multiplatform-lib`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable historical block and genesis benchmark fixtures |
-| [`0001-uplc`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/uplc/0001-uplc/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable Flat/text/CEK and phase-two benchmark fixtures |
+| [`0001-cardano-multiplatform-lib`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable historical block and genesis benchmark fixtures |
+| [`0001-uplc`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/uplc/0001-uplc/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable Flat/text/CEK and phase-two benchmark fixtures |
 | `libs/cpp/CMakeLists.txt`, `libs/cpp/CMakePresets.json`, and `libs/cpp/cmake/` | `LOCAL` | Yes | Current host restrictions, target exports, dependency discovery, and validation workflows |
 
 ## Objective

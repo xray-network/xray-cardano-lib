@@ -11,7 +11,7 @@ Provider-Evidence: ../../providers/message-signing/0001-message-signing/SNAPSHOT
 
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
-| [`0001-message-signing`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/message-signing/0001-message-signing/SNAPSHOT.md) | `PROVIDER` | Yes | CIP-8 wire and signing behavior |
+| [`0001-message-signing`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/message-signing/0001-message-signing/SNAPSHOT.md) | `PROVIDER` | Yes | CIP-8 wire and signing behavior |
 
 ## Objective
 

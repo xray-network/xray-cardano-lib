@@ -1,7 +1,7 @@
 import {
   Ed25519KeyHash,
   VRFKeyHash,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import { Address } from "../../address/index.js";
 import {
   bigintValue,

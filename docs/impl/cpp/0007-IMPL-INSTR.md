@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`cpp/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted asset-name, policy, typed Data, CIP-25, error, ownership, and packaging baseline |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Captured proposed CIP-67 algorithm/registry/schema and active CIP-68 version-4 specification |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Captured proposed CIP-67 algorithm/registry/schema and active CIP-68 version-4 specification |
 | `libs/cpp/include/cardano/chain/builder.hpp` and `libs/cpp/include/cardano/plutus/data.hpp` | `LOCAL` | Yes | Existing `AssetName`, `ScriptHash`, and typed `Data` owners to reuse |
 
 ## Objective
