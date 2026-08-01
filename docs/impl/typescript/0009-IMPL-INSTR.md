@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`typescript/0003`](./0003-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted typed Data, UPLC, serialized-script, and Plutus V1/V2/V3 ownership |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0057 specification and complete captured meta-schema set |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0057 specification and complete captured meta-schema set |
 | Captured `CIP-0057/README.md` and `schemas/README.md` | `PROVIDER` | Yes | Document structure, vocabulary, validation semantics, and schema inventory |
 | Captured five `CIP-0057/schemas/*.json` files | `PROVIDER` | Yes | Exact blueprint, argument, parameter, Data, and builtin schema constraints |
 | `libs/typescript/packages/plutus/` and runtime facade | `LOCAL` | Yes | Existing package, Data, script codec, hash, export, and security boundaries |

@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`typescript/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted package identities, CML compatibility baseline, and browser boundary |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0014 definition and eight official vectors |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0014 definition and eight official vectors |
 | `artifacts/upstream/CIP-0014/README.md` in the declared snapshot | `PROVIDER` | Yes | Exact digest, concatenation, HRP, and vector semantics |
 | `libs/typescript/packages/crypto/`, `chain/`, `cip/`, and `runtime/` | `LOCAL` | Yes | Existing hash, `ScriptHash`, `AssetName`, CIP, and aggregate owners |
 

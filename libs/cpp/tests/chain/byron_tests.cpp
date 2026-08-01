@@ -133,7 +133,7 @@ TEST_CASE("Byron era models enforce embedded transaction productions", "[chain][
 
 TEST_CASE("genesis parsers validate all captured TypeScript fixtures", "[chain][genesis]") {
   const auto root = std::filesystem::path(CARDANO_REPOSITORY_ROOT) /
-                    "updates/providers/cardano-multiplatform-lib/"
+                    ".xray/updates/providers/cardano-multiplatform-lib/"
                     "0001-cardano-multiplatform-lib/artifacts/test-vectors/genesis";
   std::size_t byron_count = 0;
   bool federal_seen = false;

@@ -1,6 +1,7 @@
 # ADR 0002: Shared update ledger and provider evidence
 
-- Status: Accepted
+- Status: Accepted; canonical-root and lifecycle-ledger sections superseded by
+  [ADR 0004](./0004-xray-updates-standard.md)
 - Date: 2026-07-31
 - Supersedes: the implementation-record and provider-location sections of
   [ADR 0001](./0001-repository-architecture.md)

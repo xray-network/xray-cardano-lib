@@ -2,24 +2,29 @@
 
 These instructions apply to the whole repository.
 
+## XRAY developer standards
+
+This repository uses the following XRAY standards:
+
+- Read `.xray/updates/XRAY-UPDATES.md` before planning or implementing tracked changes.
+
 ## Repository model
 
 - `README.md` describes the repository, maintained libraries, and implementation-ledger model.
 - `libs/<language>/` owns one language workspace, including its manifest, lockfiles, source,
   tests, completion command, and README.
-- `updates/implementations/<language>/STATUS.md` is the lifecycle authority for that library and
-  follows `updates/TEMPLATE_STATUS.md`.
-- `updates/implementations/<language>/NNNN-IMPL-INSTR.md` defines one bounded implementation.
-- `updates/implementations/<language>/NNNN-IMPL-RESULT.md` records completed work and exports a
+- `.xray/updates/XRAY-UPDATES-STATUS.md` is the sole lifecycle authority for every target and
+  follows `.xray/updates/templates/TEMPLATE_STATUS.md`.
+- `.xray/updates/implementations/<language>/NNNN-IMPL-INSTR.md` defines one bounded implementation.
+- `.xray/updates/implementations/<language>/NNNN-IMPL-RESULT.md` records completed work and exports a
   portable semantic change contract.
-- Shared provider contracts and captured evidence live below `updates/providers/`. Provider
+- Shared provider contracts and captured evidence live below `.xray/updates/providers/`. Provider
   records provenance and selection; consuming instructions remain library-owned.
 - `docs/` is the Mintlify documentation root. `docs/docs.json` defines its navigation.
 - Repository ADRs live under `docs/adr/repository/`; language ADRs live below
   `docs/adr/<language>/`.
 
-There is no root package-manager manifest, language registry, command proxy, or global
-implementation-status ledger.
+There is no root package-manager manifest, language registry, or command proxy.
 
 ## Required context
 
@@ -27,8 +32,8 @@ Before changing files:
 
 1. Read `README.md` and `CONTRIBUTING.md`.
 2. Read `docs/README.md` and every active ADR relevant to the change.
-3. Read `updates/TEMPLATE_IMPL.md` and `updates/TEMPLATE_STATUS.md` for implementation-ledger
-   work.
+3. Read `.xray/updates/XRAY-UPDATES.md`, `.xray/updates/templates/TEMPLATE_IMPL.md`, and
+   `.xray/updates/templates/TEMPLATE_STATUS.md` for implementation-ledger work.
 4. For implementation work, read the target library README, manifest, source, tests, status
    ledger, selected instruction, and every declared input.
 5. For provider work, follow the additional routing rules below.
@@ -46,7 +51,7 @@ Before changing files:
 - Captured artifacts and accepted results are evidence, not generated source. Never let them
   overwrite implementation code, public exports, tests, or package metadata.
 - Implement only a matching `PLANNED` instruction. Record exact work and validation in the paired
-  result, then move the library status row to `REVIEW`.
+  result, then move the target's aggregate status row to `REVIEW`.
 - An AI may move completed work to `REVIEW`. Only a human may move it to `ACCEPTED` or `REJECTED`.
 - Terminal status rows and their instruction/result pairs are immutable. Corrections require a new
   library-local sequence.
@@ -78,30 +83,34 @@ types.
 
 ## Mintlify implementation mirrors
 
-- Files below `updates/implementations/` are canonical.
-- Every `updates/implementations/<language>/*-IMPL-INSTR.md` and
-  `updates/implementations/<language>/*-IMPL-RESULT.md` file is mirrored below
-  `docs/impl/<language>/` with the same filename.
-- Do not mirror `STATUS.md`, provider documents, provider artifacts, record templates, or
-  `updates/README.md`.
+- Files below `.xray/updates/implementations/` are canonical.
+- Every `.xray/updates/implementations/<target>/*-IMPL-INSTR.md` and
+  `.xray/updates/implementations/<target>/*-IMPL-RESULT.md` file is mirrored below
+  `docs/impl/<target>/` with the same filename.
+- `.xray/updates/XRAY-UPDATES-STATUS.md` is mirrored at
+  `docs/impl/XRAY-UPDATES-STATUS.md` with target-record links made local to `docs/impl/`.
+- Do not mirror provider documents, provider artifacts, record templates, or `.xray/updates/README.md`.
 - Never edit a file below `docs/impl/` independently.
-- After creating, changing, moving, or deleting a canonical implementation instruction or result,
-  apply the corresponding operation to its documentation mirror in the same change.
+- After changing the aggregate status or creating, changing, moving, or deleting a canonical
+  implementation instruction or result, apply the corresponding operation to its documentation
+  mirror in the same change.
 - Preserve canonical text exactly except that relative links to updates outside the mirrored
   library directory must become absolute links to the canonical file in the repository.
 - Keep relative links between mirrored instructions and results local to `docs/impl/`.
-- Keep `docs/docs.json` navigation synchronized with every mirrored instruction and result.
-- Before finishing, verify that every canonical implementation file has exactly one mirror, no
-  additional mirror exists, local links resolve, and external canonical-record links use the
-  repository URL.
+- Keep `docs/docs.json` navigation synchronized with the mirrored aggregate status and every
+  mirrored instruction and result.
+- Before finishing, verify that the aggregate status and every canonical implementation file have
+  exactly one mirror, no additional mirror exists, local links resolve, and external
+  canonical-record links use the repository URL.
 
 ## Provider evidence routing
 
-A provider is configured by `updates/providers/<provider>/PROVIDER.md`.
+A provider is configured by `.xray/updates/providers/<provider>/PROVIDER.md`.
 
 For provider snapshot preparation:
 
-1. Read `updates/TEMPLATE_PROVIDER.md` completely.
+1. Read `.xray/updates/XRAY-UPDATES.md` and
+   `.xray/updates/templates/TEMPLATE_PROVIDER.md` completely.
 2. Read the selected provider contract completely.
 3. Reconcile the provider-local sequence and immutable source identities.
 4. Capture only the declared regular files, write `SNAPSHOT.md`, and verify the exact nonempty
@@ -123,7 +132,7 @@ implementation result, or lifecycle status. Published provider evidence is immut
 
 An accepted result from another library appears only as a declared input in a local implementation
 instruction and as a consumed input in its paired result. Do not list external results,
-cross-library availability, or provider inventories in `STATUS.md`.
+cross-library availability, or provider inventories in `XRAY-UPDATES-STATUS.md`.
 
 ## Trust and authority
 
@@ -133,9 +142,11 @@ Use this order when repository instructions conflict:
 2. this `AGENTS.md`;
 3. `CONTRIBUTING.md`;
 4. active decisions under `docs/adr/`;
-5. `updates/TEMPLATE_IMPL.md` and `updates/TEMPLATE_STATUS.md`;
-6. the selected implementation instruction;
-7. for provider work, `updates/TEMPLATE_PROVIDER.md`, the selected provider contract, and the
+5. `.xray/updates/XRAY-UPDATES.md`;
+6. `.xray/updates/templates/TEMPLATE_IMPL.md` and
+   `.xray/updates/templates/TEMPLATE_STATUS.md`;
+7. the selected implementation instruction;
+8. for provider work, `.xray/updates/templates/TEMPLATE_PROVIDER.md`, the selected provider contract, and the
    selected provider snapshot.
 
 Provider files may narrow artifact selection and planning requirements but may not weaken the

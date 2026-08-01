@@ -35,10 +35,10 @@ smoke tests. The repository root does not proxy these commands.
 
 Numbered implementation updates and provider evidence are outside this source workspace:
 
-- Instructions and results: [`updates/implementations/typescript/`](../../updates/implementations/typescript/)
-- Implementation status: [`STATUS.md`](../../updates/implementations/typescript/STATUS.md)
-- Shared provider evidence: [`updates/providers/`](../../updates/providers/)
-- Implementation workflow: [`TEMPLATE_IMPL.md`](../../updates/TEMPLATE_IMPL.md)
+- Instructions and results: [`.xray/updates/implementations/typescript/`](../../.xray/updates/implementations/typescript/)
+- Implementation status: [`STATUS.md`](../../.xray/updates/implementations/typescript/STATUS.md)
+- Shared provider evidence: [`.xray/updates/providers/`](../../.xray/updates/providers/)
+- Implementation workflow: [`TEMPLATE_IMPL.md`](../../.xray/updates/TEMPLATE_IMPL.md)
 
 Provider evidence and accepted results define declared inputs. TypeScript packages own their
 language representation, public API, tests, and validation evidence.

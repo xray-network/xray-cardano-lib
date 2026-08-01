@@ -14,7 +14,7 @@ Provider-Evidence: NONE
 | `docs/adr/repository/0003-project-identity.md` | `LOCAL` | Yes | Authoritative XRAY Cardano Lib display, repository, and package-family identities |
 | `docs/adr/typescript/0003-upstream-evidence-and-package-ownership.md` | `LOCAL` | Yes | Authoritative TypeScript package ownership and published package-family identities |
 | `libs/typescript/` | `LOCAL` | Yes | Owned package metadata, import mappings, documentation, lockfile, source, and tests |
-| `updates/implementations/typescript/0005-IMPL-INSTR.md` through `0011-IMPL-INSTR.md` | `LOCAL` | Yes | Nonterminal planned work whose package references must use the current identities |
+| `.xray/updates/implementations/typescript/0005-IMPL-INSTR.md` through `0011-IMPL-INSTR.md` | `LOCAL` | Yes | Nonterminal planned work whose package references must use the current identities |
 
 ## Objective
 

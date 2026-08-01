@@ -12,7 +12,7 @@ test("cost-model mapping tolerates short and extra tails deterministically", asy
   ]);
   assert.deepEqual(COST_MODEL_PARAMETER_NAMES.map((names) => names.length), [332, 332, 350]);
   const golden = await readFile(new URL(
-    "../../../../../updates/providers/uplc/0001-uplc/artifacts/plutus/plutus-ledger-api/CostModel/Params/CostModelParams/costModelParamNames.golden.txt",
+    "../../../../../.xray/updates/providers/uplc/0001-uplc/artifacts/plutus/plutus-ledger-api/CostModel/Params/CostModelParams/costModelParamNames.golden.txt",
     import.meta.url,
   ), "utf8");
   assert.deepEqual(COST_MODEL_PARAMETER_NAMES[2], golden.trimEnd().split("\n"));

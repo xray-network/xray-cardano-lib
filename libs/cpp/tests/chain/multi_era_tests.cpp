@@ -329,7 +329,7 @@ TEST_CASE("captured historical blocks retain their declared decode outcomes",
           "[chain][multi-era][provider]") {
   const auto repository = std::filesystem::path(CARDANO_REPOSITORY_ROOT);
   const auto fixture_root = repository /
-                            "updates/providers/cardano-multiplatform-lib/"
+                            ".xray/updates/providers/cardano-multiplatform-lib/"
                             "0001-cardano-multiplatform-lib/artifacts/test-vectors";
   const auto manifest_path = fixture_root / "manifest.json";
   const auto manifest = nlohmann::json::parse(read_text(manifest_path));

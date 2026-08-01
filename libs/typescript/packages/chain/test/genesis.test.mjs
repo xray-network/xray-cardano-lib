@@ -11,14 +11,14 @@ import {
 const inventory = JSON.parse(
   await readFile(
     new URL(
-      "../../../../../updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/manifest.json",
+      "../../../../../.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/manifest.json",
       import.meta.url,
     ),
     "utf8",
   ),
 );
 const fixtureRoot = new URL(
-  "../../../../../updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/",
+  "../../../../../.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/",
   import.meta.url,
 );
 const byronFixtures = inventory.fixtures.genesisJson.filter((fixture) =>

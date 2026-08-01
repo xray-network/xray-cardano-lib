@@ -11,7 +11,7 @@ Provider-Evidence: ../../providers/uplc/0001-uplc/SNAPSHOT.md
 
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
-| [`0001-uplc`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/uplc/0001-uplc/SNAPSHOT.md) | `PROVIDER` | Yes | Official Plutus UPLC and Cardano Ledger phase-two evidence |
+| [`0001-uplc`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/uplc/0001-uplc/SNAPSHOT.md) | `PROVIDER` | Yes | Official Plutus UPLC and Cardano Ledger phase-two evidence |
 
 ## Objective
 
@@ -33,7 +33,7 @@ No upstream code or runtime artifact is shipped or executed.
 - Official Cardano Ledger repository `https://github.com/IntersectMBO/cardano-ledger.git`, commit
   `a624de4c8db7286a6c065da149679ea55f7d5629` from `refs/heads/master`, is the authoritative
   comparison for phase-two transaction integration.
-- [`0001-cardano-ledger`](https://github.com/xray-network/cardano-lib/blob/main/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) pins the same Cardano
+- [`0001-cardano-ledger`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) pins the same Cardano
   Ledger commit for wire-schema work. Its CDDL-only artifacts are complementary; this snapshot
   captures the phase-two source paths that it deliberately excluded.
 

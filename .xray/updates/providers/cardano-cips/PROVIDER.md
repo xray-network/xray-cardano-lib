@@ -20,7 +20,7 @@ CIP, copy reference implementations, or expose a generic CIP registry.
 | Source mode | Live; resolve independently for every snapshot |
 | Submodules | Not part of the source |
 | License | Per-CIP frontmatter and copyright notice: Apache-2.0 for CIP-0005 and CIP-0016; CC-BY-4.0 for the other selected CIPs and repository license |
-| Supplementary license text | Frozen Apache-2.0 text at `updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/LICENSE-APACHE-2.0.txt`, SHA-256 `4541e95aa81113643b71a96d7ff673c4a83ede3d2e8f0df2ad676e7970e2b1fa` |
+| Supplementary license text | Frozen Apache-2.0 text at `.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/LICENSE-APACHE-2.0.txt`, SHA-256 `4541e95aa81113643b71a96d7ff673c4a83ede3d2e8f0df2ad676e7970e2b1fa` |
 
 A branch name is discovery metadata only. Every snapshot records one full commit as its
 authoritative source identity.

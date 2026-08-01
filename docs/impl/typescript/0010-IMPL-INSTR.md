@@ -13,7 +13,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | --- | --- | --- | --- |
 | [`typescript/0003`](./0003-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted typed Plutus Data owner and immutable Data behavior |
 | [`typescript/0004`](./0004-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted `ScriptHash`, `AssetName`, value, and Conway wire owners |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0067/0068 specifications, registry, and registry schema |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Immutable CIP-0067/0068 specifications, registry, and registry schema |
 | Captured `CIP-0067/README.md`, `registry.json`, and `registry.schema.json` | `PROVIDER` | Yes | Label bits, CRC-8 vectors, proposal status, and registered values |
 | Captured `CIP-0068/README.md` | `PROVIDER` | Yes | Active token relationships, versioned datum shapes, and metadata rules |
 | `libs/typescript/packages/{cip,chain,plutus,runtime}/` | `LOCAL` | Yes | Existing package, asset, Data, export, browser, and test boundaries |

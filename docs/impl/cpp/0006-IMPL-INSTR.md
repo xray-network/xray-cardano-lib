@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`cpp/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted typed Data, UPLC script, hashing, JSON-boundary, limits, ownership, and package baseline |
-| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Captured CIP-57 document and the complete five-file blueprint schema set |
+| [`0001-cardano-cips`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-cips/0001-cardano-cips/SNAPSHOT.md) | `PROVIDER` | Yes | Captured CIP-57 document and the complete five-file blueprint schema set |
 | `libs/cpp/include/cardano/plutus/data.hpp` and `libs/cpp/include/cardano/plutus/uplc.hpp` | `LOCAL` | Yes | Existing Data, schema, constant, program, and script owners to reuse |
 
 ## Objective

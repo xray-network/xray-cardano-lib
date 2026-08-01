@@ -12,7 +12,7 @@ Provider-Evidence: ../../providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.m
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
 | [`cpp/0001`](./0001-IMPL-RESULT.md) | `IMPLEMENTATION_RESULT` | Yes | Accepted builder, ledger-model, error, ownership, and compatibility baseline |
-| [`0001-cardano-ledger`](https://github.com/xray-network/xray-cardano-lib/blob/main/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) | `PROVIDER` | Yes | Frozen Conway transaction-body grammar, protocol-parameter field shapes, collateral field shapes, and governance shapes; not phase-one calculations |
+| [`0001-cardano-ledger`](https://github.com/xray-network/xray-cardano-lib/blob/main/.xray/updates/providers/cardano-ledger/0001-cardano-ledger/SNAPSHOT.md) | `PROVIDER` | Yes | Frozen Conway transaction-body grammar, protocol-parameter field shapes, collateral field shapes, and governance shapes; not phase-one calculations |
 | `libs/cpp/include/cardano/chain/builder.hpp` and `libs/cpp/src/chain/builder.cpp` | `LOCAL` | Yes | Existing public construction API and implementation to harden |
 | `libs/cpp/include/cardano/chain/era/conway.hpp` and `libs/cpp/include/cardano/chain/era/shared/models.hpp` | `LOCAL` | Yes | Existing Conway nominal owners and validated wire models |
 

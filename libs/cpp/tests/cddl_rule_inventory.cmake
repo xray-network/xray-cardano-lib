@@ -3,7 +3,7 @@ if(NOT DEFINED CARDANO_REPOSITORY_ROOT OR NOT DEFINED CARDANO_SOURCE_DIR)
 endif()
 
 set(CDDL_ROOT
-    "${CARDANO_REPOSITORY_ROOT}/updates/providers/cardano-ledger/0001-cardano-ledger/artifacts/cddl/eras"
+    "${CARDANO_REPOSITORY_ROOT}/.xray/updates/providers/cardano-ledger/0001-cardano-ledger/artifacts/cddl/eras"
 )
 set(CDDL_FILES
     byron.cddl
