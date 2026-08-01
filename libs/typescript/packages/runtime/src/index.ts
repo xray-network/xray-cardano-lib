@@ -59,6 +59,7 @@ export {
 } from "./cip/index.js";
 export {
   AlgorithmId,
+  CIP8Message,
   COSEKey,
   COSESign,
   COSESign1,
@@ -83,6 +84,7 @@ export {
   SignedMessage,
   SignedMessageKind,
 } from "./cip/index.js";
+export type { CIP8MessageEnvelope } from "./cip/index.js";
 export {
   Constr,
   Data,

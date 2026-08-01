@@ -103,6 +103,13 @@
                   "impl/typescript/0013-IMPL-INSTR",
                   "impl/typescript/0013-IMPL-RESULT"
                 ]
+              },
+              {
+                "group": "0014 — CIP8Message facade",
+                "pages": [
+                  "impl/typescript/0014-IMPL-INSTR",
+                  "impl/typescript/0014-IMPL-RESULT"
+                ]
               }
             ]
           },

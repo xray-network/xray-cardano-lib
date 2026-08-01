@@ -3,6 +3,8 @@ export {
   COSESignBuilder,
   EdDSA25519Key,
 } from "./builders.js";
+export { CIP8Message } from "./message.js";
+export type { CIP8MessageEnvelope } from "./message.js";
 export {
   AlgorithmId,
   COSEKey,

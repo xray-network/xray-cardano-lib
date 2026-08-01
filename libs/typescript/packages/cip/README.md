@@ -14,8 +14,12 @@ Import the proposal-specific entry point:
 ```ts
 import { CIP25Metadata } from "@xray-network/xray-cardano-lib-cip/cip25";
 import { CIP36KeyDeregistration } from "@xray-network/xray-cardano-lib-cip/cip36";
-import { COSESign1Builder } from "@xray-network/xray-cardano-lib-cip/cip8";
+import { CIP8Message, COSESign1Builder } from "@xray-network/xray-cardano-lib-cip/cip8";
 ```
+
+`CIP8Message.signData` and `CIP8Message.verifyData` provide the CIP-30-compatible message envelope
+facade used by application integrations. Lower-level COSE builders remain available for custom
+header and detached-payload workflows.
 
 The root package exposes proposal namespaces:
 

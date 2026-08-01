@@ -3,6 +3,7 @@ import test from "node:test";
 
 import * as cardano from "@xray-network/xray-cardano-lib";
 import {
+  CIP8Message as AggregateCIP8Message,
   Constr as AggregateConstr,
   Data as AggregateData,
 } from "@xray-network/xray-cardano-lib";
@@ -40,8 +41,10 @@ test("public packages share each nominal class owner", () => {
   assert.strictEqual(cardano.CIP25Metadata, cip25.CIP25Metadata);
   assert.strictEqual(cardano.CIP36KeyRegistration, cip36.CIP36KeyRegistration);
   assert.strictEqual(cardano.COSESign1, cip8.COSESign1);
+  assert.strictEqual(AggregateCIP8Message, cip8.CIP8Message);
   assert.strictEqual(cip.cip25.CIP25Metadata, cip25.CIP25Metadata);
   assert.strictEqual(cip.cip8.COSESign1, cip8.COSESign1);
+  assert.strictEqual(cip.cip8.CIP8Message, cip8.CIP8Message);
   assert.strictEqual(plutus.Data, plutusData.Data);
   assert.strictEqual(AggregateData, plutusData.Data);
   assert.strictEqual(AggregateConstr, plutusData.Constr);
@@ -85,6 +88,8 @@ test("all six package entry points and focused subpaths expose their primary API
   assert.equal(typeof cip25.CIP25Metadata, "function");
   assert.equal(typeof cip36.CIP36KeyRegistration, "function");
   assert.equal(typeof cip8.COSESign1Builder, "function");
+  assert.equal(typeof AggregateCIP8Message.signData, "function");
+  assert.equal(typeof AggregateCIP8Message.verifyData, "function");
   assert.equal(typeof multiEra.MultiEraBlock, "function");
   assert.equal(typeof cardano.TransactionBuilder, "function");
 });

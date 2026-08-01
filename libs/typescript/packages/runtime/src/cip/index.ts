@@ -26,6 +26,7 @@ export {
 } from "@xray-network/xray-cardano-lib-cip/cip36";
 export {
   AlgorithmId,
+  CIP8Message,
   COSEKey,
   COSESign,
   COSESign1,
@@ -50,3 +51,4 @@ export {
   SignedMessage,
   SignedMessageKind,
 } from "@xray-network/xray-cardano-lib-cip/cip8";
+export type { CIP8MessageEnvelope } from "@xray-network/xray-cardano-lib-cip/cip8";

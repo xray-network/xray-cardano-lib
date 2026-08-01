@@ -22,3 +22,4 @@ This is the only lifecycle and decision-proof ledger for TypeScript implementati
 | `0011` | [Optional CIP-21 compatibility diagnostics](./0011-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
 | `0012` | [XRAY Cardano Lib package-family rename](./0012-IMPL-INSTR.md) | `REVIEW` | [Result](./0012-IMPL-RESULT.md) | `LOCAL` | Package-family rename completed with the full TypeScript gate passing; awaiting human decision. |
 | `0013` | [Typed Plutus void and aggregate exports](./0013-IMPL-INSTR.md) | `REVIEW` | [Result](./0013-IMPL-RESULT.md) | `LOCAL` | Typed void schema and aggregate exports completed with TypeScript and C++ compatibility gates passing; awaiting human decision. |
+| `0014` | [CIP8Message facade](./0014-IMPL-INSTR.md) | `REVIEW` | [Result](./0014-IMPL-RESULT.md) | `LOCAL` | CIP8Message signing, verification, envelope typing, and aggregate exports completed with the full TypeScript gate passing; awaiting human decision. |
