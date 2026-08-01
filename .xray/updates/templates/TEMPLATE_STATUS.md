@@ -33,7 +33,7 @@ Rules:
 
 - Flat mode has exactly one repository section and one repository-wide sequence.
 - Monorepo target sections are unique and ordered by target slug.
-- Every new installation has exactly one `ACCEPTED` bootstrap row at flat `0001` or `repo/0001`.
+- Every new installation has exactly one `ACCEPTED` bootstrap row at flat `0001` or `repository/0001`.
 - IDs are four digits, unique within the applicable sequence, and ordered ascending.
 - Title is a two-to-eight-word plain-language objective label with no ending punctuation. It must
   agree with the instruction objective.

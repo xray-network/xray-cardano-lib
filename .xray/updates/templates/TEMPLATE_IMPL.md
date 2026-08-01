@@ -10,7 +10,7 @@ and result files remain directly under `implementations/`. In monorepo mode, `<t
 target-directory slug.
 
 Installation is the only workflow that may create an instruction and result in one operation and
-enter `ACCEPTED` immediately. It uses implementation `0001` in flat mode or `repo/0001` in monorepo
+enter `ACCEPTED` immediately. It uses implementation `0001` in flat mode or `repository/0001` in monorepo
 mode, and the human installation request is its decision proof.
 
 ## Instruction

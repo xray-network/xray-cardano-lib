@@ -24,8 +24,8 @@
               {
                 "group": "0001 — Install XRAY Updates",
                 "pages": [
-                  "impl/repo/0001-IMPL-INSTR",
-                  "impl/repo/0001-IMPL-RESULT"
+                  "impl/repository/0001-IMPL-INSTR",
+                  "impl/repository/0001-IMPL-RESULT"
                 ]
               }
             ]
@@ -216,10 +216,7 @@
           {
             "group": "Repository",
             "pages": [
-              "adr/repository/0001-repository-architecture",
-              "adr/repository/0002-shared-update-ledger",
-              "adr/repository/0003-project-identity",
-              "adr/repository/0004-xray-updates-standard"
+              "adr/repository/0001-xray-updates-standard"
             ]
           },
           {

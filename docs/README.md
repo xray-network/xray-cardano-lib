@@ -20,10 +20,7 @@ documentation tree.
 
 | ADR | Decision | Status |
 |---|---|---|
-| [0001](adr/repository/0001-repository-architecture.md) | Repository architecture and implementation records | Accepted; layout superseded |
-| [0002](adr/repository/0002-shared-update-ledger.md) | Shared update ledger and provider evidence | Accepted; root and ledger superseded |
-| [0003](adr/repository/0003-project-identity.md) | XRAY Cardano Lib project identity | Accepted |
-| [0004](adr/repository/0004-xray-updates-standard.md) | XRAY Updates v1 adoption | Accepted |
+| [0001](adr/repository/0001-xray-updates-standard.md) | XRAY Updates v1 installation | Accepted |
 
 ## TypeScript decisions
 

@@ -69,11 +69,12 @@ If `AGENTS.md` does not exist, create it with this section. If it exists, preser
 instruction and add only the missing heading or bullet:
 
 ```markdown
-## XRAY developer standards
+## XRAY standards
 
 This repository uses the following XRAY standards:
 
 - Read `.xray/updates/XRAY-UPDATES.md` before planning or implementing tracked changes.
+- If the user mentions `silent` or `silently`, do not create an implementation record for that request.
 ```
 
 If the section already exists, merge the missing bullet into it. Never duplicate the heading,
@@ -86,8 +87,8 @@ Every new installation creates implementation `0001` documenting installation of
 
 - Flat mode uses `implementations/0001-IMPL-INSTR.md` and
   `implementations/0001-IMPL-RESULT.md`.
-- Monorepo mode uses `implementations/repo/0001-IMPL-INSTR.md` and
-  `implementations/repo/0001-IMPL-RESULT.md`. `repo` is the reserved target for repository-wide
+- Monorepo mode uses `implementations/repository/0001-IMPL-INSTR.md` and
+  `implementations/repository/0001-IMPL-RESULT.md`. `repository` is the reserved target for repository-wide
   XRAY governance and must not contain product implementation work.
 
 The instruction uses `LOCAL` evidence, has no dependencies or provider evidence, and limits its
@@ -136,7 +137,7 @@ The two implementation forms in the tree are alternatives and must not be mixed:
   `implementations/NNNN-IMPL-RESULT.md`. It has one repository-wide sequence.
 - A monorepo uses the nested form: `implementations/<target>/NNNN-IMPL-INSTR.md` and
   `implementations/<target>/NNNN-IMPL-RESULT.md`. Its required bootstrap record uses the reserved
-  `repo` target; other sequences are independent per target.
+  `repository` target; other sequences are independent per target.
 
 An implementation **target** is the smallest stable monorepo project area with its own source
 ownership and meaningful completion validation. Examples include `api`, `web`, `mobile`,
@@ -169,7 +170,7 @@ Choose targets using these rules:
   `implementations/<target>/` for it, even when its name or a plausible target slug is known.
 - A monorepo uses nested mode. Each independently versioned, owned, or validated package/service
   usually becomes one target directory.
-- In monorepo mode, `repo` is the reserved repository-governance target. Its `0001` record is the
+- In monorepo mode, `repository` is the reserved repository-governance target. Its `0001` record is the
   XRAY Updates installation; it is not a parent product target.
 - A current human may explicitly require nested target directories when repository metadata alone
   does not establish a monorepo. Absent that direction, use flat mode.
@@ -267,6 +268,10 @@ Planning and implementation are separate operations except for the required boot
 record in §2. A request to identify or prepare the next update does not authorize product-source
 changes.
 
+If the user mentions `silent` or `silently`, do not create or update an implementation
+instruction, result, or ledger row for that request. Silent mode skips XRAY Updates tracking; it
+does not cancel requested source changes or their validation.
+
 1. Read repository guidance, relevant decisions, applicable source/tests/manifest/README, the
    applicable section in `.xray/updates/XRAY-UPDATES-STATUS.md`, all templates, and candidate
    declared inputs.
@@ -337,7 +342,7 @@ before planning, implementing, reviewing, or capturing evidence.
 
 - `XRAY-UPDATES-STATUS.md` is the only lifecycle and decision-proof authority for every target.
 - `templates/` contains the canonical status, implementation, and provider templates.
-- `implementations/0001-IMPL-*` in flat mode or `implementations/repo/0001-IMPL-*` in monorepo mode
+- `implementations/0001-IMPL-*` in flat mode or `implementations/repository/0001-IMPL-*` in monorepo mode
   is the accepted XRAY Updates installation record.
 - `implementations/NNNN-IMPL-INSTR.md` and `NNNN-IMPL-RESULT.md` are used by single-project
   repositories.
@@ -396,7 +401,7 @@ Rules:
 
 - Flat mode has exactly one repository section and one repository-wide sequence.
 - Monorepo target sections are unique and ordered by target slug.
-- Every new installation has exactly one `ACCEPTED` bootstrap row at flat `0001` or `repo/0001`.
+- Every new installation has exactly one `ACCEPTED` bootstrap row at flat `0001` or `repository/0001`.
 - IDs are four digits, unique within the applicable sequence, and ordered ascending.
 - Title is a two-to-eight-word plain-language objective label with no ending punctuation. It must
   agree with the instruction objective.
@@ -445,7 +450,7 @@ and result files remain directly under `implementations/`. In monorepo mode, `<t
 target-directory slug.
 
 Installation is the only workflow that may create an instruction and result in one operation and
-enter `ACCEPTED` immediately. It uses implementation `0001` in flat mode or `repo/0001` in monorepo
+enter `ACCEPTED` immediately. It uses implementation `0001` in flat mode or `repository/0001` in monorepo
 mode, and the human installation request is its decision proof.
 
 ## Instruction
@@ -660,7 +665,7 @@ An installation or update is valid only when all applicable checks pass:
 - Provider inputs resolve to complete snapshots whose inventory and hashes verify.
 - The three canonical templates exist only under `.xray/updates/templates/`.
 - Every new installation has exactly one matching instruction, result, and `ACCEPTED` bootstrap row
-  at flat `0001` or monorepo `repo/0001`, with the required human-request decision proof.
+  at flat `0001` or monorepo `repository/0001`, with the required human-request decision proof.
 - Exactly one aggregate `.xray/updates/XRAY-UPDATES-STATUS.md` exists, with one repository section
   in flat mode or exactly one matching section per target in monorepo mode.
 - Single-project repositories store implementation records directly under

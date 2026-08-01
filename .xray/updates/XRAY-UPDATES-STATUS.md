@@ -4,15 +4,34 @@ Status-Version: v1
 
 This is the only lifecycle and decision-proof ledger for all implementation records.
 
-## Repository implementation status
+## C++ implementation status
 
-Target: repo
+Target: cpp
 
 ### Implementation ledger
 
 | ID | Title | Instruction | State | Result | Evidence mode | Decision proof |
 | --- | --- | --- | --- | --- | --- | --- |
-| `0001` | Install XRAY Updates | [Instruction](./implementations/repo/0001-IMPL-INSTR.md) | `ACCEPTED` | [Result](./implementations/repo/0001-IMPL-RESULT.md) | `LOCAL` | Human requested installation of XRAY Updates. |
+| `0001` | Full TypeScript feature parity | [Instruction](./implementations/cpp/0001-IMPL-INSTR.md) | `ACCEPTED` | [Result](./implementations/cpp/0001-IMPL-RESULT.md) | `HYBRID` | Human acceptance was recorded on 2026-07-31 for the completed `C001`–`C013` result and its validation evidence. |
+| `0002` | Builder and typed Conway construction hardening | [Instruction](./implementations/cpp/0002-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
+| `0003` | Portability, lean components, and benchmarks | [Instruction](./implementations/cpp/0003-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
+| `0004` | CIP-14 asset fingerprints | [Instruction](./implementations/cpp/0004-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
+| `0005` | Strict identities and HD derivation | [Instruction](./implementations/cpp/0005-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
+| `0006` | CIP-57 Plutus contract blueprints | [Instruction](./implementations/cpp/0006-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
+| `0007` | CIP-67/68 token metadata | [Instruction](./implementations/cpp/0007-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
+| `0008` | Optional CIP-21 compatibility diagnostics | [Instruction](./implementations/cpp/0008-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
+| `0009` | Local CMake test ownership | [Instruction](./implementations/cpp/0009-IMPL-INSTR.md) | `REVIEW` | [Result](./implementations/cpp/0009-IMPL-RESULT.md) | `LOCAL` | Implementation completed with local domain CMake ownership and the full 141-test CI workflow passing; awaiting human decision. |
+| `0010` | XRAY Cardano Lib package rename | [Instruction](./implementations/cpp/0010-IMPL-INSTR.md) | `REVIEW` | [Result](./implementations/cpp/0010-IMPL-RESULT.md) | `LOCAL` | Rename completed with the full 141-test C++ workflow passing; awaiting human decision. |
+
+## Repository implementation status
+
+Target: repository
+
+### Implementation ledger
+
+| ID | Title | Instruction | State | Result | Evidence mode | Decision proof |
+| --- | --- | --- | --- | --- | --- | --- |
+| `0001` | Install XRAY Updates | [Instruction](./implementations/repository/0001-IMPL-INSTR.md) | `ACCEPTED` | [Result](./implementations/repository/0001-IMPL-RESULT.md) | `LOCAL` | Human requested installation of XRAY Updates. |
 
 ## TypeScript implementation status
 
@@ -38,22 +57,3 @@ Target: typescript
 | `0014` | CIP8Message facade | [Instruction](./implementations/typescript/0014-IMPL-INSTR.md) | `REVIEW` | [Result](./implementations/typescript/0014-IMPL-RESULT.md) | `LOCAL` | CIP8Message signing, verification, envelope typing, and aggregate exports completed with the full TypeScript gate passing; awaiting human decision. |
 | `0015` | CostModels JSON parsing and validation | [Instruction](./implementations/typescript/0015-IMPL-INSTR.md) | `REVIEW` | [Result](./implementations/typescript/0015-IMPL-RESULT.md) | `LOCAL` | CostModels JSON parsing, symmetric serialization, and constructor validation completed with the full TypeScript gate passing; awaiting human decision. |
 | `0016` | CIP-4 wallet checksum facade | [Instruction](./implementations/typescript/0016-IMPL-INSTR.md) | `REVIEW` | [Result](./implementations/typescript/0016-IMPL-RESULT.md) | `LOCAL` | Canonical CIP-4 checksum calculation, focused and aggregate exports, and the xray-js xpub adapter completed with all library and SDK gates passing; awaiting human decision. |
-
-## C++ implementation status
-
-Target: cpp
-
-### Implementation ledger
-
-| ID | Title | Instruction | State | Result | Evidence mode | Decision proof |
-| --- | --- | --- | --- | --- | --- | --- |
-| `0001` | Full TypeScript feature parity | [Instruction](./implementations/cpp/0001-IMPL-INSTR.md) | `ACCEPTED` | [Result](./implementations/cpp/0001-IMPL-RESULT.md) | `HYBRID` | Human acceptance was recorded on 2026-07-31 for the completed `C001`–`C013` result and its validation evidence. |
-| `0002` | Builder and typed Conway construction hardening | [Instruction](./implementations/cpp/0002-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
-| `0003` | Portability, lean components, and benchmarks | [Instruction](./implementations/cpp/0003-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
-| `0004` | CIP-14 asset fingerprints | [Instruction](./implementations/cpp/0004-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
-| `0005` | Strict identities and HD derivation | [Instruction](./implementations/cpp/0005-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
-| `0006` | CIP-57 Plutus contract blueprints | [Instruction](./implementations/cpp/0006-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
-| `0007` | CIP-67/68 token metadata | [Instruction](./implementations/cpp/0007-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
-| `0008` | Optional CIP-21 compatibility diagnostics | [Instruction](./implementations/cpp/0008-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
-| `0009` | Local CMake test ownership | [Instruction](./implementations/cpp/0009-IMPL-INSTR.md) | `REVIEW` | [Result](./implementations/cpp/0009-IMPL-RESULT.md) | `LOCAL` | Implementation completed with local domain CMake ownership and the full 141-test CI workflow passing; awaiting human decision. |
-| `0010` | XRAY Cardano Lib package rename | [Instruction](./implementations/cpp/0010-IMPL-INSTR.md) | `REVIEW` | [Result](./implementations/cpp/0010-IMPL-RESULT.md) | `LOCAL` | Rename completed with the full 141-test C++ workflow passing; awaiting human decision. |
