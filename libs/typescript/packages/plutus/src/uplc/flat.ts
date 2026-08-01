@@ -4,7 +4,7 @@ import {
   decodeCbor,
   encodeCbor,
   type CborValue,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import type { UplcConstant, UplcProgram, UplcTerm, UplcType } from "./ast.js";
 
 const MAX_INPUT_BYTES = 16 * 1024 * 1024;

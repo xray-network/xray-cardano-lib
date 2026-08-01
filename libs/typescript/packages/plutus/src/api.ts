@@ -4,7 +4,7 @@ import {
   decodeCbor,
   encodeCbor,
   type CborValue,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import { evaluateRaw } from "./ledger/evaluate.js";
 import { dataConstant, type UplcTerm } from "./uplc/ast.js";
 import {

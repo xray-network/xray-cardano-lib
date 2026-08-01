@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { encodeCbor } from "@xray-network/cardano-core";
-import { blake2b256 } from "@xray-network/cardano-crypto";
+import { encodeCbor } from "@xray-network/xray-cardano-lib-core";
+import { blake2b256 } from "@xray-network/xray-cardano-lib-crypto";
 
 const definite = { kind: "definite", width: 0 };
 const unsigned = (value) => ({ kind: "unsigned", value, encoding: { width: 0 } });

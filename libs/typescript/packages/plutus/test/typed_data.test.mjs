@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   Constr,
   Data,
-} from "@xray-network/cardano-plutus/data";
+} from "@xray-network/xray-cardano-lib-plutus/data";
 
 test("native Data codec round-trips every Plutus data variant", () => {
   const value = new Constr(3, [

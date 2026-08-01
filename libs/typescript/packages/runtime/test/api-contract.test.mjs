@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import * as cardano from "@xray-network/xray-cardano-lib";
-import * as multiEra from "@xray-network/cardano-chain/multi-era";
-import * as cip8 from "@xray-network/cardano-cip/cip8";
+import * as multiEra from "@xray-network/xray-cardano-lib-chain/multi-era";
+import * as cip8 from "@xray-network/xray-cardano-lib-cip/cip8";
 
 test("native public values do not expose WASM memory lifecycle methods", () => {
   for (const [facade, module] of [["main", cardano], ["multi-era", multiEra], ["cip8", cip8]]) {

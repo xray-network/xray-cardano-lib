@@ -20,4 +20,4 @@ This is the only lifecycle and decision-proof ledger for TypeScript implementati
 | `0009` | [CIP-57 Plutus contract blueprints](./0009-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
 | `0010` | [CIP-67/68 token metadata](./0010-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
 | `0011` | [Optional CIP-21 compatibility diagnostics](./0011-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
-| `0012` | [XRAY Cardano Lib package rename](./0012-IMPL-INSTR.md) | `REVIEW` | [Result](./0012-IMPL-RESULT.md) | `LOCAL` | Rename completed with the full TypeScript gate passing; awaiting human decision. |
+| `0012` | [XRAY Cardano Lib package-family rename](./0012-IMPL-INSTR.md) | `REVIEW` | [Result](./0012-IMPL-RESULT.md) | `LOCAL` | Package-family rename completed with the full TypeScript gate passing; awaiting human decision. |

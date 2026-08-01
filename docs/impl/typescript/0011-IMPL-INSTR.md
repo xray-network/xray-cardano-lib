@@ -34,7 +34,7 @@ for any device or firmware version.
 
 - Export
   `diagnose_cip21_transaction(transaction, options?): readonly CIP21Violation[]` from
-  `@xray-network/cardano-cip/cip21`.
+  `@xray-network/xray-cardano-lib-cip/cip21`.
 - Accept the existing lossless Conway `Transaction` binding. Never create a competing transaction,
   certificate, output, or witness type.
 - `CIP21Violation` is deeply immutable and contains stable `code`, structural JSON-pointer `path`,

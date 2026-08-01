@@ -4,4 +4,4 @@ export {
   CardanoError,
   Int,
   ProtocolMagic,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";

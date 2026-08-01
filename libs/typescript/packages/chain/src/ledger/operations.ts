@@ -12,8 +12,8 @@ import {
   encodeCbor,
   hexToBytes,
   Int,
-} from "@xray-network/cardano-core";
-import type { CborValue } from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
 import {
   AuxiliaryDataHash,
   Bip32PrivateKey,
@@ -29,7 +29,7 @@ import {
   blake2b256,
   legacyPublicKey,
   legacySign,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import { Address } from "../address/index.js";
 import { AddressContent, ByronAddress } from "../era/byron/address.js";
 import { BootstrapWitness } from "../era/byron/transaction.js";

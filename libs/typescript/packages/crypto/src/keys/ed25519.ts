@@ -5,7 +5,7 @@ import {
   copyBytes,
   hexToBytes,
   type SecureRandomSource,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import { decodeBech32WithPrefix, encodeBech32 } from "../hashes/fixed-bytes.js";
 import { Ed25519KeyHash } from "../hashes/types.js";
 import {

@@ -4,12 +4,12 @@ import {
   decodeCbor,
   encodeCbor,
   hexToBytes,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import {
   Bip32PublicKey,
   Ed25519Signature,
   PublicKey,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import {
   AddrAttributes,
   AddressContent,

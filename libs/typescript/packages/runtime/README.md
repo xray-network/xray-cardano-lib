@@ -40,11 +40,11 @@ key.dispose();
 
 | Domain | Owning package | Contents |
 | --- | --- | --- |
-| Core | `@xray-network/cardano-core` | Integers, errors, and network identifiers exposed by the facade |
-| Crypto | `@xray-network/cardano-crypto` | Keys, signatures, hashes, and EMIP-3 helpers |
-| Chain | `@xray-network/cardano-chain` | Ledger models, addresses, eras, builders, codecs, and operations |
-| CIP | `@xray-network/cardano-cip` | CIP-8 signing and CIP-25/CIP-36 metadata |
-| Plutus | `@xray-network/cardano-plutus` | Typed Data, UPLC parsing/evaluation, and phase-two valuation |
+| Core | `@xray-network/xray-cardano-lib-core` | Integers, errors, and network identifiers exposed by the facade |
+| Crypto | `@xray-network/xray-cardano-lib-crypto` | Keys, signatures, hashes, and EMIP-3 helpers |
+| Chain | `@xray-network/xray-cardano-lib-chain` | Ledger models, addresses, eras, builders, codecs, and operations |
+| CIP | `@xray-network/xray-cardano-lib-cip` | CIP-8 signing and CIP-25/CIP-36 metadata |
+| Plutus | `@xray-network/xray-cardano-lib-plutus` | Typed Data, UPLC parsing/evaluation, and phase-two valuation |
 
 Applications can depend on a domain package directly when they do not need the complete facade.
 Direct imports keep ownership clear and may reduce the surface considered by tooling.

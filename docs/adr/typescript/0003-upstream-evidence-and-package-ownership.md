@@ -23,18 +23,19 @@ proposal-specific CIP formats are independent domains rather than generic utilit
   package-boundary, and historical-fixture tests.
 - Reusable upstream vectors remain in checksummed snapshot artifact trees with pinned provenance
   and license mapping. Published packages never load snapshot artifacts at runtime.
-- The published domain packages are `cardano-core`, `cardano-crypto`, `cardano-chain`,
-  `cardano-cip`, `cardano-plutus`, and the aggregate `xray-cardano-lib` runtime.
-- `@xray-network/cardano-cip` owns CIP-8, CIP-25, and CIP-36, with focused `./cip8`, `./cip25`,
-  and `./cip36` subpaths.
-- `@xray-network/cardano-plutus` owns typed Data schemas, UPLC, parameter application, and raw
-  phase-two valuation. It exposes focused `./data` and `./uplc` subpaths.
+- The published domain packages are `xray-cardano-lib-core`, `xray-cardano-lib-crypto`,
+  `xray-cardano-lib-chain`, `xray-cardano-lib-cip`, and `xray-cardano-lib-plutus`, with
+  `xray-cardano-lib` as the aggregate runtime.
+- `@xray-network/xray-cardano-lib-cip` owns CIP-8, CIP-25, and CIP-36, with focused `./cip8`,
+  `./cip25`, and `./cip36` subpaths.
+- `@xray-network/xray-cardano-lib-plutus` owns typed Data schemas, UPLC, parameter application,
+  and raw phase-two valuation. It exposes focused `./data` and `./uplc` subpaths.
 - The public UPLC API includes immutable program/term/constant/data types, text parsing, Flat and
   serialized-script codecs, cost-model construction, default machine costs, and budgeted CEK
   evaluation. `apply_params_to_script` and `eval_phase_two_raw` are exported at the Plutus root.
 - Ledger wire models—including `PlutusData`, scripts, redeemers, and `ExUnits`—remain owned by
-  `@xray-network/cardano-chain`. Ledger decoding, script resolution, and context construction used
-  by raw valuation remain private to the Plutus package.
+  `@xray-network/xray-cardano-lib-chain`. Ledger decoding, script resolution, and context
+  construction used by raw valuation remain private to the Plutus package.
 - `@xray-network/xray-cardano-lib` re-exports curated domain bindings by identity and owns no competing
   nominal implementation.
 - Domain packages use universal ESM, `Uint8Array`, `bigint`, Web Platform APIs, and the dependency

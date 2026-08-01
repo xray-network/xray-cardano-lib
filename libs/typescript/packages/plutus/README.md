@@ -6,7 +6,7 @@ application, and raw phase-two transaction valuation for Node.js and modern brow
 ## Installation
 
 ```sh
-npm install @xray-network/cardano-plutus
+npm install @xray-network/xray-cardano-lib-plutus
 ```
 
 ## UPLC
@@ -16,7 +16,7 @@ import {
   encodeProgramEnvelope,
   evaluateProgram,
   parseUplcText,
-} from "@xray-network/cardano-plutus/uplc";
+} from "@xray-network/xray-cardano-lib-plutus/uplc";
 
 const program = parseUplcText("(program 1.0.0 (con unit ()))");
 const script = encodeProgramEnvelope(program);
@@ -34,7 +34,7 @@ budgeted and does not perform ledger phase-one validation.
 ## Typed Data
 
 ```ts
-import { Data } from "@xray-network/cardano-plutus/data";
+import { Data } from "@xray-network/xray-cardano-lib-plutus/data";
 
 const payment = Data.Object({
   owner: Data.Bytes({ minLength: 28, maxLength: 28 }),
@@ -43,15 +43,15 @@ const payment = Data.Object({
 ```
 
 Ledger wire types such as `PlutusData`, scripts, redeemers, and `ExUnits` remain owned by
-`@xray-network/cardano-chain`.
+`@xray-network/xray-cardano-lib-chain`.
 
 ## Entry points
 
 | Entry point | Domain |
 | --- | --- |
-| `@xray-network/cardano-plutus` | Data, UPLC, parameter application, and phase-two valuation |
-| `@xray-network/cardano-plutus/data` | Typed Plutus Data schemas and codecs |
-| `@xray-network/cardano-plutus/uplc` | UPLC AST, Flat/text codecs, costs, and CEK evaluation |
+| `@xray-network/xray-cardano-lib-plutus` | Data, UPLC, parameter application, and phase-two valuation |
+| `@xray-network/xray-cardano-lib-plutus/data` | Typed Plutus Data schemas and codecs |
+| `@xray-network/xray-cardano-lib-plutus/uplc` | UPLC AST, Flat/text codecs, costs, and CEK evaluation |
 
 The package is universal ESM, uses `Uint8Array` and Web Platform APIs, and is distributed under
 the [MIT License](./LICENSE).

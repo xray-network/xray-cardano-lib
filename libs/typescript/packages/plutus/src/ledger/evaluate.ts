@@ -8,8 +8,8 @@ import {
   decodeCbor,
   encodeCbor,
   type CborValue,
-} from "@xray-network/cardano-core";
-import { blake2b224, blake2b256 } from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-core";
+import { blake2b224, blake2b256 } from "@xray-network/xray-cardano-lib-crypto";
 import { decodeProgramEnvelopeCompatible, encodePlutusData } from "../uplc/flat.js";
 import {
   evaluateProgram,

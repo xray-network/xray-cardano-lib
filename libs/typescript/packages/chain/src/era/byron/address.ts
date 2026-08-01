@@ -6,15 +6,15 @@ import {
   decodeCbor,
   encodeCbor,
   hexToBytes,
-} from "@xray-network/cardano-core";
-import type { CborValue } from "@xray-network/cardano-core";
-import { decodeBech32, encodeBech32 } from "@xray-network/cardano-core/bech32";
+} from "@xray-network/xray-cardano-lib-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
+import { decodeBech32, encodeBech32 } from "@xray-network/xray-cardano-lib-core/bech32";
 import {
   Bip32PublicKey,
   PublicKey,
   blake2b224,
   sha3_256,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import { Address, AddressKind } from "../../address/index.js";
 import { Crc32, crc32, decodeBase58, encodeBase58 } from "./encoding.js";
 

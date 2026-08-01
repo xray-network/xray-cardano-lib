@@ -4,12 +4,12 @@ import {
   PlutusDataKind,
   PlutusDataList,
   PlutusMap,
-} from "@xray-network/cardano-chain";
+} from "@xray-network/xray-cardano-lib-chain";
 import {
   BigInteger,
   bytesToHex,
   hexToBytes,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import { Constr } from "./types.js";
 import type {
   AnySchema,

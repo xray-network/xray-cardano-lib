@@ -11,30 +11,32 @@ Provider-Evidence: NONE
 
 | Input | Kind | Required | Purpose |
 | --- | --- | --- | --- |
-| `docs/adr/repository/0003-project-identity.md` | `LOCAL` | Yes | Authoritative XRAY Cardano Lib display, repository, and aggregate package identities |
-| `libs/typescript/` | `LOCAL` | Yes | Owned aggregate runtime metadata, import mapping, documentation, lockfile, and tests |
+| `docs/adr/repository/0003-project-identity.md` | `LOCAL` | Yes | Authoritative XRAY Cardano Lib display, repository, and package-family identities |
+| `docs/adr/typescript/0003-upstream-evidence-and-package-ownership.md` | `LOCAL` | Yes | Authoritative TypeScript package ownership and published package-family identities |
+| `libs/typescript/` | `LOCAL` | Yes | Owned package metadata, import mappings, documentation, lockfile, source, and tests |
+| `updates/implementations/typescript/0005-IMPL-INSTR.md` through `0011-IMPL-INSTR.md` | `LOCAL` | Yes | Nonterminal planned work whose package references must use the current identities |
 
 ## Objective
 
-Rename the TypeScript aggregate runtime and its current branding from Cardano Lib to XRAY Cardano
-Lib without changing the independently owned Cardano domain package identities.
+Rename the TypeScript package family and its current branding from Cardano Lib to XRAY Cardano
+Lib while preserving the independently owned Cardano protocol domains.
 
 ## Changes to implement
 
 | Change ID | Requirement | Compatibility | Local owner | Validation |
 | --- | --- | --- | --- | --- |
-| `TS12-PKG1` | Rename the aggregate package to `@xray-network/xray-cardano-lib` in its manifest, workspace lockfile, TypeScript path mapping, tests, and examples. | Intentional package-name break; no compatibility alias is retained. | `libs/typescript/packages/runtime/`, workspace configuration, and lockfile | Build, imports, packed consumers, and complete workspace gate |
-| `TS12-DOC1` | Use XRAY Cardano Lib in maintained TypeScript package descriptions and documentation. | Documentation-only display-name change. | `libs/typescript/` | Repository name scan and package smoke tests |
-| `TS12-ID1` | Keep `@xray-network/cardano-core`, `cardano-crypto`, `cardano-chain`, `cardano-cip`, and `cardano-plutus` unchanged. | Preserves domain-package ownership and imports. | TypeScript workspace | Lockfile inspection, package-boundary tests, and complete workspace gate |
+| `TS12-PKG1` | Name the aggregate runtime `@xray-network/xray-cardano-lib` and every domain package `@xray-network/xray-cardano-lib-*` (`core`, `crypto`, `chain`, `cip`, and `plutus`) throughout manifests, the workspace lockfile, TypeScript path mappings, source imports, tests, and examples. | Intentional package-name break; no compatibility aliases are retained. | `libs/typescript/packages/`, workspace configuration, and lockfile | Build, imports, packed consumers, and complete workspace gate |
+| `TS12-DOC1` | Use XRAY Cardano Lib and the current package-family identities in maintained TypeScript package descriptions, documentation, active ADRs, and nonterminal planned work. | Documentation and planning-reference update. | `libs/typescript/`, `docs/adr/`, and nonterminal TypeScript instructions | Repository name scan and package smoke tests |
+| `TS12-ID1` | Preserve each domain package's public bindings, nominal ownership, and dependency direction while applying the XRAY package-family names. | Package specifiers change, but public domain ownership and runtime behavior remain unchanged. | TypeScript workspace | Package-boundary tests, API tests, and complete workspace gate |
 
 ## Implementation steps
 
-1. Update the runtime package manifest, workspace path aliases, and npm lockfile to the new
-   aggregate package identity.
-2. Update runtime tests, packed-consumer fixtures, and TypeScript examples to import the renamed
-   package.
-3. Update maintained TypeScript README and package-description branding while preserving domain
-   package names.
+1. Update every package manifest, workspace path alias, and npm lockfile entry to the XRAY package
+   family, keeping the aggregate runtime name unsuffixed.
+2. Update source imports, tests, packed-consumer fixtures, and TypeScript examples to import the
+   renamed packages.
+3. Update maintained TypeScript READMEs, package-description branding, active identity ADRs, and
+   nonterminal planned instructions while preserving domain ownership and public symbols.
 4. Run the complete TypeScript validation command.
 
 ## Validation
@@ -46,24 +48,25 @@ npm --prefix libs/typescript run check
 ```
 
 Also scan maintained TypeScript source, manifests, documentation, and tests for the retired
-aggregate package name.
+`@xray-network/cardano-*` and `@xray-network/cardano-lib` package names.
 
 ## Compatibility and human review
 
-This is an intentional breaking package rename requested by the project owner. Reviewers must
-confirm that no compatibility package or alias is required and that domain package identities
-remain unchanged.
+This is an intentional breaking package-family rename requested by the project owner. Reviewers
+must confirm that no compatibility packages or aliases are required and that domain ownership and
+public bindings remain unchanged.
 
 ## Completion criteria
 
-- The aggregate npm identity is `@xray-network/xray-cardano-lib` everywhere in maintained
-  TypeScript configuration, documentation, and tests.
-- The workspace lockfile resolves the runtime under the new package identity.
+- The aggregate npm identity is `@xray-network/xray-cardano-lib`, and each domain npm identity is
+  `@xray-network/xray-cardano-lib-*`, everywhere in maintained TypeScript configuration,
+  documentation, source, and tests.
+- The workspace lockfile resolves all six packages under the new identities.
 - The complete TypeScript validation gate passes.
 
 ## Out of scope
 
-- Renaming Cardano protocol domain packages or public TypeScript symbols.
+- Renaming Cardano protocol concepts, public TypeScript symbols, or domain ownership boundaries.
 - Rewriting terminal implementation records, provider snapshots, captured artifacts, or fixed
   compatibility vectors.
 - Publishing or deprecating packages in the npm registry.

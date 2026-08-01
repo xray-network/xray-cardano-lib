@@ -16,7 +16,7 @@ export {
   makeBuiltinCostModel,
   parseUplcText,
   validatePlutusDataNode,
-} from "@xray-network/cardano-plutus";
+} from "@xray-network/xray-cardano-lib-plutus";
 export type {
   BuiltinCostModel,
   CostStream,
@@ -34,4 +34,4 @@ export type {
   UplcProgram,
   UplcTerm,
   UplcType,
-} from "@xray-network/cardano-plutus";
+} from "@xray-network/xray-cardano-lib-plutus";

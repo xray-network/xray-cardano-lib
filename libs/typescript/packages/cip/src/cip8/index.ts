@@ -26,8 +26,8 @@ export {
   SignedMessage,
   SignedMessageKind,
 } from "./model.js";
-export { Int } from "@xray-network/cardano-core";
+export { Int } from "@xray-network/xray-cardano-lib-core";
 export {
   Ed25519Signature,
   PublicKey,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";

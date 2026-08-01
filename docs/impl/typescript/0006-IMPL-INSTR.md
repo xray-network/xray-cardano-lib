@@ -81,7 +81,7 @@ variant class a strongly typed `new(...)` signature and named field getters. Giv
    logic cannot diverge.
 4. Update certificate, proposal, and vote builders to consume the typed APIs without changing
    encoded bodies.
-5. Export each binding from `@xray-network/cardano-chain/conway`, the chain root, and the runtime
+5. Export each binding from `@xray-network/xray-cardano-lib-chain/conway`, the chain root, and the runtime
    facade as the same identity.
 6. Add exhaustive positive and malformed coverage, then run the workspace gate.
 

@@ -1,4 +1,4 @@
-import { assertByteLength, copyBytes } from "@xray-network/cardano-core";
+import { assertByteLength, copyBytes } from "@xray-network/xray-cardano-lib-core";
 import { Bip32PrivateKey, Bip32PublicKey, Ed25519Signature } from "../keys/ed25519.js";
 import { concatenateBytes } from "../primitives/crypto.js";
 

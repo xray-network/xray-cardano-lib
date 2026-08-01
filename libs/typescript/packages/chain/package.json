@@ -1,5 +1,5 @@
 {
-  "name": "@xray-network/cardano-chain",
+  "name": "@xray-network/xray-cardano-lib-chain",
   "version": "0.1.0",
   "description": "Native ESM Cardano ledger models, era codecs, and transaction construction",
   "publishConfig": { "access": "public" },
@@ -74,8 +74,8 @@
     }
   },
   "dependencies": {
-    "@xray-network/cardano-core": "0.1.0",
-    "@xray-network/cardano-crypto": "0.1.0"
+    "@xray-network/xray-cardano-lib-core": "0.1.0",
+    "@xray-network/xray-cardano-lib-crypto": "0.1.0"
   },
   "engines": { "node": ">=20.19.0" }
 }

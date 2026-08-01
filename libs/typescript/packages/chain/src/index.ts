@@ -64,7 +64,7 @@ export {
   min_no_script_fee,
   min_script_fee,
 } from "./ledger/index.js";
-export { Ed25519KeyHash, TransactionHash } from "@xray-network/cardano-crypto";
+export { Ed25519KeyHash, TransactionHash } from "@xray-network/xray-cardano-lib-crypto";
 export {
   CertificateBuilderResult,
   ChangeSelectionAlgo,

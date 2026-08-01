@@ -11,13 +11,13 @@ import {
   MultiEraBlockKind,
   MultiEraCertificate,
   MultiEraCertificateKind,
-} from "@xray-network/cardano-chain/multi-era";
+} from "@xray-network/xray-cardano-lib-chain/multi-era";
 import {
   BabbageBlock,
   BabbageTransactionBody,
-} from "@xray-network/cardano-chain/babbage";
-import { ByronBlockKind } from "@xray-network/cardano-chain/byron";
-import { encodeCbor } from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-chain/babbage";
+import { ByronBlockKind } from "@xray-network/xray-cardano-lib-chain/byron";
+import { encodeCbor } from "@xray-network/xray-cardano-lib-core";
 
 const inventory = JSON.parse(
   await readFile(

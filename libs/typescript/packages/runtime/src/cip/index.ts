@@ -10,7 +10,7 @@ export {
   CIP25String64,
   CIP25String64List,
   CIP25Version,
-} from "@xray-network/cardano-cip/cip25";
+} from "@xray-network/xray-cardano-lib-cip/cip25";
 export {
   CIP36Delegation,
   CIP36DelegationDistribution,
@@ -23,7 +23,7 @@ export {
   CIP36RegistrationCbor,
   CIP36RegistrationWitness,
   NonEmptyCIP36DelegationList,
-} from "@xray-network/cardano-cip/cip36";
+} from "@xray-network/xray-cardano-lib-cip/cip36";
 export {
   AlgorithmId,
   COSEKey,
@@ -49,4 +49,4 @@ export {
   SigStructure,
   SignedMessage,
   SignedMessageKind,
-} from "@xray-network/cardano-cip/cip8";
+} from "@xray-network/xray-cardano-lib-cip/cip8";

@@ -4,7 +4,7 @@ import {
   encodeCbor,
   hexToBytes,
   type CborValue,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import {
   AuxiliaryDataHash,
   BlockBodyHash,
@@ -13,7 +13,7 @@ import {
   ScriptHash,
   TransactionHash,
   blake2b256,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import { Address } from "../../address/index.js";
 import {
   AssetName,

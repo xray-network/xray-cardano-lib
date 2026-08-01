@@ -70,7 +70,7 @@ visibly provisional focused surface.
 ### C003: provisional CIP-0129 identifiers
 
 - Own `ProvisionalGovernanceCredentialId` and `ProvisionalGovernanceActionId` only under
-  `@xray-network/cardano-cip/cip129`. Add the explicit `./cip129` export, but do not add these
+  `@xray-network/xray-cardano-lib-cip/cip129`. Add the explicit `./cip129` export, but do not add these
   proposal types to the stable CIP root or aggregate runtime.
 - A credential ID is exactly 29 bytes: one header plus the existing 28-byte key/script hash.
   Header high nibbles are CC hot `0`, CC cold `1`, and DRep `2`; low nibbles are key hash `2` and

@@ -1,4 +1,4 @@
-import type { CborValue } from "@xray-network/cardano-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
 
 export type UplcType =
   | { readonly kind: "integer" }

@@ -6,11 +6,11 @@ import {
   DeserializeError,
   decodeCbor,
   encodeCbor,
-} from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
 import {
   blake2b224,
   blake2b256,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 import {
   apply_params_to_script,
   decodeFlatProgram,
@@ -18,8 +18,8 @@ import {
   eval_phase_two_raw,
   evaluateProgram,
   parseUplcText,
-} from "@xray-network/cardano-plutus";
-import * as uplc from "@xray-network/cardano-plutus/uplc";
+} from "@xray-network/xray-cardano-lib-plutus";
+import * as uplc from "@xray-network/xray-cardano-lib-plutus/uplc";
 
 const fromHex = (hex) => Uint8Array.from(hex.match(/../g)?.map((value) => Number.parseInt(value, 16)) ?? []);
 const toHex = (bytes) => Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");

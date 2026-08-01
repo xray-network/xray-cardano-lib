@@ -5,8 +5,8 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import * as cardano from "@xray-network/xray-cardano-lib";
-import { bytesToHex, hexToBytes } from "@xray-network/cardano-core";
-import { MultiEraBlock } from "@xray-network/cardano-chain/multi-era";
+import { bytesToHex, hexToBytes } from "@xray-network/xray-cardano-lib-core";
+import { MultiEraBlock } from "@xray-network/xray-cardano-lib-chain/multi-era";
 
 const privateKey = cardano.PrivateKey.from_normal_bytes(
   Uint8Array.from({ length: 32 }, (_, index) => index + 1),

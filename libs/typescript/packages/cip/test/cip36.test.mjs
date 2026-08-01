@@ -13,16 +13,16 @@ import {
   CIP36RegistrationCbor,
   CIP36RegistrationWitness,
   NonEmptyCIP36DelegationList,
-} from "@xray-network/cardano-cip/cip36";
+} from "@xray-network/xray-cardano-lib-cip/cip36";
 import {
   Address,
   Credential,
   EnterpriseAddress,
   Metadata,
   TransactionMetadatum,
-} from "@xray-network/cardano-chain";
-import { bytesToHex, decodeCbor, encodeCbor } from "@xray-network/cardano-core";
-import { Ed25519KeyHash, PrivateKey, PublicKey } from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-chain";
+import { bytesToHex, decodeCbor, encodeCbor } from "@xray-network/xray-cardano-lib-core";
+import { Ed25519KeyHash, PrivateKey, PublicKey } from "@xray-network/xray-cardano-lib-crypto";
 
 const stakeBytes = Uint8Array.from([227, 205, 36, 4, 200, 77, 230, 95, 150, 145, 143, 24, 213, 180, 69, 188, 185, 51, 167, 205, 161, 142, 237, 237, 121, 69, 221, 25, 30, 67, 35, 105]);
 const voteBytes = Uint8Array.from([0, 54, 239, 62, 31, 13, 63, 89, 137, 226, 209, 85, 234, 84, 189, 178, 167, 44, 76, 69, 108, 203, 149, 154, 244, 201, 72, 104, 244, 115, 245, 160]);

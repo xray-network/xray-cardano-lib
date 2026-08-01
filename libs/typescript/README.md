@@ -9,11 +9,11 @@ published packages, including their source and tests, live under `packages/`.
 
 | Package | Responsibility |
 | --- | --- |
-| [`@xray-network/cardano-core`](./packages/core/README.md) | Core CBOR, encoding, collections, numbers, errors, and network primitives |
-| [`@xray-network/cardano-crypto`](./packages/crypto/README.md) | Hashes, keys, signatures, encryption, and cryptographic primitives |
-| [`@xray-network/cardano-chain`](./packages/chain/README.md) | Cardano eras, ledger models, addresses, validation, and transaction building |
-| [`@xray-network/cardano-cip`](./packages/cip/README.md) | Supported Cardano Improvement Proposal APIs |
-| [`@xray-network/cardano-plutus`](./packages/plutus/README.md) | Plutus Data, UPLC, cost models, contexts, and evaluation |
+| [`@xray-network/xray-cardano-lib-core`](./packages/core/README.md) | Core CBOR, encoding, collections, numbers, errors, and network primitives |
+| [`@xray-network/xray-cardano-lib-crypto`](./packages/crypto/README.md) | Hashes, keys, signatures, encryption, and cryptographic primitives |
+| [`@xray-network/xray-cardano-lib-chain`](./packages/chain/README.md) | Cardano eras, ledger models, addresses, validation, and transaction building |
+| [`@xray-network/xray-cardano-lib-cip`](./packages/cip/README.md) | Supported Cardano Improvement Proposal APIs |
+| [`@xray-network/xray-cardano-lib-plutus`](./packages/plutus/README.md) | Plutus Data, UPLC, cost models, contexts, and evaluation |
 | [`@xray-network/xray-cardano-lib`](./packages/runtime/README.md) | Unified public runtime facade |
 
 ## Development

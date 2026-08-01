@@ -41,7 +41,7 @@ code, or duplicating typed Data/UPLC owners.
   views. A successful parse returns the normalized typed view; it does not rewrite source JSON.
 - `validate_blueprint_value` accepts the existing typed `PlutusData` binding for Data schemas and
   the existing UPLC constant representation for parameter-only builtin schemas.
-- Own the API at `@xray-network/cardano-plutus/blueprint`; export namespace `blueprint` from the
+- Own the API at `@xray-network/xray-cardano-lib-plutus/blueprint`; export namespace `blueprint` from the
   Plutus root and the exact same bindings through the runtime Plutus facade and aggregate runtime.
 
 ## Required document semantics

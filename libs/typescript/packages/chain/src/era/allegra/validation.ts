@@ -1,4 +1,4 @@
-import type { CborValue } from "@xray-network/cardano-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
 import { makePostShelleyValidators } from "../shared/post-shelley-validation.js";
 import { arrayOf, mapOf, uint16, type CborValidator } from "../shared/validation.js";
 

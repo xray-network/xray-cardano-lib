@@ -1,5 +1,5 @@
 {
-  "name": "@xray-network/cardano-plutus",
+  "name": "@xray-network/xray-cardano-lib-plutus",
   "version": "0.1.0",
   "description": "Typed Plutus Data, UPLC parsing and evaluation, and phase-two valuation",
   "publishConfig": {
@@ -40,9 +40,9 @@
     }
   },
   "dependencies": {
-    "@xray-network/cardano-chain": "0.1.0",
-    "@xray-network/cardano-core": "0.1.0",
-    "@xray-network/cardano-crypto": "0.1.0"
+    "@xray-network/xray-cardano-lib-chain": "0.1.0",
+    "@xray-network/xray-cardano-lib-core": "0.1.0",
+    "@xray-network/xray-cardano-lib-crypto": "0.1.0"
   },
   "engines": {
     "node": ">=20.19.0"

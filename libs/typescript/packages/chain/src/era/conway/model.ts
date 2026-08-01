@@ -9,9 +9,9 @@ import {
   decodeCbor,
   encodeCbor,
   hexToBytes,
-} from "@xray-network/cardano-core";
-import type { CborValue } from "@xray-network/cardano-core";
-import { AnchorDocHash, DatumHash, Ed25519KeyHash, ScriptHash } from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
+import { AnchorDocHash, DatumHash, Ed25519KeyHash, ScriptHash } from "@xray-network/xray-cardano-lib-crypto";
 import { Address } from "../../address/index.js";
 import { validateConwayModel } from "./validation.js";
 

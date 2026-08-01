@@ -42,8 +42,8 @@ policy and asset-name owners and adds only the missing Cardano-owned Blake2b-160
 - Expose `to_raw_bytes()` as a defensive copy and equality by digest bytes. Do not claim that a
   fingerprint is collision-free or reversible.
 - Do not introduce new policy-ID or asset-name nominal types. `AssetFingerprint` has one owner:
-  `@xray-network/cardano-cip/cip14`.
-- Add `./cip14` to `@xray-network/cardano-cip`; export namespace `cip14` from its root; re-export
+  `@xray-network/xray-cardano-lib-cip/cip14`.
+- Add `./cip14` to `@xray-network/xray-cardano-lib-cip`; export namespace `cip14` from its root; re-export
   the exact same binding through the runtime CIP facade and aggregate runtime.
 
 ## Implementation steps

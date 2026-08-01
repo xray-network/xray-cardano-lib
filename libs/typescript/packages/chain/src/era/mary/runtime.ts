@@ -1,5 +1,5 @@
 import { HistoricalData, HistoricalList } from "../shared/codec.js";
-import type { CborValue } from "@xray-network/cardano-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
 import { validateMary } from "./validation.js";
 
 abstract class MaryData extends HistoricalData {

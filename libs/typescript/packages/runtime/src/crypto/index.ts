@@ -23,4 +23,4 @@ export {
   TransactionHash,
   VRFKeyHash,
   VRFVkey,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";

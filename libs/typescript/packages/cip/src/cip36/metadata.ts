@@ -3,20 +3,20 @@ import {
   Metadata,
   NetworkId,
   TransactionMetadatum,
-} from "@xray-network/cardano-chain";
+} from "@xray-network/xray-cardano-lib-chain";
 import {
   UINT64_MAX,
   bytesToHex,
   decodeCbor,
   encodeCbor,
   hexToBytes,
-} from "@xray-network/cardano-core";
-import type { CborValue } from "@xray-network/cardano-core";
+} from "@xray-network/xray-cardano-lib-core";
+import type { CborValue } from "@xray-network/xray-cardano-lib-core";
 import {
   Ed25519Signature,
   PublicKey,
   blake2b256,
-} from "@xray-network/cardano-crypto";
+} from "@xray-network/xray-cardano-lib-crypto";
 
 const KEY_REGISTRATION_LABEL = 61284n;
 const REGISTRATION_WITNESS_LABEL = 61285n;
@@ -203,8 +203,8 @@ function numericFields(value: Extract<CborValue, { kind: "map" }>, allowed: read
 function required(fields: Map<bigint, CborValue>, key: bigint): CborValue { const value = fields.get(key); if (value === undefined) throw new TypeError(`missing CIP36 map key ${key}`); return value; }
 function metadataFields(value: Uint8Array): Map<bigint, CborValue> { const node = expectMap(decodeCbor(value), "CIP36 metadata view"), output = new Map<bigint, CborValue>(); for (const [key, item] of node.entries) if (key.kind === "unsigned") { if (output.has(key.value)) throw new TypeError(`duplicate metadata label ${key.value}`); output.set(key.value, item); } return output; }
 
-export { Address as PaymentAddress, Metadata, NetworkId, TransactionMetadatum } from "@xray-network/cardano-chain";
-export { Ed25519Signature, PublicKey } from "@xray-network/cardano-crypto";
+export { Address as PaymentAddress, Metadata, NetworkId, TransactionMetadatum } from "@xray-network/xray-cardano-lib-chain";
+export { Ed25519Signature, PublicKey } from "@xray-network/xray-cardano-lib-crypto";
 export type CIP36LegacyKeyRegistration = PublicKey;
 export type CIP36Nonce = bigint;
 export type CIP36StakeCredential = PublicKey;

@@ -18,11 +18,12 @@ the project rename.
 - Use **XRAY Cardano Lib** for the current project, repository, documentation, and aggregate
   package display name.
 - Use `xray-cardano-lib` as the current repository slug and in repository URLs.
-- Rename the TypeScript aggregate runtime from `@xray-network/cardano-lib` to
-  `@xray-network/xray-cardano-lib`.
+- Use `@xray-network/xray-cardano-lib` for the TypeScript aggregate runtime and
+  `@xray-network/xray-cardano-lib-*` for its independently published domain packages:
+  `core`, `crypto`, `chain`, `cip`, and `plutus`.
 - Rename the C++ vcpkg manifest package from `cardano-lib-cpp` to `xray-cardano-lib-cpp` and its
   installed CMake package from `CardanoLib` to `XRAYCardanoLib`.
-- Keep Cardano protocol identifiers unchanged, including the TypeScript domain packages,
+- Keep Cardano protocol identifiers unchanged, including public TypeScript protocol symbols,
   `cardano::*` C++ targets, `cardano` headers and namespaces, and the `libcardano` archive name.
 - Do not rewrite terminal implementation records, immutable provider snapshots, captured
   artifacts, or compatibility fixtures merely to replace the historical project name. They
@@ -30,8 +31,8 @@ the project rename.
 
 ## Consequences
 
-Consumers of the aggregate TypeScript runtime must update their package dependency and imports to
-`@xray-network/xray-cardano-lib`. C++ consumers must use
+Consumers of the TypeScript packages must update their dependencies and imports to the
+`@xray-network/xray-cardano-lib` package family. C++ consumers must use
 `find_package(XRAYCardanoLib CONFIG REQUIRED)` while continuing to link the same `cardano::*`
 targets.
 
