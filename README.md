@@ -3,6 +3,10 @@
 XRAY Cardano Lib is a repository for Cardano protocol and application libraries. It combines modular
 language ownership with captured provider evidence and auditable implementation histories.
 
+TypeScript is the only maintained implementation. The C++ workspace is retained as a concept for
+experimentation and design exploration; it is not maintained, supported, or kept in feature
+parity with TypeScript.
+
 The project emphasizes lossless data handling, explicit package boundaries, browser-compatible
 runtime behavior, reproducible dependencies, and evidence-backed compatibility.
 
@@ -13,8 +17,8 @@ Repository-wide guidance for contributors and coding agents is documented in
 
 | Library | Description | Source | Implementation history |
 | --- | --- | --- | --- |
-| TypeScript | Maintained native implementation covering encoding, cryptography, ledger eras, transactions, CIPs, Plutus Data, and UPLC | [`libs/typescript/`](./libs/typescript/) | [`updates/implementations/typescript/`](./updates/implementations/typescript/) |
-| C++ | Maintained C++23 implementation with accepted TypeScript feature parity and library-local follow-up plans | [`libs/cpp/`](./libs/cpp/) | [`updates/implementations/cpp/`](./updates/implementations/cpp/) |
+| TypeScript | The only maintained implementation, covering encoding, cryptography, ledger eras, transactions, CIPs, Plutus Data, and UPLC | [`libs/typescript/`](./libs/typescript/) | [`updates/implementations/typescript/`](./updates/implementations/typescript/) |
+| C++ | Unmaintained C++23 concept retained for experimentation and design exploration; not a supported feature-parity implementation | [`libs/cpp/`](./libs/cpp/) | [`updates/implementations/cpp/`](./updates/implementations/cpp/) |
 
 ## Project model
 
@@ -45,9 +49,9 @@ An implementation instruction explicitly selects one evidence mode:
 - `HYBRID`: use both.
 - `LOCAL`: use neither.
 
-This allows each library to implement independently. A C++ change may follow an accepted
-TypeScript result, inspect the same provider evidence directly, combine both sources, or decide
-that a result is outside its supported scope.
+This allows each library record to identify its evidence independently. TypeScript is the active
+implementation target. Historical C++ records and source remain available as concept material,
+without an ongoing maintenance or parity commitment.
 
 Provider evidence is language-neutral and may be consumed by any implementation. Provider
 contracts and snapshots record capture provenance; instructions and results record library-local
