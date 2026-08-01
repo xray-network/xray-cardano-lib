@@ -32,6 +32,7 @@ import type {
   SchemaProperties,
   StaticSchema,
   TupleSchema,
+  VoidSchema,
 } from "./types.js";
 
 export declare namespace Data {
@@ -70,6 +71,10 @@ function Bytes(options: BytesOptions = {}): BytesSchema {
 
 function BooleanType(): BooleanSchema {
   return { dataType: "boolean" };
+}
+
+function VoidType(): VoidSchema {
+  return { dataType: "void" };
 }
 
 function Any(): AnySchema {
@@ -305,6 +310,11 @@ function decodeWithSchema(data: PlutusDataValue, schema: DataSchema, depth: numb
         throw new TypeError("Expected boolean constructor");
       }
       return data.index === 1;
+    case "void":
+      if (!(data instanceof Constr) || data.index !== 0 || data.fields.length !== 0) {
+        throw new TypeError("Expected void constructor");
+      }
+      return undefined;
     case "any":
       return data;
     case "list":
@@ -375,6 +385,9 @@ function encodeWithSchema(value: unknown, schema: DataSchema, depth: number): Pl
     case "boolean":
       if (typeof value !== "boolean") throw new TypeError("Expected boolean");
       return new Constr(value ? 1 : 0, []);
+    case "void":
+      if (value !== undefined) throw new TypeError("Expected undefined");
+      return new Constr(0, []);
     case "any":
       return value as PlutusDataValue;
     case "list":
@@ -576,6 +589,7 @@ export const Data = {
   Integer,
   Bytes,
   Boolean: BooleanType,
+  Void: VoidType,
   Any,
   Array: ArrayType,
   Map: MapType,

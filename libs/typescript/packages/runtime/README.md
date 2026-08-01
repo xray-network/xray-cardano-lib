@@ -34,6 +34,15 @@ console.log(transactionId.to_hex());
 key.dispose();
 ```
 
+Typed Plutus Data is also available directly from the aggregate package:
+
+```ts
+import { Constr, Data } from "@xray-network/xray-cardano-lib";
+
+const encoded = Data.to(undefined, Data.Void());
+const constructor = new Constr(0, []);
+```
+
 ## Package role
 
 `@xray-network/xray-cardano-lib` is a curated facade over the domain packages:

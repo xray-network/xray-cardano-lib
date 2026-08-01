@@ -30,7 +30,7 @@ export type PhaseTwoRawEvaluation = readonly [
   evaluation: PhaseTwoEvaluation,
 ];
 
-export function apply_params_to_script(
+export function applyParamsToScript(
   paramsBytes: Uint8Array,
   plutusScriptBytes: Uint8Array,
 ): Uint8Array {
@@ -60,7 +60,7 @@ export function apply_params_to_script(
   return Uint8Array.from(encodeProgramEnvelope({ version: program.version, term }));
 }
 
-export function eval_phase_two_raw(
+export function evaluatePhaseTwoRaw(
   txBytes: Uint8Array,
   utxosBytes: readonly (readonly [inputBytes: Uint8Array, outputBytes: Uint8Array])[],
   costModelsBytes: Uint8Array,
@@ -90,6 +90,12 @@ export function eval_phase_two_raw(
     }),
   ] as const)));
 }
+
+/** @deprecated Use applyParamsToScript. */
+export const apply_params_to_script = applyParamsToScript;
+
+/** @deprecated Use evaluatePhaseTwoRaw. */
+export const eval_phase_two_raw = evaluatePhaseTwoRaw;
 
 function assertStandaloneLength(name: string, value: Uint8Array): void {
   if (value.length > MAX_STANDALONE_BYTES) {

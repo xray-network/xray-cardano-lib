@@ -12,9 +12,11 @@ import {
   blake2b256,
 } from "@xray-network/xray-cardano-lib-crypto";
 import {
+  applyParamsToScript,
   apply_params_to_script,
   decodeFlatProgram,
   encodeFlatProgram,
+  evaluatePhaseTwoRaw,
   eval_phase_two_raw,
   evaluateProgram,
   parseUplcText,
@@ -24,6 +26,12 @@ import * as uplc from "@xray-network/xray-cardano-lib-plutus/uplc";
 const fromHex = (hex) => Uint8Array.from(hex.match(/../g)?.map((value) => Number.parseInt(value, 16)) ?? []);
 const toHex = (bytes) => Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
 const identityScript = fromHex("4d01000033222220051200120011");
+
+test("camelCase phase-two APIs retain the snake_case compatibility bindings", () => {
+  assert.strictEqual(applyParamsToScript, apply_params_to_script);
+  assert.strictEqual(evaluatePhaseTwoRaw, eval_phase_two_raw);
+  assert.equal(toHex(applyParamsToScript(fromHex("80"), identityScript)), toHex(identityScript));
+});
 
 test("public UPLC APIs expose text parsing, Flat codecs, and budgeted evaluation", () => {
   assert.strictEqual(uplc.parseUplcText, parseUplcText);

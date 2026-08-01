@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import * as cardano from "@xray-network/xray-cardano-lib";
+import {
+  Constr as AggregateConstr,
+  Data as AggregateData,
+} from "@xray-network/xray-cardano-lib";
 import * as chain from "@xray-network/xray-cardano-lib-chain";
 import * as allegra from "@xray-network/xray-cardano-lib-chain/allegra";
 import * as alonzo from "@xray-network/xray-cardano-lib-chain/alonzo";
@@ -39,6 +43,8 @@ test("public packages share each nominal class owner", () => {
   assert.strictEqual(cip.cip25.CIP25Metadata, cip25.CIP25Metadata);
   assert.strictEqual(cip.cip8.COSESign1, cip8.COSESign1);
   assert.strictEqual(plutus.Data, plutusData.Data);
+  assert.strictEqual(AggregateData, plutusData.Data);
+  assert.strictEqual(AggregateConstr, plutusData.Constr);
   assert.strictEqual(cip8.Int, core.Int);
   assert.strictEqual(cip8.PublicKey, crypto.PublicKey);
   assert.ok(new cardano.CardanoError("INVARIANT", "identity") instanceof core.CardanoError);
@@ -61,11 +67,17 @@ test("all six package entry points and focused subpaths expose their primary API
   assert.equal("TaggedTransactionInputSet" in conway, false);
   assert.strictEqual(cardano.apply_params_to_script, plutus.apply_params_to_script);
   assert.strictEqual(cardano.eval_phase_two_raw, plutus.eval_phase_two_raw);
+  assert.strictEqual(cardano.applyParamsToScript, plutus.applyParamsToScript);
+  assert.strictEqual(cardano.evaluatePhaseTwoRaw, plutus.evaluatePhaseTwoRaw);
+  assert.strictEqual(cardano.applyParamsToScript, cardano.apply_params_to_script);
+  assert.strictEqual(cardano.evaluatePhaseTwoRaw, cardano.eval_phase_two_raw);
   assert.strictEqual(plutus.parseUplcText, uplc.parseUplcText);
   assert.strictEqual(plutus.decodeFlatProgram, uplc.decodeFlatProgram);
   assert.strictEqual(plutus.evaluateProgram, uplc.evaluateProgram);
   assert.strictEqual(cardano.parseUplcText, uplc.parseUplcText);
   assert.strictEqual(cardano.evaluateProgram, uplc.evaluateProgram);
+  assert.equal(AggregateData.to(undefined, AggregateData.Void()), "d87980");
+  assert.ok(new AggregateConstr(0, []) instanceof plutusData.Constr);
   assert.equal(typeof plutus.Constr, "function");
   assert.equal("PlutusData" in plutus, false);
   assert.equal("parsePlutusData" in plutus, false);

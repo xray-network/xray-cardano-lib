@@ -96,6 +96,13 @@
                   "impl/typescript/0012-IMPL-INSTR",
                   "impl/typescript/0012-IMPL-RESULT"
                 ]
+              },
+              {
+                "group": "0013 — Typed Plutus void and aggregate exports",
+                "pages": [
+                  "impl/typescript/0013-IMPL-INSTR",
+                  "impl/typescript/0013-IMPL-RESULT"
+                ]
               }
             ]
           },

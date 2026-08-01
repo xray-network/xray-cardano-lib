@@ -61,6 +61,22 @@ test("native Data schemas cast objects, enums, nullable values, and collections"
   assert.deepEqual(Data.from(Data.to(map, balances), balances), map);
 });
 
+test("native Data Void schema round-trips only the exact void constructor", () => {
+  const schema = Data.Void();
+
+  assert.equal(Data.to(undefined, schema), "d87980");
+  assert.equal(Data.from("d87980", schema), undefined);
+  assert.equal(Data.void(), "d87980");
+
+  for (const value of [null, false, 0n, "", [], new Constr(0, [])]) {
+    assert.throws(() => Data.to(value, schema), /Expected undefined/u);
+  }
+  for (const cbor of ["80", "d87a80", "d8798101"]) {
+    assert.throws(() => Data.from(cbor, schema), /Expected void constructor/u);
+  }
+  assert.throws(() => Data.from("d879", schema));
+});
+
 test("native Data JSON conversion is browser-safe and preserves large integers", () => {
   const value = Data.fromJson({
     owner: "alice",

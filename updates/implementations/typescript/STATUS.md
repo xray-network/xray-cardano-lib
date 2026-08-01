@@ -21,3 +21,4 @@ This is the only lifecycle and decision-proof ledger for TypeScript implementati
 | `0010` | [CIP-67/68 token metadata](./0010-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
 | `0011` | [Optional CIP-21 compatibility diagnostics](./0011-IMPL-INSTR.md) | `PLANNED` | — | `HYBRID` | Awaiting implementation. |
 | `0012` | [XRAY Cardano Lib package-family rename](./0012-IMPL-INSTR.md) | `REVIEW` | [Result](./0012-IMPL-RESULT.md) | `LOCAL` | Package-family rename completed with the full TypeScript gate passing; awaiting human decision. |
+| `0013` | [Typed Plutus void and aggregate exports](./0013-IMPL-INSTR.md) | `REVIEW` | [Result](./0013-IMPL-RESULT.md) | `LOCAL` | Typed void schema and aggregate exports completed with TypeScript and C++ compatibility gates passing; awaiting human decision. |

@@ -27,9 +27,10 @@ const result = evaluateProgram(
 );
 ```
 
-The root entry point exports the same UPLC API together with `Data`,
-`apply_params_to_script`, and `eval_phase_two_raw`. Generic CEK evaluation is explicitly
-budgeted and does not perform ledger phase-one validation.
+The root entry point exports the same UPLC API together with `Data`, `applyParamsToScript`, and
+`evaluatePhaseTwoRaw`. The legacy `apply_params_to_script` and `eval_phase_two_raw` names remain
+as deprecated compatibility aliases. Generic CEK evaluation is explicitly budgeted and does not
+perform ledger phase-one validation.
 
 ## Typed Data
 
@@ -40,7 +41,13 @@ const payment = Data.Object({
   owner: Data.Bytes({ minLength: 28, maxLength: 28 }),
   amount: Data.Integer({ minimum: 0 }),
 });
+
+const voidSchema = Data.Void();
+Data.to(undefined, voidSchema); // "d87980"
 ```
+
+`Data.Void()` is the typed schema for constructor alternative zero with no fields. The existing
+lowercase `Data.void()` helper continues to return that raw CBOR directly.
 
 Ledger wire types such as `PlutusData`, scripts, redeemers, and `ExUnits` remain owned by
 `@xray-network/xray-cardano-lib-chain`.
