@@ -37,6 +37,12 @@
       "browser": "./dist/esm/uplc/index.js",
       "import": "./dist/esm/uplc/index.js",
       "default": "./dist/esm/uplc/index.js"
+    },
+    "./blueprint": {
+      "types": "./dist/esm/blueprint/index.d.ts",
+      "browser": "./dist/esm/blueprint/index.js",
+      "import": "./dist/esm/blueprint/index.js",
+      "default": "./dist/esm/blueprint/index.js"
     }
   },
   "dependencies": {

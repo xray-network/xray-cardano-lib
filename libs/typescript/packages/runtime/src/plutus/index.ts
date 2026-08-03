@@ -63,3 +63,4 @@ export type {
   UplcType,
   VoidSchema,
 } from "@xray-network/xray-cardano-lib-plutus";
+export * as blueprint from "@xray-network/xray-cardano-lib-plutus/blueprint";

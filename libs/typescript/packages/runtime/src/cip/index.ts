@@ -55,3 +55,5 @@ export {
   SignedMessageKind,
 } from "@xray-network/xray-cardano-lib-cip/cip8";
 export type { CIP8MessageEnvelope } from "@xray-network/xray-cardano-lib-cip/cip8";
+export * as cip21 from "@xray-network/xray-cardano-lib-cip/cip21";
+export * as cip68 from "@xray-network/xray-cardano-lib-cip/cip68";

@@ -251,6 +251,7 @@ core::Result<core::Bytes> secure_random_bytes(std::size_t length) {
 }
 
 core::Bytes blake2b224(core::ByteSpan input) { return hash("Blake2b(224)", input); }
+core::Bytes blake2b160(core::ByteSpan input) { return hash("Blake2b(160)", input); }
 core::Bytes blake2b256(core::ByteSpan input) { return hash("Blake2b(256)", input); }
 core::Bytes sha2_256(core::ByteSpan input) { return hash("SHA-256", input); }
 core::Bytes sha3_256(core::ByteSpan input) { return hash("SHA-3(256)", input); }
@@ -578,15 +579,17 @@ bool PublicKey::verify(core::ByteSpan message, const Ed25519Signature& signature
   return verify_ed25519(bytes_, message, signature.span());
 }
 
-PrivateKey::PrivateKey(std::array<core::Byte, 32> bytes) : bytes_(std::move(bytes)) {}
+PrivateKey::PrivateKey(std::array<core::Byte, 64> bytes, PrivateKeyForm form)
+    : bytes_(std::move(bytes)), form_(form) {}
 PrivateKey::PrivateKey(PrivateKey&& other) noexcept
-    : bytes_(other.bytes_), cleared_(other.cleared_) {
+    : bytes_(other.bytes_), form_(other.form_), cleared_(other.cleared_) {
   other.clear();
 }
 PrivateKey& PrivateKey::operator=(PrivateKey&& other) noexcept {
   if (this != &other) {
     clear();
     bytes_ = other.bytes_;
+    form_ = other.form_;
     cleared_ = other.cleared_;
     other.clear();
   }
@@ -595,11 +598,23 @@ PrivateKey& PrivateKey::operator=(PrivateKey&& other) noexcept {
 PrivateKey::~PrivateKey() { clear(); }
 
 core::Result<PrivateKey> PrivateKey::from_bytes(core::ByteSpan bytes) {
+  return from_normal_bytes(bytes);
+}
+core::Result<PrivateKey> PrivateKey::from_normal_bytes(core::ByteSpan bytes) {
   if (bytes.size() != 32) {
     return std::unexpected(core::CardanoError(core::ErrorCode::invalid_length,
                                               "Ed25519 private key must be 32 bytes"));
   }
-  return PrivateKey(to_array<32>(bytes));
+  std::array<core::Byte, 64> owned{};
+  std::ranges::copy(bytes, owned.begin());
+  return PrivateKey(owned, PrivateKeyForm::normal);
+}
+core::Result<PrivateKey> PrivateKey::from_extended_bytes(core::ByteSpan bytes) {
+  if (bytes.size() != 64) {
+    return std::unexpected(core::CardanoError(core::ErrorCode::invalid_length,
+                                              "extended Ed25519 private key must be 64 bytes"));
+  }
+  return PrivateKey(to_array<64>(bytes), PrivateKeyForm::extended);
 }
 core::Result<PrivateKey> PrivateKey::from_hex(std::string_view hex) {
   auto bytes = parse_hex(hex);
@@ -624,12 +639,14 @@ core::Result<PrivateKey> PrivateKey::generate() {
   auto bytes = secure_random_bytes(32);
   return bytes ? from_bytes(*bytes) : std::unexpected(bytes.error());
 }
-core::Bytes PrivateKey::to_bytes() const { return {bytes_.begin(), bytes_.end()}; }
-std::string PrivateKey::to_hex() const { return core::bytes_to_hex(bytes_); }
+core::Bytes PrivateKey::to_bytes() const {
+  return {bytes_.begin(), bytes_.begin() + (form_ == PrivateKeyForm::normal ? 32 : 64)};
+}
+std::string PrivateKey::to_hex() const { return core::bytes_to_hex(to_bytes()); }
 core::Result<std::string> PrivateKey::to_bech32() const {
   return cleared_ ? std::unexpected(
                         core::CardanoError(core::ErrorCode::disposed, "private key was cleared"))
-                  : core::encode_bech32("ed25519_sk", bytes_);
+                  : core::encode_bech32("ed25519_sk", to_bytes());
 }
 core::Result<PublicKey> PrivateKey::public_key() const {
   if (cleared_ || !sodium_ready()) {
@@ -637,7 +654,11 @@ core::Result<PublicKey> PrivateKey::public_key() const {
         cleared_ ? core::ErrorCode::disposed : core::ErrorCode::crypto_failure,
         cleared_ ? "private key was cleared" : "libsodium initialization failed"));
   }
-  const auto seed = to_u8(bytes_);
+  if (form_ == PrivateKeyForm::extended) {
+    auto value = extended_public(bytes_);
+    return value ? PublicKey::from_bytes(*value) : std::unexpected(value.error());
+  }
+  const auto seed = to_u8(core::ByteSpan(bytes_).first<32>());
   std::array<unsigned char, crypto_sign_PUBLICKEYBYTES> public_key{};
   std::array<unsigned char, crypto_sign_SECRETKEYBYTES> secret_key{};
   crypto_sign_seed_keypair(public_key.data(), secret_key.data(), seed.data());
@@ -650,7 +671,8 @@ core::Result<Ed25519Signature> PrivateKey::sign(core::ByteSpan message) const {
         cleared_ ? core::ErrorCode::disposed : core::ErrorCode::crypto_failure,
         cleared_ ? "private key was cleared" : "libsodium initialization failed"));
   }
-  const auto seed = to_u8(bytes_);
+  if (form_ == PrivateKeyForm::extended) return extended_sign(bytes_, message);
+  const auto seed = to_u8(core::ByteSpan(bytes_).first<32>());
   const auto native_message = to_u8(message);
   std::array<unsigned char, crypto_sign_PUBLICKEYBYTES> public_key{};
   std::array<unsigned char, crypto_sign_SECRETKEYBYTES> secret_key{};
@@ -665,6 +687,7 @@ void PrivateKey::clear() noexcept {
   sodium_memzero(bytes_.data(), bytes_.size());
   cleared_ = true;
 }
+PrivateKeyForm PrivateKey::form() const noexcept { return form_; }
 
 Bip32PublicKey::Bip32PublicKey(std::array<core::Byte, 64> bytes) : bytes_(std::move(bytes)) {}
 core::Result<Bip32PublicKey> Bip32PublicKey::from_bytes(core::ByteSpan bytes) {
@@ -895,6 +918,11 @@ core::Result<Ed25519Signature> Bip32PrivateKey::sign(core::ByteSpan message) con
   return cleared_ ? std::unexpected(core::CardanoError(core::ErrorCode::disposed,
                                                        "BIP32 private key was cleared"))
                   : extended_sign(core::ByteSpan(bytes_).first<64>(), message);
+}
+core::Result<PrivateKey> Bip32PrivateKey::to_raw_key() const {
+  return cleared_ ? std::unexpected(core::CardanoError(core::ErrorCode::disposed,
+                                                       "BIP32 private key was cleared"))
+                  : PrivateKey::from_extended_bytes(core::ByteSpan(bytes_).first<64>());
 }
 void Bip32PrivateKey::clear() noexcept {
   sodium_memzero(bytes_.data(), bytes_.size());

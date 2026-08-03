@@ -252,6 +252,23 @@ test("test_collateral and build_tx_with_ref_input avoid double counting", () => 
   assert.ok(bodyField(body, 13)); assert.ok(bodyField(body, 16)); assert.equal(bodyField(body, 17)?.value, 500_000n); assert.ok(bodyField(body, 18));
 });
 
+test("input roles are disjoint in every insertion direction and selection failures roll back", () => {
+  const roles = [
+    (builder, value) => builder.add_input(value.result),
+    (builder, value) => builder.add_utxo(value.result),
+    (builder, value) => builder.add_collateral(value.result),
+    (builder, value) => builder.add_reference_input(TransactionUnspentOutput.new(value.txInput, value.output)),
+  ];
+  for (let first = 0; first < roles.length; first += 1) for (let second = 0; second < roles.length; second += 1) {
+    const builder = TransactionBuilder.new(config()), value = input(70 + first * 4 + second, 2_000_000n);
+    roles[first](builder, value); assert.throws(() => roles[second](builder, value));
+  }
+  const builder = TransactionBuilder.new(config()); builder.add_input(input(90, 1_900_000n).result); builder.add_utxo(input(91, 10n).result); builder.add_output(output(1_900_000n));
+  const before = builder.get_total_input().to_canonical_cbor_hex();
+  assert.throws(() => builder.select_utxos(CoinSelectionStrategyCIP2.LargestFirst));
+  assert.equal(builder.get_total_input().to_canonical_cbor_hex(), before);
+});
+
 test("test_contract and UPLC-valued execution-unit flow", () => {
   const datum = PlutusData.from_cbor_bytes(Uint8Array.of(0));
   const plutus = PlutusScript.from_v1(PlutusV1Script.new(Uint8Array.of(
@@ -270,6 +287,7 @@ test("test_contract and UPLC-valued execution-unit flow", () => {
     .output();
   const builder = TransactionBuilder.new(config());
   builder.add_input(SingleInputBuilder.new(sourceInput, sourceOutput).plutus_script(partial, requiredSigners(paymentHash), datum));
+  builder.add_collateral(input(51, 2_000_000n).result);
   builder.add_output(output(2_000_000n));
   const evaluation = builder.build_for_evaluation(ChangeSelectionAlgo.Default, address);
   assert.ok(bodyField(evaluation.draft_body(), 11)); assert.ok(evaluation.draft_tx().to_cbor_bytes().length > 0);

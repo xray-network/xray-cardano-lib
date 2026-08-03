@@ -170,3 +170,6 @@ export type {
   VoidSchema,
 } from "./plutus/index.js";
 export * from "./chain/index.js";
+export * as blueprint from "@xray-network/xray-cardano-lib-plutus/blueprint";
+export * as cip21 from "@xray-network/xray-cardano-lib-cip/cip21";
+export * as cip68 from "@xray-network/xray-cardano-lib-cip/cip68";

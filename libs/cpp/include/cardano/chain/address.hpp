@@ -63,6 +63,8 @@ class Address {
   [[nodiscard]] static core::Result<Address> from_bytes(core::ByteSpan bytes);
   [[nodiscard]] static core::Result<Address> from_hex(std::string_view hex);
   [[nodiscard]] static core::Result<Address> from_bech32(std::string_view encoded);
+  [[nodiscard]] static core::Result<Address> from_bech32_payload_compatible(
+      std::string_view encoded);
   [[nodiscard]] static bool is_valid(std::string_view encoded) noexcept;
 
   [[nodiscard]] AddressKind kind() const noexcept;

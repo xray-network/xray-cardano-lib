@@ -11,3 +11,4 @@ export type {
 } from "./api.js";
 export * from "./typed_data/index.js";
 export * from "./uplc/index.js";
+export * as blueprint from "./blueprint/index.js";

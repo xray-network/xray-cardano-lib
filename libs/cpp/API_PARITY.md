@@ -18,7 +18,7 @@ It is completed alongside the implementation. The canonical implementation statu
 | C010 | `cardano::plutus` | Recursive typed Data, schemas, CBOR-hex, detailed JSON, large integers, chain-owner conversion, and limits | `tests/plutus` |
 | C011 | `cardano::plutus` | UPLC 1.0/1.1 Flat/text codecs, builtins 0–100, semantics A–E, CEK budgets, exact cost mappings, parameter application, V1/V2/V3 contexts, and raw phase-two valuation for protocol 5–11 | `tests/plutus` and applicable provider conformance corpus |
 | C012 | Focused owners | Component headers, aggregate facade, install metadata, examples, installed identity checks, and a checked crosswalk for all 975 frozen runtime/type-only bindings across all 60 inventory rows. Non-identical names are explicit C++ naming/ownership adaptations checked against their public owner. | Compile/link/runtime consumer tests and `tests/api_inventory.cmake` |
-| C013 | Workspace | macOS 26.5 ARM64/Apple Clang 21/Ninja gates, warnings-as-errors, provider integrity, deterministic 50,000-case hardening, ASan/UBSan, Apple clang-format, conditional clang-tidy, installed-content/path/archive scan, and clean consumer | `ci`, `sanitizers`, and `hardening` workflows |
+| C013 | Workspace | C++23 capability gates; macOS/Apple Clang, Ubuntu/GCC and Clang, and Windows/MSVC matrix; compiler-family warnings and sanitizers; component exports; opt-in JSON benchmarks; provider integrity; deterministic hardening; and installed consumers | `ci`, `sanitizers`, `hardening`, and `benchmarks` presets |
 
 ## Builder compatibility details
 
@@ -34,6 +34,10 @@ It is completed alongside the implementation. The canonical implementation statu
 - `build_for_evaluation` emits dummy zero ExUnits and fake vkeys only for sizing/evaluation.
   `build_signed` retains all requirements; `SignedTxBuilder::build` is checked and
   `build_unchecked` is explicit.
+- Conway construction uses the existing `TransactionBody`, `ProposalProcedure`,
+  `VotingProcedures`, and `ProtocolParamUpdate` owners. Raw era-model constructors are closed;
+  validated ingestion uses `from_value`/`from_cbor`, and typed builders expose only explicitly
+  labelled extension points.
 
 ## Frozen public-inventory crosswalk
 

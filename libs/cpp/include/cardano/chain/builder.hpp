@@ -16,6 +16,8 @@
 
 namespace cardano::chain {
 
+class ProtocolParamUpdate;
+
 class AssetName {
  public:
   [[nodiscard]] static core::Result<AssetName> from_bytes(core::ByteSpan bytes);
@@ -116,6 +118,7 @@ struct TransactionUnspentOutput {
 struct TransactionBuilderConfig {
   LinearFee linear_fee;
   std::uint64_t reference_script_cost_per_byte{};
+  NonnegativeRational reference_script_cost{0, 1};
   std::uint64_t pool_deposit{};
   std::uint64_t key_deposit{};
   std::uint32_t max_value_size{};
@@ -132,6 +135,7 @@ class TransactionBuilderConfigBuilder {
  public:
   TransactionBuilderConfigBuilder& linear_fee(LinearFee value);
   TransactionBuilderConfigBuilder& reference_script_cost_per_byte(std::uint64_t value);
+  TransactionBuilderConfigBuilder& reference_script_cost(NonnegativeRational value);
   TransactionBuilderConfigBuilder& pool_deposit(std::uint64_t value);
   TransactionBuilderConfigBuilder& key_deposit(std::uint64_t value);
   TransactionBuilderConfigBuilder& max_value_size(std::uint32_t value);
@@ -148,6 +152,9 @@ class TransactionBuilderConfigBuilder {
   TransactionBuilderConfig config_;
   std::uint16_t required_mask_{};
 };
+
+[[nodiscard]] core::Result<TransactionBuilderConfig> transaction_builder_config_from_conway(
+    const ProtocolParamUpdate& parameters);
 
 enum class CoinSelectionStrategyCIP2 : std::uint8_t {
   largest_first = 0,
@@ -539,9 +546,9 @@ class TransactionBuilder {
 
   [[nodiscard]] core::VoidResult add_input(TransactionUnspentOutput input);
   [[nodiscard]] core::VoidResult add_input(InputBuilderResult input);
-  void add_utxo(TransactionUnspentOutput candidate);
+  core::VoidResult add_utxo(TransactionUnspentOutput candidate);
   [[nodiscard]] core::VoidResult add_output(TransactionOutput output);
-  void add_reference_input(TransactionInput input);
+  core::VoidResult add_reference_input(TransactionInput input);
   [[nodiscard]] core::VoidResult add_reference_input(TransactionUnspentOutput input);
   [[nodiscard]] core::VoidResult set_mint(std::vector<PolicyAssets> mint);
   [[nodiscard]] core::VoidResult add_mint(MintBuilderResult mint);
@@ -584,12 +591,20 @@ class TransactionBuilder {
 
  private:
   [[nodiscard]] bool contains_input(const TransactionInput& input) const;
+  [[nodiscard]] std::optional<std::string> input_role(const TransactionInput& input) const;
+  [[nodiscard]] core::VoidResult require_unused_input(const TransactionInput& input,
+                                                      std::string_view requested_role) const;
   [[nodiscard]] core::Result<bool> covered() const;
+  [[nodiscard]] core::VoidResult select_utxos_impl(CoinSelectionStrategyCIP2 strategy,
+                                                   core::SecureRandomSource* random);
+  [[nodiscard]] core::Result<bool> add_change_if_needed_impl(const Address& address,
+                                                             ChangeSelectionAlgo algorithm);
   [[nodiscard]] core::VoidResult select_candidate(std::size_t index);
   [[nodiscard]] core::Result<std::vector<TransactionOutput>> make_change(const Address& address,
                                                                          const Value& change) const;
   [[nodiscard]] core::Result<core::cbor::Value> build_body_with_fee(std::uint64_t fee,
                                                                     bool enforce_size) const;
+  [[nodiscard]] core::Result<std::uint64_t> collateral_total(std::uint64_t fee, bool checked) const;
 
   TransactionBuilderConfig config_;
   std::vector<TransactionUnspentOutput> inputs_;

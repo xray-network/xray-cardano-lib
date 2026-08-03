@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <array>
 #include <cardano/crypto/crypto.hpp>
+#include <cardano/crypto/derivation.hpp>
+#include <cardano/crypto/identity.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -53,6 +55,25 @@ TEST_CASE("required hash primitives match published empty-message vectors", "[cr
   CHECK(core::bytes_to_hex(crypto::blake2b256({})) ==
         "0e5751c026e543b2e8ab2eb06099daa1d1e5df47778f7787faab45cdf12fe3a8");
   CHECK(crypto::blake2b224({}).size() == 28);
+}
+
+TEST_CASE("role-aware key text and CIP-1852 paths are checked") {
+  auto extended = crypto::PrivateKey::from_extended_bytes(core::Bytes(64));
+  REQUIRE(extended);
+  const auto encoded = crypto::encode_cardano_private_key(crypto::KeyTextRole::drep, *extended);
+  REQUIRE(encoded);
+  const auto decoded = crypto::decode_cardano_private_key(
+      crypto::KeyTextRole::drep, crypto::PrivateKeyForm::extended, *encoded);
+  REQUIRE(decoded);
+  CHECK(decoded->form() == crypto::PrivateKeyForm::extended);
+  CHECK_FALSE(crypto::encode_cardano_private_key(crypto::KeyTextRole::payment, *extended));
+  CHECK_FALSE(crypto::decode_cardano_private_key(crypto::KeyTextRole::stake,
+                                                 crypto::PrivateKeyForm::extended, *encoded));
+
+  CHECK(crypto::Cip1852Path::make(0, crypto::Cip1852Role::external, 0));
+  CHECK(crypto::Cip1852Path::make(0x7fffffffU, crypto::Cip1852Role::cc_hot, 0x7fffffffU));
+  CHECK_FALSE(crypto::Cip1852Path::make(0x80000000U, crypto::Cip1852Role::external, 0));
+  CHECK_FALSE(crypto::Cip1852Path::make(0, crypto::Cip1852Role::external, 0x80000000U));
 }
 
 TEST_CASE("fixed hash wrappers enforce lengths and defensive ownership", "[crypto][hash]") {

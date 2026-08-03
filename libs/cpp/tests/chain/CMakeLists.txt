@@ -3,6 +3,7 @@ add_executable(
   address_tests.cpp
   builder_tests.cpp
   byron_tests.cpp
+  conway_construction_tests.cpp
   era_header_tests.cpp
   ledger_tests.cpp
   multi_era_tests.cpp

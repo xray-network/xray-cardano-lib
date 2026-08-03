@@ -1,5 +1,6 @@
 add_executable(
   cardano_plutus_tests
+  blueprint_tests.cpp
   typed_data_tests.cpp
   uplc_conformance_tests.cpp
   uplc_tests.cpp

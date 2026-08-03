@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cardano/plutus/blueprint.hpp"
 #include "cardano/plutus/data.hpp"
 #include "cardano/plutus/uplc.hpp"
 

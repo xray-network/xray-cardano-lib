@@ -45,6 +45,15 @@
         "CARDANO_HARDENING_CASES": "50000",
         "CARDANO_PROVIDER_TESTS": "ON"
       }
+    },
+    {
+      "name": "benchmarks",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CARDANO_BUILD_TESTS": "OFF",
+        "CARDANO_BUILD_BENCHMARKS": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -59,6 +68,11 @@
     {
       "name": "hardening",
       "configurePreset": "hardening"
+    },
+    {
+      "name": "benchmarks",
+      "configurePreset": "benchmarks",
+      "targets": ["cardano_benchmarks"]
     }
   ],
   "testPresets": [

@@ -802,6 +802,12 @@ export class RedeemerSetBuilder {
     }
     return output;
   }
+  public copy(): RedeemerSetBuilder {
+    const output = RedeemerSetBuilder.new();
+    output.#sources.push(...this.#sources);
+    for (const [key, value] of this.#overrides) output.#overrides.set(key, clone(value, ExUnits));
+    return output;
+  }
 }
 
 function listFromField(decoded: CborValue, key: bigint): CborValue[] {
@@ -1063,8 +1069,8 @@ function transactionNode(body: TransactionBody, witness: TransactionWitnessSet, 
 
 export class TransactionBuilder {
   readonly #config: TransactionBuilderConfig;
-  readonly #inputs: InputBuilderResult[] = [];
-  readonly #utxos: InputBuilderResult[] = [];
+  #inputs: InputBuilderResult[] = [];
+  #utxos: InputBuilderResult[] = [];
   readonly #outputs: SingleOutputBuilderResult[] = [];
   readonly #certificates: CertificateBuilderResult[] = [];
   readonly #withdrawals: WithdrawalBuilderResult[] = [];
@@ -1072,9 +1078,9 @@ export class TransactionBuilder {
   readonly #votes: VoteEntry[] = [];
   readonly #collateral: InputBuilderResult[] = [];
   readonly #referenceInputs: TransactionUnspentOutput[] = [];
-  readonly #requiredSigners = new Map<string, Ed25519KeyHash>();
-  readonly #witnesses = TransactionWitnessSetBuilder.new();
-  readonly #redeemers = RedeemerSetBuilder.new();
+  #requiredSigners = new Map<string, Ed25519KeyHash>();
+  #witnesses = TransactionWitnessSetBuilder.new();
+  #redeemers = RedeemerSetBuilder.new();
   #mint: Mint | undefined;
   #fee: bigint | undefined;
   #ttl: bigint | undefined;
@@ -1086,15 +1092,26 @@ export class TransactionBuilder {
   #currentTreasuryValue: bigint | undefined;
   private constructor(config: TransactionBuilderConfig) { this.#config = config; }
   public static new(config: TransactionBuilderConfig): TransactionBuilder { return new TransactionBuilder(config); }
+  private inputRole(id: string): string | undefined {
+    if (this.#inputs.some((entry) => canonicalHex(entry.inputValue) === id)) return "spending input";
+    if (this.#collateral.some((entry) => canonicalHex(entry.inputValue) === id)) return "collateral input";
+    if (this.#referenceInputs.some((entry) => canonicalHex(entry.input()) === id)) return "reference input";
+    if (this.#utxos.some((entry) => canonicalHex(entry.inputValue) === id)) return "selection candidate";
+    return undefined;
+  }
+  private assertUnusedInput(id: string, requestedRole: string): void {
+    const role = this.inputRole(id);
+    if (role !== undefined) throw new TypeError(`transaction input is already used as ${role}; cannot add it as ${requestedRole}`);
+  }
   public add_input(result: InputBuilderResult): void {
-    const id = canonicalHex(result.inputValue); if (this.#inputs.some((entry) => canonicalHex(entry.inputValue) === id)) throw new TypeError("duplicate transaction input");
+    const id = canonicalHex(result.inputValue); this.assertUnusedInput(id, "spending input");
     this.#inputs.push(result); this.#witnesses.add_required_wits(result.required); this.#redeemers.add_spend(result); this.addAggregate(result.aggregate);
   }
   public add_utxo(result: InputBuilderResult): void {
-    const id = canonicalHex(result.inputValue); if (!this.#utxos.some((entry) => canonicalHex(entry.inputValue) === id) && !this.#inputs.some((entry) => canonicalHex(entry.inputValue) === id)) this.#utxos.push(result);
+    const id = canonicalHex(result.inputValue); this.assertUnusedInput(id, "selection candidate"); this.#utxos.push(result);
   }
   public add_reference_input(value: TransactionUnspentOutput): void {
-    const id = canonicalHex(value.input()); if (!this.#referenceInputs.some((entry) => canonicalHex(entry.input()) === id)) this.#referenceInputs.push(value);
+    const id = canonicalHex(value.input()); this.assertUnusedInput(id, "reference input"); this.#referenceInputs.push(value);
     const reference = outputParts(value.output()).scriptRef;
     if (reference !== undefined) {
       const {hash}=discoveredScript(reference.script());
@@ -1126,6 +1143,7 @@ export class TransactionBuilder {
   public add_proposal(result: ProposalBuilderResult): void { this.#proposals.push(...result.entries); this.#redeemers.add_proposal(result); for (const entry of result.entries) this.addAggregate(entry.aggregate); }
   public add_vote(result: VoteBuilderResult): void { this.#votes.push(...result.entries); this.#redeemers.add_vote(result); for (const entry of result.entries) this.addAggregate(entry.aggregate); }
   public add_collateral(result: InputBuilderResult): void {
+    const id = canonicalHex(result.inputValue); this.assertUnusedInput(id, "collateral input");
     if (result.aggregate !== undefined) throw new TypeError("collateral must use a payment-key input");
     if (this.#collateral.length >= this.#config.maxCollateralInputs) throw new RangeError("maximum collateral input count exceeded");
     this.#collateral.push(result); this.#witnesses.add_required_wits(result.required);
@@ -1175,10 +1193,25 @@ export class TransactionBuilder {
     if (strategy === CoinSelectionStrategyCIP2.RandomImprove && this.#outputs.some((value) => outputParts(value.output()).amount.has_multiassets())) {
       throw new TypeError("RandomImprove cannot cover native assets; use RandomImproveMultiAsset");
     }
-    const available = this.#utxos.filter((candidate) => !this.#inputs.some((value) => canonicalHex(value.inputValue) === canonicalHex(candidate.inputValue)));
+    const snapshot = {
+      inputs: [...this.#inputs], utxos: [...this.#utxos], witnesses: this.#witnesses.copy(), redeemers: this.#redeemers.copy(),
+      requiredSigners: new Map([...this.#requiredSigners].map(([key, value]) => [key, Ed25519KeyHash.from_raw_bytes(value.to_raw_bytes())])),
+    };
+    try {
+    const unavailable = new Set([
+      ...this.#inputs.map((value) => canonicalHex(value.inputValue)),
+      ...this.#collateral.map((value) => canonicalHex(value.inputValue)),
+      ...this.#referenceInputs.map((value) => canonicalHex(value.input())),
+    ]);
+    const available = this.#utxos.filter((candidate) => !unavailable.has(canonicalHex(candidate.inputValue)));
     const remaining = new Set(available.map((_, index) => index));
     const valueAt = (index: number): Value => outputParts(available[index]!.outputValue).amount;
-    const add = (index: number): void => { remaining.delete(index); this.add_input(available[index]!); };
+    const add = (index: number): void => {
+      remaining.delete(index);
+      const selected = available[index]!, id = canonicalHex(selected.inputValue);
+      this.#utxos = this.#utxos.filter((entry) => canonicalHex(entry.inputValue) !== id);
+      this.add_input(selected);
+    };
     const largestFirstBy = (quantity: (value: Value) => bigint, target: bigint): void => {
       const relevant = [...remaining].filter((index) => quantity(valueAt(index)) > 0n).sort((left, right) => {
         const a = quantity(valueAt(left)), b = quantity(valueAt(right));
@@ -1254,6 +1287,11 @@ export class TransactionBuilder {
       }
     }
     if (!this.coversOutputsAndFee()) throw new RangeError("available UTxOs do not cover transaction outputs and fees");
+    } catch (error) {
+      this.#inputs = snapshot.inputs; this.#utxos = snapshot.utxos; this.#witnesses = snapshot.witnesses;
+      this.#redeemers = snapshot.redeemers; this.#requiredSigners = snapshot.requiredSigners;
+      throw error;
+    }
   }
   private coversOutputsAndFee(): boolean {
     try { const fee = this.min_fee(true); return this.get_total_input().checked_sub(addValues(this.get_total_output(), Value.from_coin(fee), "selection target")) !== undefined; } catch { return false; }
@@ -1261,27 +1299,32 @@ export class TransactionBuilder {
   public fee_for_input(value: InputBuilderResult): bigint { return BigInt(value.inputValue.to_cbor_bytes().length) * this.#config.feeAlgo.coefficient(); }
   public fee_for_output(value: SingleOutputBuilderResult): bigint { return BigInt(value.output().to_cbor_bytes().length) * this.#config.feeAlgo.coefficient(); }
   public add_change_if_needed(address: Address, includeExunits: boolean): boolean {
-    const originalOutputs = this.#outputs.length;
-    let fee = this.#fee ?? 0n;
-    for (let iteration = 0; iteration < 8; iteration += 1) {
-      this.#outputs.splice(originalOutputs);
-      const available = this.get_total_input(), required = addValues(this.get_total_output(), Value.from_coin(fee), "transaction balance");
-      const change = subtractValues(available, required, "transaction balance");
-      this.addChangeOutputs(address, change);
-      this.#fee = fee;
-      const next = this.min_fee(includeExunits);
-      if (next === fee) break;
-      fee = next;
+    const originalOutputs = [...this.#outputs], originalFee = this.#fee;
+    try {
+      let fee = this.#fee ?? 0n;
+      let previousState: string | undefined;
+      const seen = new Set<string>();
+      for (let iteration = 0; iteration < 64; iteration += 1) {
+        this.#outputs.splice(originalOutputs.length);
+        const available = this.get_total_input(), required = addValues(this.get_total_output(), Value.from_coin(fee), "transaction balance");
+        const change = subtractValues(available, required, "transaction balance");
+        this.addChangeOutputs(address, change);
+        if (this.#outputs.length === originalOutputs.length && !change.is_zero()) {
+          if (change.has_multiassets()) throw new RangeError("native-asset change cannot be absorbed into the fee");
+          fee = checkedCoin(fee + change.coin(), "transaction fee");
+        }
+        this.#fee = fee;
+        const state = `${fee}:${this.#outputs.slice(originalOutputs.length).map((value) => canonicalHex(value.output())).join(":")}`;
+        const minimum = this.min_fee(includeExunits);
+        const nextFee = minimum > fee ? minimum : fee;
+        if (state === previousState && nextFee === fee) return this.#outputs.length > originalOutputs.length;
+        if (seen.has(state)) throw new TypeError("transaction fee/change convergence cycle detected");
+        seen.add(state); previousState = state; fee = nextFee;
+      }
+      throw new TypeError("transaction fee/change did not converge within 64 iterations");
+    } catch (error) {
+      this.#outputs.splice(0, this.#outputs.length, ...originalOutputs); this.#fee = originalFee; throw error;
     }
-    this.#outputs.splice(originalOutputs);
-    const finalChange = subtractValues(this.get_total_input(), addValues(this.get_total_output(), Value.from_coin(fee), "transaction balance"), "transaction balance");
-    this.addChangeOutputs(address, finalChange);
-    if (this.#outputs.length === originalOutputs && !finalChange.is_zero()) {
-      if (finalChange.has_multiassets()) throw new RangeError("native-asset change cannot be absorbed into the fee");
-      fee = checkedCoin(fee + finalChange.coin(), "transaction fee");
-    }
-    this.#fee = fee;
-    return this.#outputs.length > originalOutputs;
   }
   private addChangeOutputs(address: Address, change: Value): void {
     const assets = cleanMultiAsset(change.multi_asset() ?? MultiAsset.new());
@@ -1308,27 +1351,35 @@ export class TransactionBuilder {
     for (const [index, bundle] of bundles.entries()) this.#outputs.push(SingleOutputBuilderResult.new(makeOutput(address, Value.new((minimums[index] ?? 0n) + (index === 0 ? remainder : 0n), bundle))));
   }
   public min_fee(includeExunits: boolean): bigint {
-    const previous = this.#fee; this.#fee = UINT64_MAX;
-    const body = this.buildBody(false), witness = this.buildWitnesses(true), transaction = Transaction.from_cbor_bytes(encodeCbor(transactionNode(body, witness, this.#auxiliaryData)));
-    this.#fee = previous;
-    return includeExunits
-      ? transactionMinFee(transaction, this.#config.feeAlgo, this.#config.exUnitPrices, this.referenceScriptSize())
-      : BigInt(transaction.to_cbor_bytes().length) * this.#config.feeAlgo.coefficient() + this.#config.feeAlgo.constant();
+    const previous = this.#fee;
+    try {
+      this.#fee = UINT64_MAX;
+      const body = this.buildBody(false), witness = this.buildWitnesses(true), transaction = Transaction.from_cbor_bytes(encodeCbor(transactionNode(body, witness, this.#auxiliaryData)));
+      return includeExunits
+        ? transactionMinFee(transaction, this.#config.feeAlgo, this.#config.exUnitPrices, this.referenceScriptSize())
+        : BigInt(transaction.to_cbor_bytes().length) * this.#config.feeAlgo.coefficient() + this.#config.feeAlgo.constant();
+    } finally { this.#fee = previous; }
   }
   public full_size(): number { return this.transactionForSize().to_cbor_bytes().length; }
   public output_sizes(): Uint32Array { return Uint32Array.from(this.#outputs.map((value) => value.output().to_cbor_bytes().length)); }
   public build_for_evaluation(_algo: ChangeSelectionAlgo, changeAddress: Address): TxRedeemerBuilder {
-    this.add_change_if_needed(changeAddress, false); return new TxRedeemerBuilder(this.buildBody(true), this.#witnesses.copy(), this.#redeemers, this.#auxiliaryData);
+    const outputs = [...this.#outputs], fee = this.#fee;
+    try { this.add_change_if_needed(changeAddress, false); return new TxRedeemerBuilder(this.buildBody(true), this.#witnesses.copy(), this.#redeemers, this.#auxiliaryData); }
+    catch (error) { this.#outputs.splice(0, this.#outputs.length, ...outputs); this.#fee = fee; throw error; }
   }
   public build(_algo: ChangeSelectionAlgo, changeAddress: Address): SignedTxBuilder {
-    this.add_change_if_needed(changeAddress, true); const body = this.buildBody(true), witnesses = this.#witnesses.copy();
-    for (let index = 0; index < this.#redeemers.build(true).len(); index += 1) witnesses.add_redeemer(this.#redeemers.build(true).get(index));
-    return this.#auxiliaryData === undefined ? SignedTxBuilder.new_without_data(body, witnesses, true) : SignedTxBuilder.new_with_data(body, witnesses, true, this.#auxiliaryData);
+    const outputs = [...this.#outputs], fee = this.#fee;
+    try {
+      this.add_change_if_needed(changeAddress, true); const body = this.buildBody(true), witnesses = this.#witnesses.copy();
+      for (let index = 0; index < this.#redeemers.build(true).len(); index += 1) witnesses.add_redeemer(this.#redeemers.build(true).get(index));
+      return this.#auxiliaryData === undefined ? SignedTxBuilder.new_without_data(body, witnesses, true) : SignedTxBuilder.new_with_data(body, witnesses, true, this.#auxiliaryData);
+    } catch (error) { this.#outputs.splice(0, this.#outputs.length, ...outputs); this.#fee = fee; throw error; }
   }
   private addAggregateRequirements(value: InputAggregateWitnessData | undefined): void { if (value === undefined) return; const required = RequiredWitnessSet.new(); addAggregateRequirements(required, value); this.#witnesses.add_required_wits(required); }
   private bodyForAccounting(): TransactionBody { const fee = this.#fee; this.#fee ??= 0n; const body = this.buildBody(false, false); this.#fee = fee; return body; }
   private buildBody(enforceSize: boolean, includeScriptData = true): TransactionBody {
     if (this.#fee === undefined) throw new TypeError("transaction fee is not specified");
+    const collateralTotal = this.collateralAccounting(enforceSize);
     const entries: Array<readonly [CborValue, CborValue]> = [
       [uint(0n), collectionNode([...this.#inputs].sort((a, b) => canonicalHex(a.inputValue).localeCompare(canonicalHex(b.inputValue))).map((value) => value.inputValue))],
       [uint(1n), array(this.#outputs.map((value) => node(value.output())))],
@@ -1350,9 +1401,7 @@ export class TransactionBuilder {
     if (this.#networkId !== undefined) entries.push([uint(15n), node(this.#networkId)]);
     if (this.#collateralReturn !== undefined) {
       entries.push([uint(16n), node(this.#collateralReturn)]);
-      const collateralCoin = this.#collateral.reduce((sum, value) => checkedCoin(sum + outputParts(value.outputValue).amount.coin()), 0n);
-      const returnCoin = outputParts(this.#collateralReturn).amount.coin(); if (returnCoin > collateralCoin) throw new RangeError("collateral return exceeds collateral input");
-      entries.push([uint(17n), uint(collateralCoin - returnCoin)]);
+      entries.push([uint(17n), uint(collateralTotal)]);
     }
     if (this.#referenceInputs.length > 0) entries.push([uint(18n), collectionNode(this.#referenceInputs.map((value) => value.input()))]);
     if (this.#votes.length > 0) entries.push([uint(19n), votingNode(this.#votes)]);
@@ -1363,6 +1412,30 @@ export class TransactionBuilder {
     const body = TransactionBody.from_cbor_bytes(encodeCbor(map(entries)));
     if (enforceSize && this.transactionForSize(body).to_cbor_bytes().length > this.#config.maxTxSize) throw new RangeError("maximum transaction size exceeded");
     return body;
+  }
+  private collateralAccounting(checked: boolean): bigint {
+    const total = this.#collateral.reduce((sum, value) => addValues(sum, outputParts(value.outputValue).amount, "collateral input"), Value.zero());
+    const returned = this.#collateralReturn === undefined ? undefined : outputParts(this.#collateralReturn).amount;
+    if (!checked) return returned === undefined || returned.coin() > total.coin() ? 0n : total.coin() - returned.coin();
+    if (returned !== undefined && this.#collateral.length === 0) throw new TypeError("collateral return requires at least one collateral input");
+    const requiredForPlutus = !this.#redeemers.is_empty();
+    if (requiredForPlutus && this.#collateral.length === 0) throw new TypeError("Plutus transactions require collateral");
+    if (requiredForPlutus) {
+      const product = this.#fee! * BigInt(this.#config.collateralPercentage);
+      const required = checkedCoin((product + 99n) / 100n, "required collateral");
+      if (total.coin() < required) throw new RangeError(`collateral coin is below required amount ${required}`);
+    }
+    const totalAssets = cleanMultiAsset(total.multi_asset() ?? MultiAsset.new());
+    if (returned === undefined) {
+      if (totalAssets !== undefined) throw new TypeError("asset-bearing collateral requires a collateral return");
+      return total.coin();
+    }
+    if (returned.coin() > total.coin()) throw new RangeError("collateral return exceeds collateral input");
+    const returnedAssets = cleanMultiAsset(returned.multi_asset() ?? MultiAsset.new());
+    const totalHex = totalAssets === undefined ? "" : canonicalHex(Value.new(0n, totalAssets));
+    const returnedHex = returnedAssets === undefined ? "" : canonicalHex(Value.new(0n, returnedAssets));
+    if (totalHex !== returnedHex) throw new TypeError("collateral return must preserve every collateral native asset exactly");
+    return total.coin() - returned.coin();
   }
   private buildWitnesses(fake: boolean): TransactionWitnessSet { const value = this.#witnesses.copy(); if (fake) value.merge_fake_witness(value.remaining_wits()); const list = this.#redeemers.build(true); for (let index = 0; index < list.len(); index += 1) value.add_redeemer(list.get(index)); return value.build(); }
   private transactionForSize(body = this.buildBody(false)): Transaction { return Transaction.from_cbor_bytes(encodeCbor(transactionNode(body, this.buildWitnesses(true), this.#auxiliaryData))); }

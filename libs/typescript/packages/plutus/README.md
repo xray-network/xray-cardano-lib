@@ -60,12 +60,20 @@ lowercase `Data.void()` helper continues to return that raw CBOR directly.
 Ledger wire types such as `PlutusData`, scripts, redeemers, and `ExUnits` remain owned by
 `@xray-network/xray-cardano-lib-chain`.
 
+## Contract blueprints
+
+`@xray-network/xray-cardano-lib-plutus/blueprint` parses bounded CIP-57 blueprint documents,
+validates their declared Plutus Data schemas, and verifies compiled validator hashes without
+executing a validator. Parsed documents are immutable; recursive or oversized untrusted schemas
+fail through the package error boundary.
+
 ## Entry points
 
 | Entry point | Domain |
 | --- | --- |
 | `@xray-network/xray-cardano-lib-plutus` | Data, UPLC, parameter application, and phase-two valuation |
 | `@xray-network/xray-cardano-lib-plutus/data` | Typed Plutus Data schemas and codecs |
+| `@xray-network/xray-cardano-lib-plutus/blueprint` | CIP-57 documents, validators, and schema validation |
 | `@xray-network/xray-cardano-lib-plutus/uplc` | UPLC AST, Flat/text codecs, costs, and CEK evaluation |
 
 The package is universal ESM, uses `Uint8Array` and Web Platform APIs, and is distributed under

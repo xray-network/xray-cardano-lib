@@ -10,6 +10,7 @@ add_test(
     "-DCARDANO_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
     "-DCARDANO_VCPKG_ROOT=${CARDANO_VCPKG_ROOT}"
     "-DCARDANO_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
+    "-DCARDANO_AR=${CMAKE_AR}"
     -P "${CMAKE_CURRENT_SOURCE_DIR}/installed_consumer.cmake"
 )
 set_tests_properties(

@@ -231,6 +231,23 @@ core::Result<Address> Address::from_hex(std::string_view hex) {
 }
 core::Result<Address> Address::from_bech32(std::string_view encoded) {
   auto decoded = core::decode_bech32(encoded);
+  if (!decoded) return std::unexpected(decoded.error());
+  auto address = from_bytes(decoded->bytes);
+  if (!address) return std::unexpected(address.error());
+  if (address->kind() == AddressKind::byron)
+    return std::unexpected(core::CardanoError(core::ErrorCode::invalid_encoding,
+                                              "Byron addresses are not Shelley Bech32 addresses"));
+  const auto network = *address->network_id();
+  const std::string expected = address->kind() == AddressKind::reward
+                                   ? (network == 1 ? "stake" : "stake_test")
+                                   : (network == 1 ? "addr" : "addr_test");
+  if (decoded->prefix != expected)
+    return std::unexpected(core::CardanoError(core::ErrorCode::invalid_encoding,
+                                              "address HRP does not match its class and network"));
+  return address;
+}
+core::Result<Address> Address::from_bech32_payload_compatible(std::string_view encoded) {
+  auto decoded = core::decode_bech32(encoded);
   return decoded ? from_bytes(decoded->bytes) : std::unexpected(decoded.error());
 }
 bool Address::is_valid(std::string_view encoded) noexcept {
@@ -263,7 +280,7 @@ core::Result<std::string> Address::to_bech32(std::optional<std::string_view> hrp
     selected = *hrp;
   } else {
     selected = kind_ == AddressKind::reward ? "stake" : "addr";
-    if (*network_id() == 0) {
+    if (*network_id() != 1) {
       selected += "_test";
     }
   }

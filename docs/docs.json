@@ -64,7 +64,8 @@
               {
                 "group": "0005 — Value and builder correctness",
                 "pages": [
-                  "impl/typescript/0005-IMPL-INSTR"
+                  "impl/typescript/0005-IMPL-INSTR",
+                  "impl/typescript/0005-IMPL-RESULT"
                 ]
               },
               {
@@ -91,19 +92,22 @@
               {
                 "group": "0009 — CIP-57 Plutus blueprints",
                 "pages": [
-                  "impl/typescript/0009-IMPL-INSTR"
+                  "impl/typescript/0009-IMPL-INSTR",
+                  "impl/typescript/0009-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0010 — CIP-67/68 token metadata",
                 "pages": [
-                  "impl/typescript/0010-IMPL-INSTR"
+                  "impl/typescript/0010-IMPL-INSTR",
+                  "impl/typescript/0010-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0011 — Optional CIP-21 diagnostics",
                 "pages": [
-                  "impl/typescript/0011-IMPL-INSTR"
+                  "impl/typescript/0011-IMPL-INSTR",
+                  "impl/typescript/0011-IMPL-RESULT"
                 ]
               },
               {
@@ -191,43 +195,50 @@
               {
                 "group": "0002 — Builder and Conway hardening",
                 "pages": [
-                  "impl/cpp/0002-IMPL-INSTR"
+                  "impl/cpp/0002-IMPL-INSTR",
+                  "impl/cpp/0002-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0003 — Portability and lean components",
                 "pages": [
-                  "impl/cpp/0003-IMPL-INSTR"
+                  "impl/cpp/0003-IMPL-INSTR",
+                  "impl/cpp/0003-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0004 — CIP-14 asset fingerprints",
                 "pages": [
-                  "impl/cpp/0004-IMPL-INSTR"
+                  "impl/cpp/0004-IMPL-INSTR",
+                  "impl/cpp/0004-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0005 — Strict identities and HD derivation",
                 "pages": [
-                  "impl/cpp/0005-IMPL-INSTR"
+                  "impl/cpp/0005-IMPL-INSTR",
+                  "impl/cpp/0005-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0006 — CIP-57 Plutus blueprints",
                 "pages": [
-                  "impl/cpp/0006-IMPL-INSTR"
+                  "impl/cpp/0006-IMPL-INSTR",
+                  "impl/cpp/0006-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0007 — CIP-67/68 token metadata",
                 "pages": [
-                  "impl/cpp/0007-IMPL-INSTR"
+                  "impl/cpp/0007-IMPL-INSTR",
+                  "impl/cpp/0007-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0008 — Optional CIP-21 diagnostics",
                 "pages": [
-                  "impl/cpp/0008-IMPL-INSTR"
+                  "impl/cpp/0008-IMPL-INSTR",
+                  "impl/cpp/0008-IMPL-RESULT"
                 ]
               },
               {

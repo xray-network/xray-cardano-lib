@@ -167,6 +167,25 @@ function uintField(node: CborValue, name: string): bigint {
   return node.value;
 }
 
+function exactJsonInteger(value: bigint): number | string {
+  return value >= BigInt(Number.MIN_SAFE_INTEGER) && value <= BigInt(Number.MAX_SAFE_INTEGER)
+    ? Number(value)
+    : value.toString(10);
+}
+
+function parseExactJsonInteger(value: unknown, minimum: bigint, maximum: bigint, name: string): bigint {
+  let parsed: bigint;
+  if (typeof value === "number") {
+    if (!Number.isSafeInteger(value) || Object.is(value, -0)) throw new TypeError(`${name} must be a safe integral number or canonical decimal string`);
+    parsed = BigInt(value);
+  } else if (typeof value === "string") {
+    if (!/^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$/u.test(value)) throw new TypeError(`${name} must be a canonical decimal string`);
+    parsed = BigInt(value);
+  } else throw new TypeError(`${name} must be a safe integral number or canonical decimal string`);
+  if (parsed < minimum || parsed > maximum) throw new RangeError(`${name} is outside its ledger bounds`);
+  return parsed;
+}
+
 abstract class RawBytesValue extends ConwayData {
   protected static readonly byteLength: number | readonly [number, number] | undefined = undefined;
   public constructor(node: CborValue) { super(node); }
@@ -396,6 +415,9 @@ export class Metadata extends ConwayData {
 }
 
 export class TransactionMetadatum extends ConwayData {
+  public static override from_json<T extends ConwayData>(this: ConwayConstructor<T>,json:string):T {
+    const node=metadatumNodeFromJson(JSON.parse(json));this.validateNode(node);return new this(node);
+  }
   public static new_int(value: Int): TransactionMetadatum { return new TransactionMetadatum(decodeCbor(value.to_cbor_bytes())); }
   public static new_bytes(value: Uint8Array): TransactionMetadatum { if(value.length>64)throw new RangeError("metadata bytes are limited to 64 bytes");return new TransactionMetadatum({kind:"bytes",value:copyBytes(value),encoding:{kind:"definite",width:0}}); }
   public static new_text(value: string): TransactionMetadatum { if(new TextEncoder().encode(value).length>64)throw new RangeError("metadata text is limited to 64 UTF-8 bytes");return new TransactionMetadatum({kind:"text",value,encoding:{kind:"definite",width:0}}); }
@@ -407,8 +429,19 @@ export class TransactionMetadatum extends ConwayData {
   public as_text(): string | undefined { const node=this.cborNode();return node.kind==="text"?node.value:undefined; }
   public as_list(): MetadatumList | undefined { const node=this.cborNode();if(node.kind!=="array")return undefined;const out=MetadatumList.new();for(const item of node.values)out.add(new TransactionMetadatum(item));return out; }
   public as_map(): MetadatumMap | undefined { const node=this.cborNode();if(node.kind!=="map")return undefined;const out=MetadatumMap.new();for(const [key,value] of node.entries)out.insert(new TransactionMetadatum(key),new TransactionMetadatum(value));return out; }
-  public to_json_value(): unknown { const node=this.cborNode();if(node.kind==="unsigned"||node.kind==="negative")return {int:Number(node.value)};if(node.kind==="bytes")return {bytes:bytesToHex(node.value)};if(node.kind==="text")return {string:node.value};if(node.kind==="array")return {list:node.values.map((item)=>new TransactionMetadatum(item).to_json_value())};if(node.kind==="map")return {map:node.entries.map(([key,value])=>({k:new TransactionMetadatum(key).to_json_value(),v:new TransactionMetadatum(value).to_json_value()}))};throw new TypeError("invalid transaction metadatum"); }
+  public to_json_value(): unknown { const node=this.cborNode();if(node.kind==="unsigned"||node.kind==="negative")return {int:exactJsonInteger(node.value)};if(node.kind==="bytes")return {bytes:bytesToHex(node.value)};if(node.kind==="text")return {string:node.value};if(node.kind==="array")return {list:node.values.map((item)=>new TransactionMetadatum(item).to_json_value())};if(node.kind==="map")return {map:node.entries.map(([key,value])=>({k:new TransactionMetadatum(key).to_json_value(),v:new TransactionMetadatum(value).to_json_value()}))};throw new TypeError("invalid transaction metadatum"); }
   public override to_js_value(): unknown { return this.to_json_value(); }
+}
+
+function metadatumNodeFromJson(value:unknown,depth=0):CborValue {
+  if(depth>128)throw new RangeError("transaction metadatum JSON exceeds maximum depth");
+  if(typeof value!=="object"||value===null||Array.isArray(value)||Object.keys(value).length!==1)throw new TypeError("transaction metadatum JSON must contain exactly one variant");
+  if(Object.hasOwn(value,"int")){const integer=parseExactJsonInteger((value as {int:unknown}).int,-UINT64_MAX-1n,UINT64_MAX,"metadata integer");return integerNode(integer);}
+  if(Object.hasOwn(value,"bytes")){const item=(value as {bytes:unknown}).bytes;if(typeof item!=="string"||!/^(?:[0-9a-f]{2})*$/u.test(item))throw new TypeError("metadata bytes must be lowercase even-length hex");const decoded=hexToBytes(item);if(decoded.length>64)throw new RangeError("metadata bytes are limited to 64 bytes");return {kind:"bytes",value:decoded,encoding:{kind:"definite",width:0}};}
+  if(Object.hasOwn(value,"string")){const item=(value as {string:unknown}).string;if(typeof item!=="string"||new TextEncoder().encode(item).length>64)throw new TypeError("metadata string must contain at most 64 UTF-8 bytes");return {kind:"text",value:item,encoding:{kind:"definite",width:0}};}
+  if(Object.hasOwn(value,"list")){const item=(value as {list:unknown}).list;if(!Array.isArray(item))throw new TypeError("metadata list must be an array");return {kind:"array",values:item.map((entry)=>metadatumNodeFromJson(entry,depth+1)),encoding:{kind:"definite",width:0}};}
+  if(Object.hasOwn(value,"map")){const item=(value as {map:unknown}).map;if(!Array.isArray(item))throw new TypeError("metadata map must be an array");return {kind:"map",entries:item.map((entry)=>{if(typeof entry!=="object"||entry===null||Array.isArray(entry)||!("k" in entry)||!("v" in entry))throw new TypeError("metadata map entry requires k and v");return [metadatumNodeFromJson(entry.k,depth+1),metadatumNodeFromJson(entry.v,depth+1)] as const;}),encoding:{kind:"definite",width:0}};}
+  throw new TypeError("unknown transaction metadatum JSON variant");
 }
 
 export class MapU64ToArrI64 extends ConwayMap<bigint,BigInt64Array> {
@@ -487,9 +520,9 @@ export class MultiAsset {
   public static new(): MultiAsset { return new MultiAsset(); }
   public len(): number { return this.#policies.len(); }
   public policy_count(): number { return this.len(); }
-  public keys(): ScriptHash[] { return this.#policies.keys(); }
-  public get_assets(policy: ScriptHash): MapAssetNameToCoin | undefined { return this.#policies.get(policy); }
-  public insert_assets(policy: ScriptHash, assets: MapAssetNameToCoin): MapAssetNameToCoin | undefined { return this.#policies.insert(policy,assets); }
+  public keys(): ScriptHash[] { return this.#policies.keys().map((key)=>ScriptHash.from_raw_bytes(key.to_raw_bytes())); }
+  public get_assets(policy: ScriptHash): MapAssetNameToCoin | undefined { const value=this.#policies.get(policy);return value===undefined?undefined:copyAssetMap(value); }
+  public insert_assets(policy: ScriptHash, assets: MapAssetNameToCoin): MapAssetNameToCoin | undefined { const prior=this.#policies.insert(ScriptHash.from_raw_bytes(policy.to_raw_bytes()),copyAssetMap(assets));return prior===undefined?undefined:copyAssetMap(prior); }
   public get(policy: ScriptHash, asset: AssetName): bigint | undefined { return this.#policies.get(policy)?.get(asset); }
   public get_value(policy: ScriptHash, asset: AssetName): bigint { return this.get(policy,asset)??0n; }
   public insert(policy: ScriptHash, asset: AssetName, amount: bigint): bigint | undefined { if(amount<0n||amount>UINT64_MAX)throw new RangeError("asset coin must fit uint64"); let assets=this.#policies.get(policy); if(assets===undefined){assets=MapAssetNameToCoin.new();this.#policies.insert(policy,assets)} return assets.insert(asset,amount); }
@@ -511,22 +544,27 @@ export class Mint extends ConwayMap<ScriptHash, MapAssetNameToNonZeroInt64> {
 
 export class Value extends ConwayData {
   readonly #coin: bigint; readonly #assets: MultiAsset | undefined;
-  public constructor(node: CborValue, coin?:bigint, assets?:MultiAsset) { super(node); const parsed=coin===undefined?parseValueNode(node):{coin,assets};this.#coin=parsed.coin;this.#assets=parsed.assets; }
-  public static new(coin: bigint, assets?: MultiAsset): Value { if(coin<0n||coin>UINT64_MAX)throw new RangeError("coin must fit uint64"); const node: CborValue=assets===undefined?uintNode(coin):{kind:"array",values:[uintNode(coin),multiAssetNode(assets)],encoding:{kind:"definite",width:0}}; return new Value(node,coin,assets); }
+  public constructor(node: CborValue, coin?:bigint, assets?:MultiAsset) { super(node); const parsed=coin===undefined?parseValueNode(node):{coin,assets};this.#coin=parsed.coin;this.#assets=parsed.assets===undefined?undefined:copyMultiAsset(parsed.assets); }
+  public static new(coin: bigint, assets?: MultiAsset): Value { if(coin<0n||coin>UINT64_MAX)throw new RangeError("coin must fit uint64");const snapshot=assets===undefined?undefined:copyMultiAsset(assets);const node:CborValue=snapshot===undefined?uintNode(coin):{kind:"array",values:[uintNode(coin),multiAssetNode(snapshot)],encoding:{kind:"definite",width:0}};return new Value(node,coin,snapshot); }
+  public static override from_json<T extends ConwayData>(this:ConwayConstructor<T>,json:string):T { const node=valueNodeFromJson(JSON.parse(json));this.validateNode(node);return new this(node); }
   public static zero(): Value { return Value.new(0n); }
   public static from_coin(coin: bigint): Value { return Value.new(coin); }
   public coin(): bigint { return this.#coin; }
-  public multi_asset(): MultiAsset | undefined { return this.#assets; }
+  public multi_asset(): MultiAsset | undefined { return this.#assets===undefined?undefined:copyMultiAsset(this.#assets); }
   public has_multiassets(): boolean { return this.#assets!==undefined&&this.#assets.len()>0; }
   public is_zero(): boolean { return this.#coin===0n&&!this.has_multiassets(); }
   public checked_add(other: Value): Value | undefined { const coin=this.#coin+other.#coin;if(coin>UINT64_MAX)return undefined; const assets=(this.#assets??MultiAsset.new()).checked_add(other.#assets??MultiAsset.new());return assets===undefined?undefined:Value.new(coin,assets); }
   public checked_sub(other: Value): Value | undefined { if(this.#coin<other.#coin)return undefined;const assets=(this.#assets??MultiAsset.new()).checked_sub(other.#assets??MultiAsset.new());return assets===undefined?undefined:Value.new(this.#coin-other.#coin,assets); }
   public clamped_sub(other: Value): Value { return Value.new(this.#coin>other.#coin?this.#coin-other.#coin:0n,(this.#assets??MultiAsset.new()).clamped_sub(other.#assets??MultiAsset.new())); }
-  public override to_js_value(): unknown { return { coin: Number(this.#coin), multiasset: this.#assets===undefined?{}:multiAssetJson(this.#assets) }; }
+  public override to_js_value(): unknown { return { coin:exactJsonInteger(this.#coin),multiasset:this.#assets===undefined?{}:multiAssetJson(this.#assets) }; }
 }
 
+function copyAssetMap(value:MapAssetNameToCoin):MapAssetNameToCoin { const out=MapAssetNameToCoin.new();for(const asset of value.keys())out.insert(AssetName.from_raw_bytes(asset.to_raw_bytes()),value.get(asset)??0n);return out; }
+function copyMultiAsset(value:MultiAsset):MultiAsset { const out=MultiAsset.new();for(const policy of value.keys()){const assets=value.get_assets(policy);if(assets!==undefined)out.insert_assets(policy,assets);}return out; }
+
 function multiAssetNode(value: MultiAsset): CborValue { return {kind:"map",entries:value.keys().map((policy)=>[{kind:"bytes",value:policy.to_raw_bytes(),encoding:{kind:"definite",width:0}},{kind:"map",entries:(value.get_assets(policy)?.keys()??[]).map((asset)=>[{kind:"bytes",value:asset.to_raw_bytes(),encoding:{kind:"definite",width:0}},uintNode(value.get_value(policy,asset))]),encoding:{kind:"definite",width:0}}]),encoding:{kind:"definite",width:0}}; }
-function multiAssetJson(value: MultiAsset): unknown { return Object.fromEntries(value.keys().map((policy)=>[policy.to_hex(),Object.fromEntries((value.get_assets(policy)?.keys()??[]).map((asset)=>[asset.to_hex(),Number(value.get_value(policy,asset))]))])); }
+function multiAssetJson(value: MultiAsset): unknown { return Object.fromEntries(value.keys().map((policy)=>[policy.to_hex(),Object.fromEntries((value.get_assets(policy)?.keys()??[]).map((asset)=>[asset.to_hex(),exactJsonInteger(value.get_value(policy,asset))]))])); }
+function valueNodeFromJson(value:unknown):CborValue { if(typeof value!=="object"||value===null||Array.isArray(value))throw new TypeError("Value JSON must be an object");const entries=Object.entries(value);if(entries.some(([key])=>key!=="coin"&&key!=="multiasset")||!("coin" in value))throw new TypeError("Value JSON contains invalid fields");const coin=parseExactJsonInteger(value.coin,0n,UINT64_MAX,"coin");const rawAssets="multiasset" in value?value.multiasset:{};if(typeof rawAssets!=="object"||rawAssets===null||Array.isArray(rawAssets))throw new TypeError("multiasset must be an object");const assets=MultiAsset.new();for(const [policyText,bundle] of Object.entries(rawAssets)){if(!/^[0-9a-f]{56}$/u.test(policyText))throw new TypeError("policy id must be 28-byte lowercase hex");if(typeof bundle!=="object"||bundle===null||Array.isArray(bundle))throw new TypeError("asset bundle must be an object");const policy=ScriptHash.from_raw_bytes(hexToBytes(policyText));for(const [assetText,amount] of Object.entries(bundle)){if(!/^(?:[0-9a-f]{2}){0,32}$/u.test(assetText))throw new TypeError("asset name must be lowercase even-length hex up to 32 bytes");assets.insert(policy,AssetName.from_raw_bytes(hexToBytes(assetText)),parseExactJsonInteger(amount,0n,UINT64_MAX,"asset quantity"));}}return assets.len()===0?uintNode(coin):{kind:"array",values:[uintNode(coin),multiAssetNode(assets)],encoding:{kind:"definite",width:0}}; }
 function parseValueNode(node:CborValue):{coin:bigint;assets?:MultiAsset}{if(node.kind==="unsigned")return {coin:node.value};if(node.kind!=="array"||node.values.length!==2||node.values[0]?.kind!=="unsigned"||node.values[1]?.kind!=="map")throw new TypeError("Value requires coin or [coin,multiasset]");const assets=MultiAsset.new();for(const [policyNode,bundleNode] of node.values[1].entries){if(policyNode.kind!=="bytes"||policyNode.value.length!==28||bundleNode.kind!=="map")throw new TypeError("invalid multiasset");const policy=ScriptHash.from_raw_bytes(policyNode.value);for(const [assetNode,amountNode] of bundleNode.entries){if(assetNode.kind!=="bytes"||amountNode.kind!=="unsigned")throw new TypeError("invalid asset bundle");assets.insert(policy,AssetName.from_raw_bytes(assetNode.value),amountNode.value);}}return {coin:node.values[0].value,assets};}
 
 export class AlonzoFormatTxOut extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): AlonzoFormatTxOut { const node=modelNode(this.wireShape,values);this.validateNode(node);return new AlonzoFormatTxOut(node); } }
