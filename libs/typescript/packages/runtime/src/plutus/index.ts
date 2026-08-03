@@ -13,10 +13,13 @@ export {
   encodeFlatProgram,
   encodePlutusData,
   encodeProgramEnvelope,
+  evaluatePhaseTwo,
   evaluatePhaseTwoRaw,
   evaluateProgram,
   makeBuiltinCostModel,
   parseUplcText,
+  SerializedPlutusScript,
+  SerializedPlutusScriptKind,
   validatePlutusDataNode,
 } from "@xray-network/xray-cardano-lib-plutus";
 export type {
@@ -43,6 +46,7 @@ export type {
   ObjectSchema,
   PhaseTwoEvaluation,
   PhaseTwoRawEvaluation,
+  TypedPhaseTwoEvaluation,
   PlutusDataValue,
   ProgramDecodeOptions,
   Redeemer,

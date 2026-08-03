@@ -17,6 +17,7 @@ import * as mary from "@xray-network/xray-cardano-lib-chain/mary";
 import * as multiEra from "@xray-network/xray-cardano-lib-chain/multi-era";
 import * as shelley from "@xray-network/xray-cardano-lib-chain/shelley";
 import * as cip from "@xray-network/xray-cardano-lib-cip";
+import * as cip14 from "@xray-network/xray-cardano-lib-cip/cip14";
 import * as cip25 from "@xray-network/xray-cardano-lib-cip/cip25";
 import * as cip36 from "@xray-network/xray-cardano-lib-cip/cip36";
 import * as cip4 from "@xray-network/xray-cardano-lib-cip/cip4";
@@ -26,11 +27,16 @@ import * as crypto from "@xray-network/xray-cardano-lib-crypto";
 import * as plutus from "@xray-network/xray-cardano-lib-plutus";
 import * as plutusData from "@xray-network/xray-cardano-lib-plutus/data";
 import * as uplc from "@xray-network/xray-cardano-lib-plutus/uplc";
+import * as runtimeCip from "../dist/esm/cip/index.js";
+import * as runtimeChain from "../dist/esm/chain/index.js";
 
 test("public packages share each nominal class owner", () => {
   assert.strictEqual(cardano.CardanoError, core.CardanoError);
   assert.strictEqual(cardano.TransactionHash, crypto.TransactionHash);
+  assert.strictEqual(cardano.Cip1852Path, crypto.Cip1852Path);
+  assert.strictEqual(cardano.CardanoKeyRole, crypto.CardanoKeyRole);
   assert.strictEqual(cardano.TransactionInput, chain.TransactionInput);
+  assert.strictEqual(cardano.discover_required_witnesses, chain.discover_required_witnesses);
   assert.strictEqual(multiEra.MultiEraBlock, chain.MultiEraBlock);
   assert.strictEqual(byron.ByronBlock, chain.ByronBlock);
   assert.strictEqual(shelley.ShelleyBlock, chain.ShelleyBlock);
@@ -39,21 +45,39 @@ test("public packages share each nominal class owner", () => {
   assert.strictEqual(alonzo.AlonzoBlock, chain.AlonzoBlock);
   assert.strictEqual(babbage.BabbageTransactionBody, chain.BabbageTransactionBody);
   assert.strictEqual(conway.Block, chain.Block);
+  assert.strictEqual(conway.CostModels, chain.CostModels);
+  assert.strictEqual(runtimeChain.CostModels, chain.CostModels);
+  assert.strictEqual(cardano.CostModels, chain.CostModels);
   assert.strictEqual(cardano.CIP25Metadata, cip25.CIP25Metadata);
+  assert.strictEqual(cardano.AssetFingerprint, cip14.AssetFingerprint);
+  assert.strictEqual(runtimeCip.AssetFingerprint, cip14.AssetFingerprint);
   assert.strictEqual(cardano.CIP36KeyRegistration, cip36.CIP36KeyRegistration);
   assert.strictEqual(cardano.CIP4, cip4.CIP4);
   assert.strictEqual(cardano.COSESign1, cip8.COSESign1);
   assert.strictEqual(AggregateCIP8Message, cip8.CIP8Message);
   assert.strictEqual(cip.cip25.CIP25Metadata, cip25.CIP25Metadata);
+  assert.strictEqual(cip.cip14.AssetFingerprint, cip14.AssetFingerprint);
   assert.strictEqual(cip.cip4.CIP4, cip4.CIP4);
   assert.strictEqual(cip.cip8.COSESign1, cip8.COSESign1);
   assert.strictEqual(cip.cip8.CIP8Message, cip8.CIP8Message);
   assert.strictEqual(plutus.Data, plutusData.Data);
+  assert.strictEqual(cardano.SerializedPlutusScript, plutus.SerializedPlutusScript);
+  assert.strictEqual(cardano.evaluatePhaseTwo, plutus.evaluatePhaseTwo);
   assert.strictEqual(AggregateData, plutusData.Data);
   assert.strictEqual(AggregateConstr, plutusData.Constr);
   assert.strictEqual(cip8.Int, core.Int);
   assert.strictEqual(cip8.PublicKey, crypto.PublicKey);
   assert.ok(new cardano.CardanoError("INVARIANT", "identity") instanceof core.CardanoError);
+});
+
+test("CostModels JSON consumption is identical through every intended public path", () => {
+  const json='{"0":[1,-2,3],"1":[4],"2":[5]}';
+  for(const owner of [conway.CostModels,chain.CostModels,runtimeChain.CostModels,cardano.CostModels]){
+    const models=owner.from_json(json);
+    assert.deepEqual(JSON.parse(models.to_json()),{0:[1,-2,3],1:[4],2:[5]});
+    assert.equal(owner.from_json(models.to_json()).to_canonical_cbor_hex(),models.to_canonical_cbor_hex());
+    assert.throws(()=>owner.from_json('{"PlutusV1":[1]}'),/numeric language ids/);
+  }
 });
 
 test("all six package entry points and focused subpaths expose their primary APIs", () => {
@@ -89,6 +113,11 @@ test("all six package entry points and focused subpaths expose their primary API
   assert.equal("parsePlutusData" in plutus, false);
   assert.equal("parsePlutusDataHex" in plutus, false);
   assert.equal(typeof cip25.CIP25Metadata, "function");
+  assert.equal(typeof cip14.AssetFingerprint, "function");
+  assert.equal("ProvisionalGovernanceCredentialId" in cip, false);
+  assert.equal("ProvisionalGovernanceActionId" in cip, false);
+  assert.equal("ProvisionalGovernanceCredentialId" in cardano, false);
+  assert.equal("ProvisionalGovernanceActionId" in cardano, false);
   assert.equal(typeof cip36.CIP36KeyRegistration, "function");
   assert.equal(typeof cip4.CIP4.calculateChecksum, "function");
   assert.equal(typeof cip8.COSESign1Builder, "function");
@@ -96,4 +125,9 @@ test("all six package entry points and focused subpaths expose their primary API
   assert.equal(typeof AggregateCIP8Message.verifyData, "function");
   assert.equal(typeof multiEra.MultiEraBlock, "function");
   assert.equal(typeof cardano.TransactionBuilder, "function");
+  assert.equal(typeof chain.Script.new_native, "function");
+  assert.equal(typeof chain.ScriptRef.new, "function");
+  assert.equal(typeof cardano.discover_required_witnesses, "function");
+  assert.equal(typeof plutus.SerializedPlutusScript.from_raw_flat, "function");
+  assert.equal(typeof cardano.evaluatePhaseTwo, "function");
 });

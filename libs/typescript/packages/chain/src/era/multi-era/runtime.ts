@@ -409,8 +409,10 @@ export class MultiEraCertificate {
   public static from_cbor_hex(hex: string): MultiEraCertificate {
     return this.from_cbor_bytes(hexToBytes(hex));
   }
-  private variant<T>(tag: number, owner: { from_cbor_bytes(bytes: Uint8Array): T }): T | undefined {
-    return this.kind() === tag ? owner.from_cbor_bytes(encodeCbor(this.#node)) : undefined;
+  private variant<T>(tag: number, owner: { new(node: CborValue): T; validateNode(node: CborValue): void }): T | undefined {
+    if(this.kind()!==tag)return undefined;
+    owner.validateNode(this.#node);
+    return new owner(this.#node);
   }
   public as_stake_registration(): StakeRegistration | undefined { return this.variant(0, StakeRegistration); }
   public as_stake_deregistration(): StakeDeregistration | undefined { return this.variant(1, StakeDeregistration); }

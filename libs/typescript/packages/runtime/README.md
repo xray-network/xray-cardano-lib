@@ -24,7 +24,7 @@ import {
 
 const key = PrivateKey.generate_ed25519();
 const address = Address.from_bech32(
-  "addr1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8sxy9w7g",
+  "stake1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8squng76",
 );
 const transactionId = TransactionHash.from_raw_bytes(new Uint8Array(32));
 
@@ -41,6 +41,15 @@ import { Constr, Data } from "@xray-network/xray-cardano-lib";
 
 const encoded = Data.to(undefined, Data.Void());
 const constructor = new Constr(0, []);
+```
+
+Ledger cost models retain their chain-owned identity through the facade:
+
+```ts
+import { CostModels } from "@xray-network/xray-cardano-lib";
+
+const models = CostModels.from_json('{"0":[1,-2,3],"1":[4],"2":[5]}');
+models.to_json();
 ```
 
 ## Package role

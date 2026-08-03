@@ -41,6 +41,7 @@ import {
   legacySign,
 } from "../dist/esm/byron/legacy.js";
 import {
+  blake2b160,
   blake2b224,
   blake2b256,
   sha3_256,
@@ -52,6 +53,12 @@ const message = new TextEncoder().encode("Cardano signing vector");
 
 test("Blake2b and SHA3 match independent published vectors", () => {
   const abc = new TextEncoder().encode("abc");
+  assert.equal(toHex(blake2b160(abc)), "384264f676f39536840523f284921cdc68b6846b");
+  assert.equal(blake2b160(abc).length, 20);
+  assert.notEqual(toHex(blake2b160(abc)), toHex(blake2b256(abc).slice(0, 20)));
+  const digest = blake2b160(abc);
+  digest.fill(0);
+  assert.equal(toHex(blake2b160(abc)), "384264f676f39536840523f284921cdc68b6846b");
   assert.equal(toHex(blake2b224(abc)), "9bd237b02a29e43bdd6738afa5b53ff0eee178d6210b618e4511aec8");
   assert.equal(toHex(blake2b256(abc)), "bddd813c634239723171ef3fee98579b94964e3bb1cb3e427262c8c068d52319");
   assert.equal(

@@ -31,6 +31,15 @@ The root entry point exports the same UPLC API together with `Data`, `applyParam
 `evaluatePhaseTwoRaw`. Generic CEK evaluation is explicitly budgeted and does not perform ledger
 phase-one validation.
 
+`SerializedPlutusScript.from_raw_flat`, `from_single_cbor`, and `from_double_cbor` explicitly own
+the three serialized-script forms. Each constructor validates an exact Flat program and its exact
+CBOR nesting; `to_raw_flat`, `to_single_cbor`, and `to_double_cbor` convert without envelope
+guessing.
+
+`evaluatePhaseTwo(transaction, resolvedInputs, costModels, ...)` accepts the existing chain-owned
+ledger bindings and returns immutable evaluations paired with chain-owned `RedeemerWitnessKey`
+values. `evaluatePhaseTwoRaw` remains available for byte-oriented compatibility.
+
 ## Typed Data
 
 ```ts

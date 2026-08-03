@@ -20,7 +20,7 @@ Node.js 20.19 or newer is required.
 import { Address, NetworkInfo } from "@xray-network/xray-cardano-lib-chain";
 
 const address = Address.from_bech32(
-  "addr1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8sxy9w7g",
+  "stake1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8squng76",
 );
 
 console.log(address.network_id() === NetworkInfo.mainnet().network_id());
@@ -44,6 +44,42 @@ Import from an era entry point when an application only needs that era's runtime
 | `@xray-network/xray-cardano-lib-chain/babbage` | Babbage blocks, reference inputs, inline data, and reference scripts |
 | `@xray-network/xray-cardano-lib-chain/conway` | Conway ledger and governance models |
 | `@xray-network/xray-cardano-lib-chain/multi-era` | Era detection and a common view across all supported eras |
+
+Conway certificates and governance values should normally be created with their typed factories:
+
+```ts
+import {
+  Certificate,
+  Credential,
+  StakeDeregistration,
+} from "@xray-network/xray-cardano-lib-chain/conway";
+
+const certificate = Certificate.new_stake_deregistration(
+  StakeDeregistration.new(Credential.new_pub_key(stakeKeyHash)),
+);
+```
+
+The generic `new(...ConwayInput[])` constructors remain available as advanced raw compatibility
+APIs. They validate against the same Conway wire rules; typed factories and field accessors are the
+preferred application surface.
+
+`discover_required_witnesses(transaction, resolvedInputs)` analyzes an existing transaction with
+its structurally resolved spending, collateral, and reference inputs. It returns nominal key,
+bootstrap, script, datum, redeemer, and reference-script requirements without performing account
+ownership or key-derivation work.
+
+`Script.new_native`, `new_plutus_v1`, `new_plutus_v2`, and `new_plutus_v3` construct every ledger
+script variant without numeric discriminants. `ScriptRef.new(script)` creates the exact tag-24
+ledger reference, and `script()` recovers its typed defensive payload.
+
+`CostModels.from_json('{"0":[...],"1":[...],"2":[...]}')` consumes numeric ledger language IDs;
+`to_json()` returns the symmetric object form. Conway, chain-root, and aggregate imports all expose
+this same nominal owner.
+
+`Address.from_bech32` validates the canonical CIP-5 address HRP against both address kind and
+network. `Address.to_bech32()` always emits that canonical form. Existing custom-prefix calls are
+retained as compatibility forwarders to the explicit low-level
+`Address.to_bech32_unchecked(hrp)` API; Byron addresses remain Base58.
 
 For example, an indexer can decode the explicit network envelope without selecting an era first:
 

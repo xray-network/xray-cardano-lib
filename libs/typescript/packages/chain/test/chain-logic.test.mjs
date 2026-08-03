@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   Address,
@@ -58,6 +59,7 @@ import {
   min_script_fee,
 } from "../../runtime/dist/esm/index.js";
 import { decodeCbor, encodeCbor } from "../../core/dist/esm/index.js";
+import { decodeBech32, encodeBech32 } from "../../core/dist/esm/encoding/index.js";
 import {
   crc32,
   decodeBase58,
@@ -126,7 +128,7 @@ test("bip32_15, bip32_24, Icarus, and multisig address vectors match", () => {
 });
 
 test("address_header_matching, bech32_parsing, pointer_address_big, and long_address", () => {
-  const parsed = Address.from_bech32("addr1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8sxy9w7g");
+  const parsed = Address.from_bech32("stake1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8squng76");
   assert.equal(parsed.to_bech32("foobar"), "foobar1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8s92n4tm");
   const reward = RewardAddress.new(9, Credential.new_script(ScriptHash.from_hex("7f".repeat(28)))).to_address();
   assert.equal(reward.header(), 0xf9);
@@ -134,11 +136,52 @@ test("address_header_matching, bech32_parsing, pointer_address_big, and long_add
   const pointer = PointerAddress.from_address(Address.from_bech32("addr_test1grqe6lg9ay8wkcu5k5e38lne63c80h3nq6xxhqfmhewf645pllllllllllll7lupllllllllllll7lupllllllllllll7lc9wayvj")).stake();
   assert.deepEqual([pointer.slot(), pointer.transaction_index(), pointer.certificate_index()], [0xffff_ffff_ffff_ffffn, 0xffff_ffff_ffff_ffffn, 0xffff_ffff_ffff_ffffn]);
   const long = "addr1q9d66zzs27kppmx8qc8h43q7m4hkxp5d39377lvxefvxd8j7eukjsdqc5c97t2zg5guqadepqqx6rc9m7wtnxy6tajjvk4a0kze4ljyuvvrpexg5up2sqxj33363v35gtew";
-  assert.equal(Address.from_bech32(long).to_bech32(), long);
+  const longRaw = Address.from_raw_bytes(decodeBech32(long).bytes);
+  assert.equal(longRaw.to_bech32_unchecked("addr"), long);
+  assert.throws(() => longRaw.to_bech32());
+  assert.throws(() => Address.from_bech32(long));
   assert.throws(() => Address.from_bech32("addr_test1vqt3w9chzut3w9chzut3w9chzut3w9chzut3w9chzut3w9cqqspqvqcqsmxqdssg97"));
   const huge = Pointer.new((1n << 1400n) - 1n, 0xffff_ffff_ffff_ffffn, 0xffff_ffff_ffff_ffffn);
   const hugeAddress = PointerAddress.new(0, Credential.new_pub_key(Ed25519KeyHash.from_hex("01".repeat(28))), huge).to_address();
   assert.equal(Address.from_raw_bytes(hugeAddress.to_raw_bytes()).to_hex(), hugeAddress.to_hex());
+});
+
+test("address Bech32 parsing enforces canonical CIP-5 HRPs and encoding families", () => {
+  const credential = Credential.new_pub_key(Ed25519KeyHash.from_hex("42".repeat(28)));
+  const mainnet = EnterpriseAddress.new(1, credential).to_address();
+  const testnet = EnterpriseAddress.new(9, credential).to_address();
+  const rewardMainnet = RewardAddress.new(1, credential).to_address();
+  const rewardTestnet = RewardAddress.new(9, credential).to_address();
+  assert.equal(mainnet.to_bech32().startsWith("addr1"), true);
+  assert.equal(testnet.to_bech32().startsWith("addr_test1"), true);
+  assert.equal(rewardMainnet.to_bech32().startsWith("stake1"), true);
+  assert.equal(rewardTestnet.to_bech32().startsWith("stake_test1"), true);
+  assert.equal(mainnet.to_bech32_unchecked("custom"), mainnet.to_bech32("custom"));
+  for (const invalid of [
+    encodeBech32("addr_test", mainnet.to_raw_bytes()),
+    encodeBech32("stake", mainnet.to_raw_bytes()),
+    encodeBech32("addr", testnet.to_raw_bytes()),
+    encodeBech32("addr", rewardMainnet.to_raw_bytes()),
+    encodeBech32("other", mainnet.to_raw_bytes()),
+  ]) assert.throws(() => Address.from_bech32(invalid));
+
+  const trailing = Uint8Array.from([...mainnet.to_raw_bytes(), 0]);
+  assert.equal(Address.from_raw_bytes(trailing).to_raw_bytes().length, 30);
+  assert.throws(() => Address.from_bech32(encodeBech32("addr", trailing)));
+  assert.throws(() => Address.from_bech32(encodeBech32("addr", Uint8Array.from([0x90, ...new Uint8Array(28)]))));
+  const byron = ByronAddress.from_base58("Ae2tdPwUPEZHtBmjZBF4YpMkK9tMSPTE2ADEZTPN97saNkhG78TvXdp3GDk");
+  assert.throws(() => Address.from_bech32(encodeBech32("addr", byron.to_address().to_raw_bytes())));
+  assert.equal(byron.to_base58(), "Ae2tdPwUPEZHtBmjZBF4YpMkK9tMSPTE2ADEZTPN97saNkhG78TvXdp3GDk");
+});
+
+test("all captured CIP-0019 mainnet and testnet Shelley address vectors are canonical", async () => {
+  const source = await readFile(new URL(
+    "../../../../../.xray/updates/providers/cardano-cips/0001-cardano-cips/artifacts/upstream/CIP-0019/README.md",
+    import.meta.url,
+  ), "utf8");
+  const vectors = [...source.matchAll(/type-\d+: ((?:addr|stake)(?:_test)?1[a-z0-9]+)/gu)].map((match) => match[1]);
+  assert.equal(vectors.length, 20);
+  for (const vector of vectors) assert.equal(Address.from_bech32(vector).to_bech32(), vector);
 });
 
 test("base58 vectors, crc32, Icarus, and Byron envelope round trips", () => {
@@ -193,7 +236,7 @@ test("calc_redeem_txid and Shelley genesis transaction IDs match source vectors"
   const redeem = genesis_txid_byron(publicKey);
   assert.equal(redeem.txid().to_hex(), "927edb96f3386ab91b5f5d85d84cb4253c65b1c2f65fa7df25f81fab1d62987a");
   assert.equal(redeem.address().to_base58(), "Ae2tdPwUPEZ9vtyppa1FdJzvqJZkEcXgdHxVYAzTWcPaoNycVq5rc36LC1S");
-  const shelley = Address.from_bech32("addr1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8sxy9w7g");
+  const shelley = Address.from_bech32("stake1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8squng76");
   assert.equal(genesis_txid_shelley(shelley).to_hex(), "30753180ac456e3e045a2c1f6a7bb367b9b0bbb02126754fb2455a953e3076a5");
 });
 

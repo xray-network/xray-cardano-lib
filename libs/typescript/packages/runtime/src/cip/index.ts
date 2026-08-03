@@ -1,3 +1,4 @@
+export { AssetFingerprint } from "@xray-network/xray-cardano-lib-cip/cip14";
 export {
   CIP25ChunkableString,
   CIP25ChunkableStringKind,

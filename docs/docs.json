@@ -70,19 +70,22 @@
               {
                 "group": "0006 — Typed Conway governance",
                 "pages": [
-                  "impl/typescript/0006-IMPL-INSTR"
+                  "impl/typescript/0006-IMPL-INSTR",
+                  "impl/typescript/0006-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0007 — CIP-14 asset fingerprints",
                 "pages": [
-                  "impl/typescript/0007-IMPL-INSTR"
+                  "impl/typescript/0007-IMPL-INSTR",
+                  "impl/typescript/0007-IMPL-RESULT"
                 ]
               },
               {
                 "group": "0008 — Strict identities and HD derivation",
                 "pages": [
-                  "impl/typescript/0008-IMPL-INSTR"
+                  "impl/typescript/0008-IMPL-INSTR",
+                  "impl/typescript/0008-IMPL-RESULT"
                 ]
               },
               {
@@ -136,6 +139,41 @@
                 "pages": [
                   "impl/typescript/0016-IMPL-INSTR",
                   "impl/typescript/0016-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0017 — Typed transaction decomposition",
+                "pages": [
+                  "impl/typescript/0017-IMPL-INSTR",
+                  "impl/typescript/0017-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0018 — Required-witness discovery",
+                "pages": [
+                  "impl/typescript/0018-IMPL-INSTR",
+                  "impl/typescript/0018-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0019 — Typed scripts and serialized envelopes",
+                "pages": [
+                  "impl/typescript/0019-IMPL-INSTR",
+                  "impl/typescript/0019-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0020 — Typed phase-two redeemer identity",
+                "pages": [
+                  "impl/typescript/0020-IMPL-INSTR",
+                  "impl/typescript/0020-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0021 — CostModels public consumption identity",
+                "pages": [
+                  "impl/typescript/0021-IMPL-INSTR",
+                  "impl/typescript/0021-IMPL-RESULT"
                 ]
               }
             ]

@@ -4,6 +4,7 @@ import { decodeCbor, encodeCbor } from "../../core/dist/esm/index.js";
 import { __setCoinSelectionRandomSourceForTests } from "../dist/esm/builder/transaction.js";
 import { evaluatePhaseTwoRaw } from "../../plutus/dist/esm/api.js";
 import {
+  AnchorDocHash,
   Bip32PrivateKey,
   PrivateKey,
   ScriptHash,
@@ -11,6 +12,7 @@ import {
 } from "../../crypto/dist/esm/index.js";
 import {
   Address,
+  Anchor,
   AssetName,
   AuxiliaryData,
   ByronAddress,
@@ -23,6 +25,7 @@ import {
   ExUnitPrices,
   ExUnits,
   GovActionId,
+  GovAction,
   LinearFee,
   MapAssetNameToNonZeroInt64,
   MultiAsset,
@@ -48,6 +51,7 @@ import {
   SingleInputBuilder,
   SingleMintBuilder,
   SingleWithdrawalBuilder,
+  StakeDeregistration,
   TransactionBuilder,
   TransactionBuilderConfigBuilder,
   TransactionInput,
@@ -57,7 +61,9 @@ import {
   Value,
   VoteBuilder,
   Voter,
+  Vote,
   VotingProcedure,
+  Url,
   hash_transaction,
   make_icarus_bootstrap_witness,
   make_vkey_witness,
@@ -224,28 +230,13 @@ test("mint, burn, native-asset change, and purification retain exact balances", 
 
 test("build_tx_with_certs, withdrawals, proposals, and votes", () => {
   const builder = TransactionBuilder.new(config()); builder.add_input(input(30, 8_000_000n).result); builder.add_output(output(2_000_000n));
-  builder.add_cert(SingleCertificateBuilder.new(Certificate.new(1n, Credential.new_pub_key(paymentHash))).payment_key());
+  builder.add_cert(SingleCertificateBuilder.new(Certificate.new_stake_deregistration(StakeDeregistration.new(Credential.new_pub_key(paymentHash)))).payment_key());
   builder.add_withdrawal(SingleWithdrawalBuilder.new(reward, 1_000n).payment_key());
-  const proposal = ProposalProcedure.from_cbor_bytes(encodeCbor({
-    kind: "array",
-    values: [
-      uintNode(200n),
-      { kind: "bytes", value: reward.to_address().to_raw_bytes(), encoding: { kind: "definite", width: 0 } },
-      { kind: "array", values: [uintNode(6n)], encoding: { kind: "definite", width: 0 } },
-      {
-        kind: "array",
-        values: [
-          { kind: "text", value: "", encoding: { kind: "definite", width: 0 } },
-          { kind: "bytes", value: new Uint8Array(32), encoding: { kind: "definite", width: 0 } },
-        ],
-        encoding: { kind: "definite", width: 0 },
-      },
-    ],
-    encoding: { kind: "definite", width: 0 },
-  })); builder.add_proposal(ProposalBuilder.new().with_proposal(proposal).build());
-  const voter = Voter.new(0n, paymentHash.to_raw_bytes());
-  const action = GovActionId.from_cbor_bytes(encodeCbor({ kind: "array", values: [{ kind: "bytes", value: new Uint8Array(32), encoding: { kind: "definite", width: 0 } }, uintNode(0n)], encoding: { kind: "definite", width: 0 } }));
-  const procedure = VotingProcedure.new(1n, null);
+  const proposal = ProposalProcedure.new(200n, reward, GovAction.new_info_action(), Anchor.new(Url.new(""), AnchorDocHash.from_raw_bytes(new Uint8Array(32))));
+  builder.add_proposal(ProposalBuilder.new().with_proposal(proposal).build());
+  const voter = Voter.new_constitutional_committee_hot_key(paymentHash);
+  const action = GovActionId.new(TransactionHash.from_raw_bytes(new Uint8Array(32)), 0);
+  const procedure = VotingProcedure.new(Vote.Yes, null);
   builder.add_vote(VoteBuilder.new().with_vote(voter, action, procedure).build());
   const signed = builder.build(ChangeSelectionAlgo.Default, address);
   for (const field of [4, 5, 19, 20]) assert.ok(bodyField(signed.body(), field));

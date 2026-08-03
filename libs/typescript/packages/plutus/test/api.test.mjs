@@ -12,14 +12,26 @@ import {
   blake2b256,
 } from "@xray-network/xray-cardano-lib-crypto";
 import {
+  CostModels,
+  LegacyRedeemer,
+  RedeemerTag,
+  RedeemerWitnessKey,
+  Transaction,
+  TransactionInput,
+  TransactionOutput,
+  TransactionUnspentOutput,
+} from "@xray-network/xray-cardano-lib-chain";
+import {
   applyParamsToScript,
   decodeFlatProgram,
   encodeFlatProgram,
+  evaluatePhaseTwo,
   evaluatePhaseTwoRaw,
   evaluateProgram,
   parseUplcText,
 } from "@xray-network/xray-cardano-lib-plutus";
 import * as uplc from "@xray-network/xray-cardano-lib-plutus/uplc";
+import * as runtime from "../../runtime/dist/esm/index.js";
 
 const fromHex = (hex) => Uint8Array.from(hex.match(/../g)?.map((value) => Number.parseInt(value, 16)) ?? []);
 const toHex = (bytes) => Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
@@ -174,6 +186,39 @@ test("evaluatePhaseTwoRaw resolves an Alonzo spending script and rewrites ExUnit
     rewritten.values[3].values.map((value) => value.value),
     [1_100n, 209_100n],
   );
+
+  const typed=evaluatePhaseTwo(
+    Transaction.from_cbor_bytes(encodeCbor(transaction)),
+    [TransactionUnspentOutput.new(
+      TransactionInput.from_cbor_bytes(inputBytes),
+      TransactionOutput.from_cbor_bytes(encodeCbor(output)),
+    )],
+    CostModels.from_cbor_bytes(encodeCbor(costModels)),
+    [10_000_000n,10_000_000n],
+    [0n,0n,1_000n],
+    5,
+    true,
+  );
+  assert.equal(typed.length,1);
+  assert.ok(typed[0].redeemer instanceof RedeemerWitnessKey);
+  assert.equal(typed[0].redeemer.tag(),RedeemerTag.Spend);
+  assert.equal(typed[0].redeemer.index(),0n);
+  assert.deepEqual(typed[0].evaluation,result[1]);
+  assert.ok(Object.isFrozen(typed));assert.ok(Object.isFrozen(typed[0]));assert.ok(Object.isFrozen(typed[0].evaluation.logs));
+});
+
+test("typed redeemer identity covers every tag and exact uint32 bounds", () => {
+  for(let tag=RedeemerTag.Spend;tag<=RedeemerTag.Proposing;tag+=1){
+    const key=RedeemerWitnessKey.new(tag,0xffff_ffffn);
+    assert.equal(key.tag(),tag);assert.equal(key.index(),0xffff_ffffn);
+  }
+  assert.throws(()=>RedeemerWitnessKey.new(-1,0n),/tag/);
+  assert.throws(()=>RedeemerWitnessKey.new(6,0n),/tag/);
+  assert.throws(()=>RedeemerWitnessKey.new(RedeemerTag.Spend,-1n),/uint32/);
+  assert.throws(()=>RedeemerWitnessKey.new(RedeemerTag.Spend,0x1_0000_0000n),/uint32/);
+  assert.throws(()=>LegacyRedeemer.from_cbor_bytes(encodeCbor(array([unsigned(6n),unsigned(0n),unsigned(0n),array([unsigned(0n),unsigned(0n)])]))),/LegacyRedeemer/);
+  assert.strictEqual(runtime.evaluatePhaseTwo,evaluatePhaseTwo);
+  assert.strictEqual(runtime.RedeemerWitnessKey,RedeemerWitnessKey);
 });
 
 test("evaluatePhaseTwoRaw selects Babbage V2 and Conway V3 argument conventions", async () => {

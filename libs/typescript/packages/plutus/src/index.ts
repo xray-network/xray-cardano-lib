@@ -1,10 +1,12 @@
 export {
   applyParamsToScript,
+  evaluatePhaseTwo,
   evaluatePhaseTwoRaw,
 } from "./api.js";
 export type {
   PhaseTwoEvaluation,
   PhaseTwoRawEvaluation,
+  TypedPhaseTwoEvaluation,
   UplcExBudget,
 } from "./api.js";
 export * from "./typed_data/index.js";

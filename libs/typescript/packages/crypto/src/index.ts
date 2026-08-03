@@ -19,9 +19,25 @@ export {
 export {
   Bip32PrivateKey,
   Bip32PublicKey,
+  CardanoKeyRole,
+  Cip1852Path,
+  Cip1852Role,
   Ed25519Signature,
   PrivateKey,
   PublicKey,
+  cip1852AccountPublic,
+  cip1852RootFromIcarusEntropy,
+  decodeCardanoBip32PrivateKey,
+  decodeCardanoBip32PublicKey,
+  decodeCardanoPrivateKey,
+  decodeCardanoPublicKey,
+  deriveCip1852AccountPrivate,
+  deriveCip1852Private,
+  deriveCip1852Public,
+  encodeCardanoBip32PrivateKey,
+  encodeCardanoBip32PublicKey,
+  encodeCardanoPrivateKey,
+  encodeCardanoPublicKey,
 } from "./keys/index.js";
 export {
   LegacyDaedalusPrivateKey,
@@ -33,6 +49,7 @@ export {
   emip3_encrypt_with_password,
 } from "./encryption/index.js";
 export {
+  blake2b160,
   blake2b224,
   blake2b256,
   blake2b512,

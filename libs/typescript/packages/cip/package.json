@@ -26,6 +26,12 @@
       "import": "./dist/esm/index.js",
       "default": "./dist/esm/index.js"
     },
+    "./cip14": {
+      "types": "./dist/esm/cip14/index.d.ts",
+      "browser": "./dist/esm/cip14/index.js",
+      "import": "./dist/esm/cip14/index.js",
+      "default": "./dist/esm/cip14/index.js"
+    },
     "./cip25": {
       "types": "./dist/esm/cip25/index.d.ts",
       "browser": "./dist/esm/cip25/index.js",
@@ -49,6 +55,12 @@
       "browser": "./dist/esm/cip8/index.js",
       "import": "./dist/esm/cip8/index.js",
       "default": "./dist/esm/cip8/index.js"
+    },
+    "./cip129": {
+      "types": "./dist/esm/cip129/index.d.ts",
+      "browser": "./dist/esm/cip129/index.js",
+      "import": "./dist/esm/cip129/index.js",
+      "default": "./dist/esm/cip129/index.js"
     }
   },
   "dependencies": {

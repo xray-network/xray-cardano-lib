@@ -22,6 +22,7 @@ import {
   AuxiliaryData,
   AssetName,
   Certificate,
+  CertificateKind,
   CostModels,
   DatumOption,
   ExUnitPrices,
@@ -44,6 +45,7 @@ import {
   RedeemerTag,
   RequiredSigners,
   Script,
+  ScriptKind,
   ScriptRef,
   Transaction,
   TransactionBody,
@@ -174,7 +176,7 @@ function requiredSignerHashes(value: RequiredSigners): Ed25519KeyHash[] {
   });
 }
 
-function scriptFromNative(value: NativeScript): Script { return Script.from_cbor_bytes(encodeCbor(array([uint(0n), node(value)]))); }
+function scriptFromNative(value: NativeScript): Script { return Script.new_native(value); }
 
 function scriptParts(value: Script): { kind: number; payload: CborValue } {
   const decoded = node(value);
@@ -197,7 +199,11 @@ export class PlutusScript {
   public as_v3(): PlutusV3Script | undefined { return this.#version === Language.PlutusV3 ? PlutusV3Script.from_raw_bytes(this.#bytes) : undefined; }
   public version(): Language { return this.#version; }
   public hash(): ScriptHash { return ScriptHash.from_raw_bytes(blake2b224(Uint8Array.from([this.#version + 1, ...this.#bytes]))); }
-  public to_script(): Script { return Script.from_cbor_bytes(encodeCbor(array([uint(BigInt(this.#version + 1)), bytes(this.#bytes)]))); }
+  public to_script(): Script {
+    if(this.#version===Language.PlutusV1)return Script.new_plutus_v1(PlutusV1Script.from_raw_bytes(this.#bytes));
+    if(this.#version===Language.PlutusV2)return Script.new_plutus_v2(PlutusV2Script.from_raw_bytes(this.#bytes));
+    return Script.new_plutus_v3(PlutusV3Script.from_raw_bytes(this.#bytes));
+  }
 }
 
 export class PlutusScriptWitness {
@@ -237,7 +243,11 @@ export class NativeScriptWitnessInfo {
 export class RedeemerWitnessKey {
   readonly #tag: RedeemerTag;
   readonly #index: bigint;
-  private constructor(tag: RedeemerTag, index: bigint) { this.#tag = tag; this.#index = checkedCoin(index, "redeemer index"); }
+  private constructor(tag: RedeemerTag, index: bigint) {
+    if(!Number.isInteger(tag)||tag<RedeemerTag.Spend||tag>RedeemerTag.Proposing)throw new RangeError("redeemer tag must be in 0..5");
+    if(index<0n||index>0xffff_ffffn)throw new RangeError("redeemer index must fit uint32");
+    this.#tag = tag; this.#index = index;
+  }
   public static new(tag: RedeemerTag, index: bigint): RedeemerWitnessKey { return new RedeemerWitnessKey(tag, index); }
   public static from_redeemer(redeemer: LegacyRedeemer): RedeemerWitnessKey {
     const decoded = node(redeemer);
@@ -359,6 +369,148 @@ export class TransactionUnspentOutput {
   public output(): TransactionOutput { return clone(this.#output, TransactionOutput); }
   public to_cbor_bytes(): Uint8Array { return encodeCbor(array([node(this.#input), node(this.#output)])); }
   public to_cbor_hex(): string { return bytesToHex(this.to_cbor_bytes()); }
+}
+
+type DiscoveredScript = { native?: NativeScript; plutus: boolean };
+
+function discoveredScript(value: Script): { hash: ScriptHash; kind: DiscoveredScript } {
+  if (value.kind() === ScriptKind.Native) {
+    const native = value.as_native();
+    if(native===undefined)throw new TypeError("native script payload is absent");
+    return { hash: native.hash(), kind: { native, plutus: false } };
+  }
+  if (value.kind() === ScriptKind.PlutusV1) {
+    const script = PlutusScript.from_v1(value.as_plutus_v1() as PlutusV1Script);
+    return { hash: script.hash(), kind: { plutus: true } };
+  }
+  if (value.kind() === ScriptKind.PlutusV2) {
+    const script = PlutusScript.from_v2(value.as_plutus_v2() as PlutusV2Script);
+    return { hash: script.hash(), kind: { plutus: true } };
+  }
+  if (value.kind() === ScriptKind.PlutusV3) {
+    const script = PlutusScript.from_v3(value.as_plutus_v3() as PlutusV3Script);
+    return { hash: script.hash(), kind: { plutus: true } };
+  }
+  throw new TypeError(`unsupported script language ${value.kind()}`);
+}
+
+function sortedCollectionValues(value: CborValue | undefined): CborValue[] {
+  return collectionValues(value).sort((left, right) => compareBytes(
+    encodeCbor(left, { mode: "canonical" }),
+    encodeCbor(right, { mode: "canonical" }),
+  ));
+}
+
+/** Discover the ledger witnesses required by a transaction and its resolved inputs. */
+export function discover_required_witnesses(
+  transaction: Transaction,
+  resolvedInputs: readonly TransactionUnspentOutput[],
+): RequiredWitnessSet {
+  const required = RequiredWitnessSet.new();
+  const resolved = new Map<string, TransactionUnspentOutput>();
+  for (const utxo of resolvedInputs) {
+    const key = canonicalHex(utxo.input()), previous = resolved.get(key);
+    if (previous !== undefined && canonicalHex(previous.output()) !== canonicalHex(utxo.output())) {
+      throw new TypeError(`conflicting resolved transaction input ${key}`);
+    }
+    resolved.set(key, utxo);
+  }
+
+  const body = transaction.body(), witnessSet = transaction.witness_set();
+  const witnessScripts = new Map<string, DiscoveredScript>();
+  for (const value of collectionValues(mapField(witnessSet, 1n))) {
+    const native = NativeScript.from_cbor_bytes(encodeCbor(value));
+    const entry = { native, plutus: false };
+    witnessScripts.set(native.hash().to_hex(), entry);
+  }
+  for (const [field, language] of [[3n, Language.PlutusV1], [6n, Language.PlutusV2], [7n, Language.PlutusV3]] as const) {
+    for (const value of collectionValues(mapField(witnessSet, field))) {
+      if (value.kind !== "bytes") throw new TypeError("Plutus witness must be bytes");
+      const script = language === Language.PlutusV1
+        ? PlutusScript.from_v1(PlutusV1Script.from_raw_bytes(value.value))
+        : language === Language.PlutusV2
+          ? PlutusScript.from_v2(PlutusV2Script.from_raw_bytes(value.value))
+          : PlutusScript.from_v3(PlutusV3Script.from_raw_bytes(value.value));
+      witnessScripts.set(script.hash().to_hex(), { plutus: true });
+    }
+  }
+
+  const referenceScripts = new Map<string, DiscoveredScript>();
+  const resolve = (value: CborValue): TransactionUnspentOutput => {
+    const input = TransactionInput.from_cbor_bytes(encodeCbor(value));
+    const key = canonicalHex(input), utxo = resolved.get(key);
+    if (utxo === undefined) throw new TypeError(`missing resolved transaction input ${key}`);
+    return utxo;
+  };
+  for (const value of sortedCollectionValues(mapField(body, 18n))) {
+    const reference = outputParts(resolve(value).output()).scriptRef;
+    if (reference !== undefined) {
+      const entry = discoveredScript(reference.script());
+      referenceScripts.set(entry.hash.to_hex(), entry.kind);
+    }
+  }
+
+  const requireScript = (hash: ScriptHash, redeemer?: RedeemerWitnessKey): void => {
+    const key = hash.to_hex(), reference = referenceScripts.get(key), witness = witnessScripts.get(key);
+    if (reference !== undefined) required.add_script_ref(hash); else required.add_script_hash(hash);
+    const kind = reference ?? witness;
+    if (kind?.native !== undefined) {
+      const signers = kind.native.get_required_signers();
+      for (let index = 0; index < signers.len(); index += 1) required.add_vkey_key_hash(signers.get(index));
+    } else if (kind?.plutus === true && redeemer !== undefined) required.add_redeemer_tag(redeemer);
+  };
+  const addOutput = (output: TransactionOutput, redeemer?: RedeemerWitnessKey): void => {
+    const outputRequirements = requirementsForOutput(output);
+    required.add_all(outputRequirements);
+    for (const hash of outputRequirements.scripts.values()) requireScript(hash, redeemer);
+  };
+
+  for (const [index, value] of sortedCollectionValues(mapField(body, 0n)).entries()) {
+    addOutput(resolve(value).output(), RedeemerWitnessKey.new(RedeemerTag.Spend, BigInt(index)));
+  }
+  for (const value of sortedCollectionValues(mapField(body, 13n))) addOutput(resolve(value).output());
+
+  for (const [index, value] of collectionValues(mapField(body, 4n)).entries()) {
+    const certificate = Certificate.from_cbor_bytes(encodeCbor(value));
+    const certificateRequired = certificateRequirements(certificate);
+    required.add_all(certificateRequired);
+    for (const hash of certificateRequired.scripts.values()) requireScript(hash, RedeemerWitnessKey.new(RedeemerTag.Cert, BigInt(index)));
+  }
+
+  const withdrawals = mapField(body, 5n);
+  if (withdrawals !== undefined) {
+    if (withdrawals.kind !== "map") throw new TypeError("withdrawals must be a CBOR map");
+    const entries = [...withdrawals.entries].sort((left, right) => compareBytes(
+      encodeCbor(left[0], { mode: "canonical" }),
+      encodeCbor(right[0], { mode: "canonical" }),
+    ));
+    for (const [index, [address]] of entries.entries()) {
+      if (address.kind !== "bytes") throw new TypeError("withdrawal account must be bytes");
+      const reward = RewardAddress.from_address(Address.from_raw_bytes(address.value));
+      if (reward === undefined) throw new TypeError("withdrawal account must be a reward address");
+      const withdrawalRequired = RequiredWitnessSet.new();
+      withdrawalRequired.withdrawal_required_wits(reward);
+      required.add_all(withdrawalRequired);
+      for (const hash of withdrawalRequired.scripts.values()) requireScript(hash, RedeemerWitnessKey.new(RedeemerTag.Reward, BigInt(index)));
+    }
+  }
+
+  for (const signer of collectionValues(mapField(body, 14n))) {
+    if (signer.kind !== "bytes") throw new TypeError("required signer must be a key hash");
+    required.add_vkey_key_hash(Ed25519KeyHash.from_raw_bytes(signer.value));
+  }
+
+  const redeemers = mapField(witnessSet, 5n);
+  if (redeemers?.kind === "array") {
+    for (const value of redeemers.values) required.add_redeemer_tag(RedeemerWitnessKey.from_redeemer(LegacyRedeemer.from_cbor_bytes(encodeCbor(value))));
+  } else if (redeemers?.kind === "map") {
+    for (const [key] of redeemers.entries) {
+      if (key.kind !== "array" || key.values[0]?.kind !== "unsigned" || key.values[1]?.kind !== "unsigned") throw new TypeError("invalid redeemer key");
+      required.add_redeemer_tag(RedeemerWitnessKey.new(Number(key.values[0].value), key.values[1].value));
+    }
+  } else if (redeemers !== undefined) throw new TypeError("redeemers must be an array or map");
+
+  return required;
 }
 
 export class SingleInputBuilder {
@@ -516,31 +668,36 @@ export class SingleWithdrawalBuilder {
 }
 
 function certificateCredential(value: Certificate): { as_pub_key(): Ed25519KeyHash | undefined; as_script(): ScriptHash | undefined } | undefined {
-  const decoded = node(value);
-  if (decoded.kind !== "array" || decoded.values[0]?.kind !== "unsigned") throw new TypeError("invalid certificate");
-  const tag = Number(decoded.values[0].value);
-  if (tag === 0) return undefined;
-  const position = new Map<number, number>([[1,1],[2,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[15,1],[16,1]]).get(tag);
-  const credential = position === undefined ? undefined : decoded.values[position];
-  if (credential?.kind !== "array" || credential.values[0]?.kind !== "unsigned" || credential.values[1]?.kind !== "bytes") return undefined;
-  const hashBytes = copyBytes(credential.values[1].value);
-  return credential.values[0].value === 0n
-    ? { as_pub_key: () => Ed25519KeyHash.from_raw_bytes(hashBytes), as_script: () => undefined }
-    : { as_pub_key: () => undefined, as_script: () => ScriptHash.from_raw_bytes(hashBytes) };
+  switch (value.kind()) {
+    case CertificateKind.StakeRegistration: return undefined;
+    case CertificateKind.StakeDeregistration: return value.as_stake_deregistration()?.stake_credential();
+    case CertificateKind.StakeDelegation: return value.as_stake_delegation()?.stake_credential();
+    case CertificateKind.RegCert: return value.as_reg_cert()?.stake_credential();
+    case CertificateKind.UnregCert: return value.as_unreg_cert()?.stake_credential();
+    case CertificateKind.VoteDelegCert: return value.as_vote_deleg_cert()?.stake_credential();
+    case CertificateKind.StakeVoteDelegCert: return value.as_stake_vote_deleg_cert()?.stake_credential();
+    case CertificateKind.StakeRegDelegCert: return value.as_stake_reg_deleg_cert()?.stake_credential();
+    case CertificateKind.VoteRegDelegCert: return value.as_vote_reg_deleg_cert()?.stake_credential();
+    case CertificateKind.StakeVoteRegDelegCert: return value.as_stake_vote_reg_deleg_cert()?.stake_credential();
+    case CertificateKind.AuthCommitteeHotCert: return value.as_auth_committee_hot_cert()?.cold_credential();
+    case CertificateKind.ResignCommitteeColdCert: return value.as_resign_committee_cold_cert()?.cold_credential();
+    case CertificateKind.RegDrepCert: return value.as_reg_drep_cert()?.drep_credential();
+    case CertificateKind.UnregDrepCert: return value.as_unreg_drep_cert()?.drep_credential();
+    case CertificateKind.UpdateDrepCert: return value.as_update_drep_cert()?.drep_credential();
+    case CertificateKind.PoolRegistration:
+    case CertificateKind.PoolRetirement: return undefined;
+  }
 }
 
 function certificateRequirements(value: Certificate): RequiredWitnessSet {
   const required = RequiredWitnessSet.new(), credential = certificateCredential(value);
   if (credential !== undefined) required.addCredential(credential);
-  const decoded = node(value);
-  if (decoded.kind === "array" && decoded.values[0]?.kind === "unsigned") {
-    if (decoded.values[0].value === 4n && decoded.values[1]?.kind === "bytes") required.add_vkey_key_hash(Ed25519KeyHash.from_raw_bytes(decoded.values[1].value));
-    if (decoded.values[0].value === 3n && decoded.values[1]?.kind === "array") {
-      const pool = decoded.values[1];
-      if (pool.values[0]?.kind === "bytes") required.add_vkey_key_hash(Ed25519KeyHash.from_raw_bytes(pool.values[0].value));
-      const owners = pool.values[6];
-      for (const owner of collectionValues(owners)) if (owner.kind === "bytes") required.add_vkey_key_hash(Ed25519KeyHash.from_raw_bytes(owner.value));
-    }
+  const retirement=value.as_pool_retirement();
+  if(retirement!==undefined)required.add_vkey_key_hash(retirement.pool_key_hash());
+  const registration=value.as_pool_registration();
+  if(registration!==undefined){
+    const parameters=registration.pool_params();required.add_vkey_key_hash(parameters.operator());
+    for(const owner of parameters.pool_owners())required.add_vkey_key_hash(owner);
   }
   return required;
 }
@@ -940,20 +1097,8 @@ export class TransactionBuilder {
     const id = canonicalHex(value.input()); if (!this.#referenceInputs.some((entry) => canonicalHex(entry.input()) === id)) this.#referenceInputs.push(value);
     const reference = outputParts(value.output()).scriptRef;
     if (reference !== undefined) {
-      const decoded = node(reference);
-      if (decoded.kind === "tag" && decoded.value.kind === "bytes") {
-        const script = Script.from_cbor_bytes(decoded.value.value); const { kind, payload } = scriptParts(script);
-        const hash = kind === 0
-          ? NativeScript.from_cbor_bytes(encodeCbor(payload)).hash()
-          : payload.kind === "bytes" && kind === 1
-            ? PlutusScript.from_v1(PlutusV1Script.from_raw_bytes(payload.value)).hash()
-            : payload.kind === "bytes" && kind === 2
-              ? PlutusScript.from_v2(PlutusV2Script.from_raw_bytes(payload.value)).hash()
-              : payload.kind === "bytes" && kind === 3
-                ? PlutusScript.from_v3(PlutusV3Script.from_raw_bytes(payload.value)).hash()
-                : undefined;
-        if (hash !== undefined) this.#witnesses.add_required_wits(scriptReferenceRequirement(hash));
-      }
+      const {hash}=discoveredScript(reference.script());
+      this.#witnesses.add_required_wits(scriptReferenceRequirement(hash));
     }
   }
   public add_output(value: SingleOutputBuilderResult): void {

@@ -44,3 +44,7 @@ export type {
 export {
   parseUplcText,
 } from "./text.js";
+export {
+  SerializedPlutusScript,
+  SerializedPlutusScriptKind,
+} from "./serialized-script.js";

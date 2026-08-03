@@ -8,7 +8,7 @@ It provides:
 - normal and extended Ed25519 keys and signatures;
 - Cardano Ed25519-BIP32 private/public keys and derivation;
 - fixed-size Cardano hash and verification-key wrappers;
-- Blake2b-224, Blake2b-256, and SHA3-256 helpers;
+- Blake2b-160, Blake2b-224, Blake2b-256, Blake2b-512, and SHA3-256 helpers;
 - cryptographically secure random bytes through Web Crypto;
 - EMIP-3 password encryption and decryption; and
 - the legacy Daedalus key operations required by Byron compatibility code.
@@ -77,6 +77,11 @@ try {
 
 Hardened derivation requires a private key. `Bip32PublicKey.derive` rejects hardened indexes.
 
+For typed Cardano paths, `Cip1852Path` fixes the purpose and coin-type components and validates
+account, role, and address indexes. `deriveCip1852Private` and `deriveCip1852Public` return the
+existing BIP32 key owners. Role-aware text codecs use the CIP-5/CIP-16 HRPs selected by
+`CardanoKeyRole`; mnemonic parsing remains outside this package.
+
 ## Hash Cardano data
 
 ```ts
@@ -128,9 +133,9 @@ The supported package entry point is `@xray-network/xray-cardano-lib-crypto`.
 
 | Area | Public values |
 |---|---|
-| Keys | `PrivateKey`, `PublicKey`, `Ed25519Signature`, `Bip32PrivateKey`, `Bip32PublicKey` |
+| Keys | `PrivateKey`, `PublicKey`, `Ed25519Signature`, `Bip32PrivateKey`, `Bip32PublicKey`, `CardanoKeyRole`, `Cip1852Path`, `Cip1852Role`, role-aware text codecs, CIP-1852 derivation helpers |
 | Hashes | `Ed25519KeyHash`, `ScriptHash`, `TransactionHash`, `GenesisDelegateHash`, `GenesisHash`, `AuxiliaryDataHash`, `PoolMetadataHash`, `VRFKeyHash`, `BlockBodyHash`, `BlockHeaderHash`, `DatumHash`, `ScriptDataHash`, `VRFVkey`, `KESVkey`, `NonceHash`, `AnchorDocHash` |
-| Digests | `blake2b224`, `blake2b256`, `sha3_256` |
+| Digests | `blake2b160`, `blake2b224`, `blake2b256`, `blake2b512`, `sha3_256` |
 | Randomness | `secureRandomBytes`, `systemSecureRandomSource` |
 | Encryption | `emip3_encrypt_with_password`, `emip3_decrypt_with_password` |
 | Byron compatibility | `LegacyDaedalusPrivateKey`, `legacyPublicKey`, `legacySign` |
@@ -147,6 +152,7 @@ src/
     fixed-bytes.ts
     types.ts
   keys/
+    cardano.ts
     index.ts
     ed25519.ts
   primitives/

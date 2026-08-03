@@ -21,7 +21,7 @@ const packageRules = {
       "@xray-network/xray-cardano-lib-crypto": "0.1.0",
     },
     name: "@xray-network/xray-cardano-lib-cip",
-    subpaths: ["./cip25", "./cip36", "./cip4", "./cip8"],
+    subpaths: ["./cip14", "./cip25", "./cip36", "./cip4", "./cip8", "./cip129"],
   },
   core: {
     dependencies: {},

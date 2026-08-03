@@ -5,6 +5,13 @@ import {
   encodeCbor,
   type CborValue,
 } from "@xray-network/xray-cardano-lib-core";
+import {
+  CostModels,
+  LegacyRedeemer,
+  RedeemerWitnessKey,
+  Transaction,
+  TransactionUnspentOutput,
+} from "@xray-network/xray-cardano-lib-chain";
 import { evaluateRaw } from "./ledger/evaluate.js";
 import { dataConstant, type UplcTerm } from "./uplc/ast.js";
 import {
@@ -29,6 +36,11 @@ export type PhaseTwoRawEvaluation = readonly [
   redeemerBytes: Uint8Array,
   evaluation: PhaseTwoEvaluation,
 ];
+
+export interface TypedPhaseTwoEvaluation {
+  readonly redeemer: RedeemerWitnessKey;
+  readonly evaluation: PhaseTwoEvaluation;
+}
 
 export function applyParamsToScript(
   paramsBytes: Uint8Array,
@@ -89,6 +101,37 @@ export function evaluatePhaseTwoRaw(
       logs: Object.freeze([...result.logs]),
     }),
   ] as const)));
+}
+
+export function evaluatePhaseTwo(
+  transaction: Transaction,
+  resolvedInputs: readonly TransactionUnspentOutput[],
+  costModels: CostModels,
+  maxBudget: readonly [cpu: bigint, memory: bigint],
+  slotConfig: readonly [
+    zeroTimeMilliseconds: bigint,
+    zeroSlot: bigint,
+    slotLengthMilliseconds: bigint,
+  ],
+  protocolMajorVersion: number,
+  runPhaseOne: boolean,
+): readonly TypedPhaseTwoEvaluation[] {
+  const raw=evaluatePhaseTwoRaw(
+    transaction.to_cbor_bytes(),
+    resolvedInputs.map((utxo)=>[utxo.input().to_cbor_bytes(),utxo.output().to_cbor_bytes()] as const),
+    costModels.to_cbor_bytes(),
+    maxBudget,
+    slotConfig,
+    protocolMajorVersion,
+    runPhaseOne,
+  );
+  return Object.freeze(raw.map(([redeemer,evaluation])=>Object.freeze({
+    redeemer:RedeemerWitnessKey.from_redeemer(LegacyRedeemer.from_cbor_bytes(redeemer)),
+    evaluation:Object.freeze({
+      cost:Object.freeze({cpu:evaluation.cost.cpu,memory:evaluation.cost.memory}),
+      logs:Object.freeze([...evaluation.logs]),
+    }),
+  })));
 }
 
 function assertStandaloneLength(name: string, value: Uint8Array): void {

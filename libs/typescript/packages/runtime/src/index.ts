@@ -5,6 +5,7 @@ export {
   Int,
   ProtocolMagic,
 } from "./core/index.js";
+export { AssetFingerprint } from "./cip/index.js";
 export {
   AnchorDocHash,
   AuxiliaryDataHash,
@@ -30,6 +31,22 @@ export {
   TransactionHash,
   VRFKeyHash,
   VRFVkey,
+  CardanoKeyRole,
+  Cip1852Path,
+  Cip1852Role,
+  cip1852AccountPublic,
+  cip1852RootFromIcarusEntropy,
+  decodeCardanoBip32PrivateKey,
+  decodeCardanoBip32PublicKey,
+  decodeCardanoPrivateKey,
+  decodeCardanoPublicKey,
+  deriveCip1852AccountPrivate,
+  deriveCip1852Private,
+  deriveCip1852Public,
+  encodeCardanoBip32PrivateKey,
+  encodeCardanoBip32PublicKey,
+  encodeCardanoPrivateKey,
+  encodeCardanoPublicKey,
 } from "./crypto/index.js";
 export {
   CIP25ChunkableString,
@@ -102,10 +119,13 @@ export {
   encodeFlatProgram,
   encodePlutusData,
   encodeProgramEnvelope,
+  evaluatePhaseTwo,
   evaluatePhaseTwoRaw,
   evaluateProgram,
   makeBuiltinCostModel,
   parseUplcText,
+  SerializedPlutusScript,
+  SerializedPlutusScriptKind,
   validatePlutusDataNode,
 } from "./plutus/index.js";
 export type {
@@ -132,6 +152,7 @@ export type {
   ObjectSchema,
   PhaseTwoEvaluation,
   PhaseTwoRawEvaluation,
+  TypedPhaseTwoEvaluation,
   PlutusDataValue,
   ProgramDecodeOptions,
   Redeemer,
