@@ -28,8 +28,9 @@ const result = evaluateProgram(
 ```
 
 The root entry point exports the same UPLC API together with `Data`, `applyParamsToScript`, and
-`evaluatePhaseTwoRaw`. Generic CEK evaluation is explicitly budgeted and does not perform ledger
-phase-one validation.
+`evaluatePhaseTwoRaw`. It also exposes `data`, `uplc`, and `blueprint` namespaces for predictable
+domain access. Generic CEK evaluation is explicitly budgeted and does not perform ledger phase-one
+validation.
 
 `SerializedPlutusScript.from_raw_flat`, `from_single_cbor`, and `from_double_cbor` explicitly own
 the three serialized-script forms. Each constructor validates an exact Flat program and its exact
@@ -71,7 +72,7 @@ fail through the package error boundary.
 
 | Entry point | Domain |
 | --- | --- |
-| `@xray-network/xray-cardano-lib-plutus` | Data, UPLC, parameter application, and phase-two valuation |
+| `@xray-network/xray-cardano-lib-plutus` | Flat owning APIs plus `data`, `uplc`, and `blueprint` namespaces |
 | `@xray-network/xray-cardano-lib-plutus/data` | Typed Plutus Data schemas and codecs |
 | `@xray-network/xray-cardano-lib-plutus/blueprint` | CIP-57 documents, validators, and schema validation |
 | `@xray-network/xray-cardano-lib-plutus/uplc` | UPLC AST, Flat/text codecs, costs, and CEK evaluation |

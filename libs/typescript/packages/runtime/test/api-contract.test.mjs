@@ -6,7 +6,7 @@ import * as multiEra from "@xray-network/xray-cardano-lib-chain/multi-era";
 import * as cip8 from "@xray-network/xray-cardano-lib-cip/cip8";
 
 test("native public values do not expose WASM memory lifecycle methods", () => {
-  for (const [facade, module] of [["main", cardano], ["multi-era", multiEra], ["cip8", cip8]]) {
+  for (const [facade, module] of [["chain", cardano.chain], ["crypto", cardano.crypto], ["multi-era", multiEra], ["cip8", cip8]]) {
     for (const [name, value] of Object.entries(module)) {
       if (typeof value !== "function" || value.prototype === undefined) continue;
       let prototype = value.prototype;
@@ -17,15 +17,15 @@ test("native public values do not expose WASM memory lifecycle methods", () => {
       }
     }
   }
-  assert.equal(typeof cardano.PrivateKey.from_normal_bytes(new Uint8Array(32)).dispose, "function");
+  assert.equal(typeof cardano.crypto.PrivateKey.from_normal_bytes(new Uint8Array(32)).dispose, "function");
 });
 
 test("collection getters clone, mutations stay local, and bounds throw", () => {
-  const input = cardano.TransactionInput.new(
-    cardano.TransactionHash.from_raw_bytes(new Uint8Array(32).fill(0x11)),
+  const input = cardano.chain.TransactionInput.new(
+    cardano.crypto.TransactionHash.from_raw_bytes(new Uint8Array(32).fill(0x11)),
     3n,
   );
-  const list = cardano.TransactionInputList.new();
+  const list = cardano.chain.TransactionInputList.new();
   list.add(input);
   const first = list.get(0);
   const second = list.get(0);
@@ -39,7 +39,7 @@ test("collection getters clone, mutations stay local, and bounds throw", () => {
 });
 
 test("recursive JSON shapes retain runtime-compatible number and byte conventions", () => {
-  const value = cardano.PlutusData.from_json(JSON.stringify({
+  const value = cardano.chain.PlutusData.from_json(JSON.stringify({
     constructor: 0,
     fields: [{ list: [{ int: 42 }, { bytes: "aabb" }] }],
   }));
@@ -47,5 +47,5 @@ test("recursive JSON shapes retain runtime-compatible number and byte convention
     constructor: 0,
     fields: [{ list: [{ int: 42 }, { bytes: "aabb" }] }],
   });
-  assert.throws(() => cardano.PlutusData.from_json('{"bytes":"zz"}'), /hex/u);
+  assert.throws(() => cardano.chain.PlutusData.from_json('{"bytes":"zz"}'), /hex/u);
 });

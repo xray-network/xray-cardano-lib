@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   CostModels,
   MapU64ToArrI64,
-} from "../../runtime/dist/esm/index.js";
+} from "../dist/esm/index.js";
 import { decodeCbor } from "../../core/dist/esm/index.js";
 
 test("CostModels parses numeric JSON keys and signed integer parameters", () => {

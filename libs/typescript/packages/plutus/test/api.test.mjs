@@ -217,8 +217,8 @@ test("typed redeemer identity covers every tag and exact uint32 bounds", () => {
   assert.throws(()=>RedeemerWitnessKey.new(RedeemerTag.Spend,-1n),/uint32/);
   assert.throws(()=>RedeemerWitnessKey.new(RedeemerTag.Spend,0x1_0000_0000n),/uint32/);
   assert.throws(()=>LegacyRedeemer.from_cbor_bytes(encodeCbor(array([unsigned(6n),unsigned(0n),unsigned(0n),array([unsigned(0n),unsigned(0n)])]))),/LegacyRedeemer/);
-  assert.strictEqual(runtime.evaluatePhaseTwo,evaluatePhaseTwo);
-  assert.strictEqual(runtime.RedeemerWitnessKey,RedeemerWitnessKey);
+  assert.strictEqual(runtime.plutus.evaluatePhaseTwo,evaluatePhaseTwo);
+  assert.strictEqual(runtime.chain.RedeemerWitnessKey,RedeemerWitnessKey);
 });
 
 test("evaluatePhaseTwoRaw selects Babbage V2 and Conway V3 argument conventions", async () => {

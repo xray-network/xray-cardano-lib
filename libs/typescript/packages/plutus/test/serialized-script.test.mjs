@@ -57,7 +57,7 @@ test("serialized envelopes reject malformed, trailing, invalid, and ambiguous fo
 
 test("serialized script ownership is identical across focused, root, and aggregate exports", () => {
   assert.strictEqual(focused.SerializedPlutusScript,root.SerializedPlutusScript);
-  assert.strictEqual(aggregate.SerializedPlutusScript,root.SerializedPlutusScript);
+  assert.strictEqual(aggregate.plutus.SerializedPlutusScript,root.SerializedPlutusScript);
   assert.strictEqual(focused.SerializedPlutusScriptKind,root.SerializedPlutusScriptKind);
-  assert.strictEqual(aggregate.SerializedPlutusScriptKind,root.SerializedPlutusScriptKind);
+  assert.strictEqual(aggregate.plutus.SerializedPlutusScriptKind,root.SerializedPlutusScriptKind);
 });

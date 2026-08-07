@@ -28,11 +28,8 @@ import {
   PlutusData,
   Pointer,
   PointerAddress,
-  PrivateKey,
-  PublicKey,
   Rational,
   RewardAddress,
-  ScriptHash,
   TransactionMetadatum,
   Transaction,
   TransactionBody,
@@ -57,7 +54,8 @@ import {
   min_fee,
   min_no_script_fee,
   min_script_fee,
-} from "../../runtime/dist/esm/index.js";
+} from "../dist/esm/index.js";
+import { PrivateKey, PublicKey, ScriptHash } from "../../crypto/dist/esm/index.js";
 import { decodeCbor, encodeCbor } from "../../core/dist/esm/index.js";
 import { decodeBech32, encodeBech32 } from "../../core/dist/esm/encoding/index.js";
 import {

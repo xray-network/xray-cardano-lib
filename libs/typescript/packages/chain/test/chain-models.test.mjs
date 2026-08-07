@@ -2,9 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   AssetName,
-  BigInteger,
   ConstrPlutusData,
-  Int,
   MultiAsset,
   NativeScript,
   NativeScriptList,
@@ -15,7 +13,8 @@ import {
   TransactionInput,
   TransactionMetadatum,
   Value,
-} from "../../runtime/dist/esm/index.js";
+} from "../dist/esm/index.js";
+import { BigInteger, Int } from "../../core/dist/esm/index.js";
 import { ScriptHash } from "../../crypto/dist/esm/index.js";
 import { TaggedTransactionInputSet } from "../dist/esm/era/shared/models.js";
 

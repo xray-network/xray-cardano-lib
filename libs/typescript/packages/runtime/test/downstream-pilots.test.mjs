@@ -8,25 +8,25 @@ import * as cardano from "@xray-network/xray-cardano-lib";
 import { bytesToHex, hexToBytes } from "@xray-network/xray-cardano-lib-core";
 import { MultiEraBlock } from "@xray-network/xray-cardano-lib-chain/multi-era";
 
-const privateKey = cardano.PrivateKey.from_normal_bytes(
+const privateKey = cardano.crypto.PrivateKey.from_normal_bytes(
   Uint8Array.from({ length: 32 }, (_, index) => index + 1),
 );
-const address = cardano.EnterpriseAddress.new(
+const address = cardano.chain.EnterpriseAddress.new(
   0,
-  cardano.Credential.new_pub_key(privateKey.to_public().hash()),
+  cardano.chain.Credential.new_pub_key(privateKey.to_public().hash()),
 ).to_address();
 
 function sourceUtxo(index = 0) {
   const hash = new Uint8Array(32); hash[31] = index;
-  const input = cardano.TransactionInput.new(cardano.TransactionHash.from_raw_bytes(hash), BigInt(index));
-  const output = cardano.TransactionOutputBuilder.new().with_address(address)
-    .next().with_value(cardano.Value.from_coin(5_000_000n)).build().output();
-  return cardano.TransactionUnspentOutput.new(input, output);
+  const input = cardano.chain.TransactionInput.new(cardano.crypto.TransactionHash.from_raw_bytes(hash), BigInt(index));
+  const output = cardano.chain.TransactionOutputBuilder.new().with_address(address)
+    .next().with_value(cardano.chain.Value.from_coin(5_000_000n)).build().output();
+  return cardano.chain.TransactionUnspentOutput.new(input, output);
 }
 
 test("wallet pilot crosses only CIP-30 hex boundaries", async () => {
   const utxo = sourceUtxo(1);
-  const witnesses = cardano.TransactionWitnessSet.new();
+  const witnesses = cardano.chain.TransactionWitnessSet.new();
   const provider = {
     async enable() {
       return {
@@ -37,26 +37,26 @@ test("wallet pilot crosses only CIP-30 hex boundaries", async () => {
     },
   };
   const wallet = await provider.enable();
-  const decoded = (await wallet.getUtxos()).map((value) => cardano.TransactionUnspentOutput.from_cbor_hex(value));
+  const decoded = (await wallet.getUtxos()).map((value) => cardano.chain.TransactionUnspentOutput.from_cbor_hex(value));
   assert.equal(decoded[0].output().amount().coin(), 5_000_000n);
-  assert.deepEqual(cardano.Address.from_raw_bytes(hexToBytes(await wallet.getChangeAddress())).to_raw_bytes(), address.to_raw_bytes());
-  assert.deepEqual(cardano.TransactionWitnessSet.from_cbor_hex(await wallet.signTx("a0", true)).to_cbor_bytes(), witnesses.to_cbor_bytes());
+  assert.deepEqual(cardano.chain.Address.from_raw_bytes(hexToBytes(await wallet.getChangeAddress())).to_raw_bytes(), address.to_raw_bytes());
+  assert.deepEqual(cardano.chain.TransactionWitnessSet.from_cbor_hex(await wallet.signTx("a0", true)).to_cbor_bytes(), witnesses.to_cbor_bytes());
 });
 
 test("dApp pilot constructs a balanced payment body", () => {
-  const configuration = cardano.TransactionBuilderConfigBuilder.new()
-    .fee_algo(cardano.LinearFee.new(1n, 10n, 0n))
+  const configuration = cardano.chain.TransactionBuilderConfigBuilder.new()
+    .fee_algo(cardano.chain.LinearFee.new(1n, 10n, 0n))
     .pool_deposit(500n).key_deposit(100n)
     .max_value_size(5000).max_tx_size(16_384).coins_per_utxo_byte(1n)
-    .ex_unit_prices(cardano.ExUnitPrices.new(cardano.Rational.new(1n, 10n), cardano.Rational.new(1n, 10n)))
+    .ex_unit_prices(cardano.chain.ExUnitPrices.new(cardano.chain.Rational.new(1n, 10n), cardano.chain.Rational.new(1n, 10n)))
     .collateral_percentage(150).max_collateral_inputs(3).build();
   const source = sourceUtxo(2);
-  const builder = cardano.TransactionBuilder.new(configuration);
-  builder.add_input(cardano.SingleInputBuilder.new(source.input(), source.output()).payment_key());
-  builder.add_output(cardano.TransactionOutputBuilder.new().with_address(address)
-    .next().with_value(cardano.Value.from_coin(2_000_000n)).build());
-  const signed = builder.build(cardano.ChangeSelectionAlgo.Default, address);
-  signed.add_vkey(cardano.make_vkey_witness(cardano.hash_transaction(signed.body()), privateKey));
+  const builder = cardano.chain.TransactionBuilder.new(configuration);
+  builder.add_input(cardano.chain.SingleInputBuilder.new(source.input(), source.output()).payment_key());
+  builder.add_output(cardano.chain.TransactionOutputBuilder.new().with_address(address)
+    .next().with_value(cardano.chain.Value.from_coin(2_000_000n)).build());
+  const signed = builder.build(cardano.chain.ChangeSelectionAlgo.Default, address);
+  signed.add_vkey(cardano.chain.make_vkey_witness(cardano.chain.hash_transaction(signed.body()), privateKey));
   assert.ok(signed.build_checked().to_cbor_bytes().length > 0);
   assert.equal(builder.get_total_input().coin(), builder.get_total_output().coin() + builder.get_fee_if_set());
 });

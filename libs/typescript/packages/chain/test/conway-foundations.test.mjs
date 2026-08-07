@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   Anchor,
-  AnchorDocHash,
   AuthCommitteeHotCert,
   AssetName,
   AuxiliaryData,
@@ -13,12 +12,10 @@ import {
   Credential,
   DRep,
   DRepKind,
-  Ed25519KeyHash,
   ExUnits,
   GovAction,
   GovActionId,
   GovActionKind,
-  Int,
   MapAssetNameToCoin,
   MapCommitteeColdCredentialToEpoch,
   MapU64ToArrI64,
@@ -34,14 +31,12 @@ import {
   RegDrepCert,
   ResignCommitteeColdCert,
   RewardAddress,
-  ScriptHash,
   StakeDelegation,
   StakeDeregistration,
   StakeRegistration,
   StakeRegDelegCert,
   StakeVoteDelegCert,
   StakeVoteRegDelegCert,
-  TransactionHash,
   Transaction,
   TransactionBody,
   TransactionWitnessSet,
@@ -61,7 +56,9 @@ import {
   VotingProcedures,
   Withdrawals,
   VRFCert,
-} from "../../runtime/dist/esm/index.js";
+} from "../dist/esm/index.js";
+import { Int } from "../../core/dist/esm/index.js";
+import { AnchorDocHash, Ed25519KeyHash, ScriptHash, TransactionHash } from "../../crypto/dist/esm/index.js";
 import { decodeCbor, encodeCbor } from "../../core/dist/esm/index.js";
 
 const bytes = (hex) => Uint8Array.from(Buffer.from(hex, "hex"));
@@ -242,7 +239,7 @@ test("typed Conway governance factories preserve kinds, fields, maps, and public
   const aggregate = await import("../../runtime/dist/esm/index.js");
   for (const binding of ["Certificate", "DRep", "GovAction", "GovActionId", "ProposalProcedure", "Voter", "VotingProcedure", "VotingProcedures"]) {
     assert.equal(focused[binding], root[binding]);
-    assert.equal(root[binding], aggregate[binding]);
+    assert.equal(root[binding], aggregate.chain[binding]);
   }
 });
 
@@ -298,5 +295,5 @@ test("transactions expose typed defensive parts and preserve noncanonical child 
   const root = await import("../dist/esm/index.js");
   const aggregate = await import("../../runtime/dist/esm/index.js");
   assert.equal(focused.Transaction, root.Transaction);
-  assert.equal(root.Transaction, aggregate.Transaction);
+  assert.equal(root.Transaction, aggregate.chain.Transaction);
 });

@@ -21,7 +21,7 @@ const packageRules = {
       "@xray-network/xray-cardano-lib-crypto": "0.1.0",
     },
     name: "@xray-network/xray-cardano-lib-cip",
-    subpaths: ["./cip14", "./cip25", "./cip36", "./cip4", "./cip8", "./cip129"],
+    subpaths: ["./cip4", "./cip8", "./cip14", "./cip21", "./cip25", "./cip36", "./cip67", "./cip68", "./cip129"],
   },
   core: {
     dependencies: {},
@@ -53,7 +53,7 @@ const packageRules = {
       "@xray-network/xray-cardano-lib-crypto": "0.1.0",
     },
     name: "@xray-network/xray-cardano-lib-plutus",
-    subpaths: ["./data", "./uplc"],
+    subpaths: ["./data", "./uplc", "./blueprint"],
   },
 };
 const nodeBuiltins = new Set(builtinModules.map((name) => name.replace(/^node:/u, "")));

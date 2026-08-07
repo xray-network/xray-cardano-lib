@@ -12,13 +12,13 @@ npm install @xray-network/xray-cardano-lib-cip
 Import the proposal-specific entry point:
 
 ```ts
-import { AssetFingerprint } from "@xray-network/xray-cardano-lib-cip/cip14";
-import { CIP25Metadata } from "@xray-network/xray-cardano-lib-cip/cip25";
-import { CIP36KeyDeregistration } from "@xray-network/xray-cardano-lib-cip/cip36";
 import { CIP4 } from "@xray-network/xray-cardano-lib-cip/cip4";
 import { CIP8Message, COSESign1Builder } from "@xray-network/xray-cardano-lib-cip/cip8";
-import { diagnoseCip21 } from "@xray-network/xray-cardano-lib-cip/cip21";
-import { makeAssetNameLabel } from "@xray-network/xray-cardano-lib-cip/cip67";
+import { AssetFingerprint } from "@xray-network/xray-cardano-lib-cip/cip14";
+import { diagnose_cip21_transaction } from "@xray-network/xray-cardano-lib-cip/cip21";
+import { CIP25Metadata } from "@xray-network/xray-cardano-lib-cip/cip25";
+import { CIP36KeyDeregistration } from "@xray-network/xray-cardano-lib-cip/cip36";
+import { make_labeled_asset_name } from "@xray-network/xray-cardano-lib-cip/cip67";
 import { CIP68Datum } from "@xray-network/xray-cardano-lib-cip/cip68";
 ```
 
@@ -38,18 +38,17 @@ pass that hash to this facade.
 facade used by application integrations. Lower-level COSE builders remain available for custom
 header and detached-payload workflows.
 
-The root package exposes stable proposal namespaces. CIP-67 remains a focused building block and
-is intentionally not duplicated at the root:
+The root package exposes every stable implemented proposal as a numerically ordered namespace:
 
 ```ts
-import { cip4, cip8, cip14, cip21, cip25, cip36, cip68 } from "@xray-network/xray-cardano-lib-cip";
+import { cip4, cip8, cip14, cip21, cip25, cip36, cip67, cip68 } from "@xray-network/xray-cardano-lib-cip";
 ```
 
 ## Entry points
 
 | Entry point | Domain |
 | --- | --- |
-| `@xray-network/xray-cardano-lib-cip` | CIP-4, CIP-8, CIP-14, CIP-25, and CIP-36 namespaces |
+| `@xray-network/xray-cardano-lib-cip` | Stable CIP-4, CIP-8, CIP-14, CIP-21, CIP-25, CIP-36, CIP-67, and CIP-68 namespaces |
 | `@xray-network/xray-cardano-lib-cip/cip14` | User-facing asset fingerprints |
 | `@xray-network/xray-cardano-lib-cip/cip21` | Bounded, pure compatibility diagnostics over preserved CBOR |
 | `@xray-network/xray-cardano-lib-cip/cip67` | CRC-8 labelled asset-name codec |
