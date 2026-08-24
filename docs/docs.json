@@ -179,6 +179,20 @@
                   "impl/typescript/0021-IMPL-INSTR",
                   "impl/typescript/0021-IMPL-RESULT"
                 ]
+              },
+              {
+                "group": "0022 — Normalize protocol export namespaces",
+                "pages": [
+                  "impl/typescript/0022-IMPL-INSTR",
+                  "impl/typescript/0022-IMPL-RESULT"
+                ]
+              },
+              {
+                "group": "0023 — Canonicalize constructed ADA-only values",
+                "pages": [
+                  "impl/typescript/0023-IMPL-INSTR",
+                  "impl/typescript/0023-IMPL-RESULT"
+                ]
               }
             ]
           },

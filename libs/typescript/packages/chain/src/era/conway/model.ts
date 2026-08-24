@@ -545,7 +545,7 @@ export class Mint extends ConwayMap<ScriptHash, MapAssetNameToNonZeroInt64> {
 export class Value extends ConwayData {
   readonly #coin: bigint; readonly #assets: MultiAsset | undefined;
   public constructor(node: CborValue, coin?:bigint, assets?:MultiAsset) { super(node); const parsed=coin===undefined?parseValueNode(node):{coin,assets};this.#coin=parsed.coin;this.#assets=parsed.assets===undefined?undefined:copyMultiAsset(parsed.assets); }
-  public static new(coin: bigint, assets?: MultiAsset): Value { if(coin<0n||coin>UINT64_MAX)throw new RangeError("coin must fit uint64");const snapshot=assets===undefined?undefined:copyMultiAsset(assets);const node:CborValue=snapshot===undefined?uintNode(coin):{kind:"array",values:[uintNode(coin),multiAssetNode(snapshot)],encoding:{kind:"definite",width:0}};return new Value(node,coin,snapshot); }
+  public static new(coin: bigint, assets?: MultiAsset): Value { if(coin<0n||coin>UINT64_MAX)throw new RangeError("coin must fit uint64");const snapshot=assets===undefined||assets.len()===0?undefined:copyMultiAsset(assets);const node:CborValue=snapshot===undefined?uintNode(coin):{kind:"array",values:[uintNode(coin),multiAssetNode(snapshot)],encoding:{kind:"definite",width:0}};return new Value(node,coin,snapshot); }
   public static override from_json<T extends ConwayData>(this:ConwayConstructor<T>,json:string):T { const node=valueNodeFromJson(JSON.parse(json));this.validateNode(node);return new this(node); }
   public static zero(): Value { return Value.new(0n); }
   public static from_coin(coin: bigint): Value { return Value.new(coin); }
@@ -561,6 +561,7 @@ export class Value extends ConwayData {
 
 function copyAssetMap(value:MapAssetNameToCoin):MapAssetNameToCoin { const out=MapAssetNameToCoin.new();for(const asset of value.keys())out.insert(AssetName.from_raw_bytes(asset.to_raw_bytes()),value.get(asset)??0n);return out; }
 function copyMultiAsset(value:MultiAsset):MultiAsset { const out=MultiAsset.new();for(const policy of value.keys()){const assets=value.get_assets(policy);if(assets!==undefined)out.insert_assets(policy,assets);}return out; }
+function constructedValueNode(value:Value):CborValue { return value.has_multiassets()?decodeCbor(value.to_cbor_bytes()):uintNode(value.coin()); }
 
 function multiAssetNode(value: MultiAsset): CborValue { return {kind:"map",entries:value.keys().map((policy)=>[{kind:"bytes",value:policy.to_raw_bytes(),encoding:{kind:"definite",width:0}},{kind:"map",entries:(value.get_assets(policy)?.keys()??[]).map((asset)=>[{kind:"bytes",value:asset.to_raw_bytes(),encoding:{kind:"definite",width:0}},uintNode(value.get_value(policy,asset))]),encoding:{kind:"definite",width:0}}]),encoding:{kind:"definite",width:0}}; }
 function multiAssetJson(value: MultiAsset): unknown { return Object.fromEntries(value.keys().map((policy)=>[policy.to_hex(),Object.fromEntries((value.get_assets(policy)?.keys()??[]).map((asset)=>[asset.to_hex(),exactJsonInteger(value.get_value(policy,asset))]))])); }
@@ -860,7 +861,7 @@ export class TransactionOutput extends ConwayData {
   public static new(address: Address, amount: Value, datumOption?: DatumOption | null, scriptReference?: ScriptRef | null): TransactionOutput {
     const entries: Array<readonly [CborValue, CborValue]> = [
       [uintNode(0n), { kind: "bytes", value: address.to_raw_bytes(), encoding: { kind: "definite", width: 0 } }],
-      [uintNode(1n), decodeCbor(amount.to_cbor_bytes())],
+      [uintNode(1n), constructedValueNode(amount)],
     ];
     if (datumOption != null) entries.push([uintNode(2n), decodeCbor(datumOption.to_cbor_bytes())]);
     if (scriptReference != null) entries.push([uintNode(3n), decodeCbor(scriptReference.to_cbor_bytes())]);
@@ -890,7 +891,7 @@ export class TransactionOutput extends ConwayData {
   public datum_hash(): DatumHash | undefined { const value=this.cborNode().kind==="array"?this.field(2n,2):undefined;return value?.kind==="bytes"&&value.value.length===32?DatumHash.from_raw_bytes(value.value):undefined; }
   public script_ref(): ScriptRef | undefined { const value=this.cborNode().kind==="map"?this.field(3n,3):undefined;return value===undefined?undefined:ScriptRef.from_cbor_bytes(encodeCbor(value)); }
   public set_address(value: Address): void { this.setField(0n,0,{kind:"bytes",value:value.to_raw_bytes(),encoding:{kind:"definite",width:0}}); }
-  public set_amount(value: Value): void { this.setField(1n,1,decodeCbor(value.to_cbor_bytes())); }
+  public set_amount(value: Value): void { this.setField(1n,1,constructedValueNode(value)); }
   public as_alonzo_format_tx_out(): AlonzoFormatTxOut | undefined { return this.kind()===TransactionOutputKind.AlonzoFormatTxOut?AlonzoFormatTxOut.from_cbor_bytes(this.to_cbor_bytes()):undefined; }
   public as_conway_format_tx_out(): ConwayFormatTxOut | undefined { return this.kind()===TransactionOutputKind.ConwayFormatTxOut?ConwayFormatTxOut.from_cbor_bytes(this.to_cbor_bytes()):undefined; }
 }

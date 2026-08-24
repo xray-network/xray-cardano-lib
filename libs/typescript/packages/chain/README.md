@@ -76,6 +76,11 @@ ledger reference, and `script()` recovers its typed defensive payload.
 `to_json()` returns the symmetric object form. Conway, chain-root, and aggregate imports all expose
 this same nominal owner.
 
+`Value.new(coin, assets)` and transaction-output builders encode absent or empty multi-assets as the
+coin-only CBOR form. Token-bearing values retain the `[coin, multiasset]` form. Decoded values remain
+lossless: an existing `[coin, {}]` value re-encodes byte-for-byte until an application explicitly
+rebuilds it.
+
 `Address.from_bech32` validates the canonical CIP-5 address HRP against both address kind and
 network. `Address.to_bech32()` always emits that canonical form. Existing custom-prefix calls are
 retained as compatibility forwarders to the explicit low-level

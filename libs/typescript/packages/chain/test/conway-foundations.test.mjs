@@ -19,6 +19,7 @@ import {
   MapAssetNameToCoin,
   MapCommitteeColdCredentialToEpoch,
   MapU64ToArrI64,
+  MultiAsset,
   NetworkId,
   PoolParams,
   PoolRegistration,
@@ -56,6 +57,7 @@ import {
   VotingProcedures,
   Withdrawals,
   VRFCert,
+  hash_transaction,
 } from "../dist/esm/index.js";
 import { Int } from "../../core/dist/esm/index.js";
 import { AnchorDocHash, Ed25519KeyHash, ScriptHash, TransactionHash } from "../../crypto/dist/esm/index.js";
@@ -98,6 +100,56 @@ test("assets use structural keys and checked component-wise arithmetic", () => {
   assert.equal(Value.from_cbor_hex(value.to_cbor_hex()).coin(), 5n);
   assert.equal(value.checked_sub(Value.from_coin(6n)), undefined);
   assert.equal(value.checked_add(Value.from_coin(7n))?.coin(), 12n);
+});
+
+test("constructed ADA-only values are canonical while decoded empty assets remain lossless", () => {
+  const coin = 4_000_000n;
+  const coinCbor = "1a003d0900";
+  const emptyTupleCbor = `82${coinCbor}a0`;
+  const emptyAssets = MultiAsset.new();
+
+  assert.equal(Value.new(coin).to_cbor_hex(), coinCbor);
+  assert.equal(Value.new(coin, emptyAssets).to_cbor_hex(), coinCbor);
+  assert.equal(Value.from_coin(1n).checked_add(Value.from_coin(2n))?.to_cbor_hex(), "03");
+  assert.equal(Value.from_coin(3n).checked_sub(Value.from_coin(2n))?.to_cbor_hex(), "01");
+  assert.equal(Value.from_coin(1n).clamped_sub(Value.from_coin(2n)).to_cbor_hex(), "00");
+
+  const policy = ScriptHash.from_hex("00".repeat(28));
+  const asset = AssetName.new(new Uint8Array());
+  const tokenAssets = MultiAsset.new();
+  tokenAssets.insert(policy, asset, 1n);
+  assert.equal(Value.new(coin, tokenAssets).to_cbor_hex(), `82${coinCbor}a1581c${"00".repeat(28)}a14001`);
+
+  const preserved = Value.from_cbor_hex(emptyTupleCbor);
+  assert.equal(preserved.to_cbor_hex(), emptyTupleCbor);
+  assert.equal(preserved.coin(), coin);
+  assert.equal(preserved.has_multiassets(), false);
+});
+
+test("transaction-body round trips preserve received empty-asset tuples and their hashes", () => {
+  const amount = decodeCbor(bytes("821a003d0900a0"));
+  const output = {
+    kind: "map",
+    entries: [
+      [uint(0n), byteNode(new Uint8Array(29))],
+      [uint(1n), amount],
+    ],
+    encoding: { kind: "definite", width: 0 },
+  };
+  const bodyBytes = encodeCbor({
+    kind: "map",
+    entries: [
+      [uint(0n), { kind: "tag", tag: 258n, value: array([]), encoding: { width: 2 } }],
+      [uint(1n), array([output])],
+      [uint(2n), uint(0n)],
+    ],
+    encoding: { kind: "definite", width: 0 },
+  });
+  const body = TransactionBody.from_cbor_bytes(bodyBytes);
+  const initialHash = hash_transaction(body).to_hex();
+
+  assert.deepEqual(body.to_cbor_bytes(), bodyBytes);
+  assert.equal(hash_transaction(TransactionBody.from_cbor_bytes(body.to_cbor_bytes())).to_hex(), initialHash);
 });
 
 test("certificate, governance, crypto, and block family representatives round-trip", () => {

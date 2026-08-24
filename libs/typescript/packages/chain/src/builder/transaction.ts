@@ -162,7 +162,7 @@ function outputParts(output: TransactionOutput): {
 function makeOutput(address: Address, amount: Value, datum?: DatumOption, scriptRef?: ScriptRef): TransactionOutput {
   const entries: Array<readonly [CborValue, CborValue]> = [
     [uint(0n), bytes(address.to_raw_bytes())],
-    [uint(1n), node(amount)],
+    [uint(1n), amount.has_multiassets() ? node(amount) : uint(amount.coin())],
   ];
   if (datum !== undefined) entries.push([uint(2n), node(datum)]);
   if (scriptRef !== undefined) entries.push([uint(3n), node(scriptRef)]);

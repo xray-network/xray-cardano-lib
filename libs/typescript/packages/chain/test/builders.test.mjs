@@ -55,6 +55,7 @@ import {
   TransactionBuilder,
   TransactionBuilderConfigBuilder,
   TransactionInput,
+  TransactionOutput,
   TransactionOutputBuilder,
   TransactionUnspentOutput,
   TransactionWitnessSetBuilder,
@@ -115,6 +116,31 @@ test("add_output_amount, add_output_coin, and too-big output gates", () => {
   assert.ok(built.output().to_js_value());
   assert.ok(min_ada_required(built.output(), 2n) <= Value.from_cbor_bytes(bodyFieldFromOutput(built.output(), 1)).coin());
   assert.throws(() => TransactionBuilder.new(config({ maxValueSize: 1 })).add_output(output(2_000_000n)), /maximum size/);
+});
+
+test("output construction and transaction bodies omit empty multi-assets", () => {
+  const emptyTuple = Value.from_cbor_hex("821a003d0900a0");
+  const result = TransactionOutputBuilder.new()
+    .with_address(address)
+    .next()
+    .with_value(emptyTuple)
+    .build();
+  const built = result.output();
+  assert.equal(Buffer.from(bodyFieldFromOutput(built, 1)).toString("hex"), "1a003d0900");
+  const direct = TransactionOutput.new(address, emptyTuple);
+  assert.equal(Buffer.from(bodyFieldFromOutput(direct, 1)).toString("hex"), "1a003d0900");
+  direct.set_amount(emptyTuple);
+  assert.equal(Buffer.from(bodyFieldFromOutput(direct, 1)).toString("hex"), "1a003d0900");
+
+  const builder = TransactionBuilder.new(config({ fee: LinearFee.new(0n, 200n, 0n) }));
+  builder.add_input(input(99, 4_000_200n).result);
+  builder.add_output(result);
+  const outputs = bodyField(builder.build(ChangeSelectionAlgo.Default, address).body(), 1);
+  assert.equal(outputs?.kind, "array");
+  assert.equal(outputs.values[0]?.kind, "map");
+  const amount = outputs.values[0].entries.find(([keyNode]) => keyNode.kind === "unsigned" && keyNode.value === 1n)?.[1];
+  assert.equal(amount?.kind, "unsigned");
+  assert.equal(amount?.value, 4_000_000n);
 });
 
 test("vkey_test, bootstrap_test, native_script_test, and witness requirements", () => {
