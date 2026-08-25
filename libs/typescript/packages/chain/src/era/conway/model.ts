@@ -11,9 +11,10 @@ import {
   hexToBytes,
 } from "@xray-network/xray-cardano-lib-core";
 import type { CborValue } from "@xray-network/xray-cardano-lib-core";
-import { AnchorDocHash, DatumHash, Ed25519KeyHash, ScriptHash, TransactionHash } from "@xray-network/xray-cardano-lib-crypto";
+import { AnchorDocHash, DatumHash, Ed25519KeyHash, Ed25519Signature, PoolMetadataHash, PublicKey, ScriptHash, TransactionHash, VRFKeyHash } from "@xray-network/xray-cardano-lib-crypto";
 import { Address, RewardAddress } from "../../address/index.js";
-import { NativeScript } from "../shared/models.js";
+import { BootstrapWitness } from "../byron/transaction.js";
+import { NativeScript, NativeScriptList, PlutusData, PlutusDataList } from "../shared/models.js";
 import type { CostModelsJSON } from "../shared/json-types.js";
 import { validateConwayModel } from "./validation.js";
 
@@ -130,6 +131,39 @@ export class ConwayData {
   public to_canonical_cbor_hex(): string { return bytesToHex(this.to_canonical_cbor_bytes()); }
   public to_js_value(): unknown { return nodeJson(this.#node); }
   public to_json(): string { return JSON.stringify(this.to_js_value(), null, 2); }
+}
+
+/** Defensively owned CBOR for an extension field not recognized by the current ledger model. */
+export class UnknownCborField {
+  readonly #key: CborValue;
+  readonly #value: CborValue;
+  public constructor(key: CborValue, value: CborValue) {
+    this.#key = decodeCbor(encodeCbor(key));
+    this.#value = decodeCbor(encodeCbor(value));
+  }
+  public unsigned_key(): bigint | undefined { return this.#key.kind === "unsigned" ? this.#key.value : undefined; }
+  public key_cbor_bytes(): Uint8Array { return encodeCbor(this.#key); }
+  public value_cbor_bytes(): Uint8Array { return encodeCbor(this.#value); }
+}
+
+function mapFieldNode(node: CborValue, key: bigint): CborValue | undefined {
+  if (node.kind !== "map") return undefined;
+  return node.entries.find(([candidate]) => candidate.kind === "unsigned" && candidate.value === key)?.[1];
+}
+
+function collectionNode(node: CborValue): CborValue | undefined {
+  return node.kind === "tag" && node.tag === 258n ? node.value : node;
+}
+
+function typedList<T>(
+  node: CborValue | undefined,
+  list: { add(value: T): void },
+  owner: { from_cbor_bytes(bytes: Uint8Array): T },
+): typeof list | undefined {
+  const values = node === undefined ? undefined : collectionNode(node);
+  if (values?.kind !== "array") return undefined;
+  for (const value of values.values) list.add(owner.from_cbor_bytes(encodeCbor(value)));
+  return list;
 }
 
 function typedArray(values: readonly ConwayInput[]): CborValue {
@@ -361,7 +395,7 @@ export class VRFCert extends ConwayData {
   public override to_js_value():unknown { return {output:[...this.output()],proof:[...this.proof()]}; }
 }
 
-export class ConwayList<T extends ConwayData> {
+export class ConwayList<T> {
   readonly #values: T[] = [];
   public static new<T>(this: new()=>T): T { return new this(); }
   public len(): number { return this.#values.length; }
@@ -576,7 +610,19 @@ export class AuthCommitteeHotCert extends ConwayData {
   public cold_credential(): Credential { return decodeField(this.arrayField(1),Credential); }
   public hot_credential(): Credential { return decodeField(this.arrayField(2),Credential); }
 }
-export class AuxiliaryData extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "choice"; public static new(...values: ConwayInput[]): AuxiliaryData { const node=modelNode(this.wireShape,values);this.validateNode(node);return new AuxiliaryData(node); } }
+export class AuxiliaryData extends ConwayData {
+  protected static override readonly wireShape: ConwayWireShape = "choice";
+  public static new(...values: ConwayInput[]): AuxiliaryData { const node=modelNode(this.wireShape,values);this.validateNode(node);return new AuxiliaryData(node); }
+  private payload(): CborValue { const node=this.cborNode();return node.kind==="tag"&&node.tag===259n?node.value:node; }
+  public kind(): AuxiliaryDataKind { const node=this.cborNode();return node.kind==="map"?AuxiliaryDataKind.Shelley:node.kind==="array"?AuxiliaryDataKind.ShelleyMA:AuxiliaryDataKind.Conway; }
+  private component(key: bigint, index: number): CborValue | undefined { const node=this.payload();return node.kind==="map"?mapFieldNode(node,key):node.kind==="array"?node.values[index]:undefined; }
+  public metadata(): Metadata | undefined { const node=this.kind()===AuxiliaryDataKind.Shelley?this.cborNode():this.component(0n,0);return node===undefined?undefined:Metadata.from_cbor_bytes(encodeCbor(node)); }
+  public native_scripts(): NativeScriptList | undefined { return typedList(this.component(1n,1),NativeScriptList.new(),NativeScript) as NativeScriptList|undefined; }
+  public plutus_v1_scripts(): PlutusV1ScriptList | undefined { return typedList(this.component(2n,2),PlutusV1ScriptList.new(),PlutusV1Script) as PlutusV1ScriptList|undefined; }
+  public plutus_v2_scripts(): PlutusV2ScriptList | undefined { return typedList(this.component(3n,3),PlutusV2ScriptList.new(),PlutusV2Script) as PlutusV2ScriptList|undefined; }
+  public plutus_v3_scripts(): PlutusV3ScriptList | undefined { return typedList(this.component(4n,4),PlutusV3ScriptList.new(),PlutusV3Script) as PlutusV3ScriptList|undefined; }
+  public unknown_fields(): readonly UnknownCborField[] { const node=this.payload();if(this.kind()!==AuxiliaryDataKind.Conway||node.kind!=="map")return [];return node.entries.filter(([key])=>key.kind!=="unsigned"||key.value>4n).map(([key,value])=>new UnknownCborField(key,value)); }
+}
 export class Block extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): Block { const node=modelNode(this.wireShape,values);this.validateNode(node);return new Block(node); } }
 export class Certificate extends ConwayData {
   protected static override readonly wireShape: ConwayWireShape = "array";
@@ -641,7 +687,13 @@ export class DRep extends ConwayData {
   public as_script(): ScriptHash | undefined { return this.kind()===DRepKind.Script?ScriptHash.from_raw_bytes(hash28Field(this.arrayField(1),"DRep script hash")):undefined; }
 }
 export class DRepVotingThresholds extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): DRepVotingThresholds { const node=modelNode(this.wireShape,values);this.validateNode(node);return new DRepVotingThresholds(node); } }
-export class DatumOption extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): DatumOption { const node=modelNode(this.wireShape,values);this.validateNode(node);return new DatumOption(node); } }
+export class DatumOption extends ConwayData {
+  protected static override readonly wireShape: ConwayWireShape = "array";
+  public static new(...values: ConwayInput[]): DatumOption { const node=modelNode(this.wireShape,values);this.validateNode(node);return new DatumOption(node); }
+  public kind(): DatumOptionKind { return this.arrayDiscriminant("DatumOption") as DatumOptionKind; }
+  public as_hash(): DatumHash | undefined { const node=this.arrayField(1);return this.kind()===DatumOptionKind.Hash&&node.kind==="bytes"?DatumHash.from_raw_bytes(node.value):undefined; }
+  public as_datum(): PlutusData | undefined { if(this.kind()!==DatumOptionKind.Datum)return undefined;const node=this.arrayField(1);if(node.kind!=="tag"||node.tag!==24n||node.value.kind!=="bytes")throw new TypeError("inline datum must be embedded CBOR");return PlutusData.from_cbor_bytes(node.value.value); }
+}
 export class GovAction extends ConwayData {
   protected static override readonly wireShape: ConwayWireShape = "array";
   public static new(...values: ConwayInput[]): GovAction { const node=modelNode(this.wireShape,values);this.validateNode(node);return new GovAction(node); }
@@ -685,16 +737,23 @@ export class NoConfidence extends ConwayData { protected static override readonl
 export class Nonce extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): Nonce { const node=modelNode(this.wireShape,values);this.validateNode(node);return new Nonce(node); } }
 export class OperationalCert extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): OperationalCert { const node=modelNode(this.wireShape,values);this.validateNode(node);return new OperationalCert(node); } }
 export class ParameterChangeAction extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): ParameterChangeAction { const node=modelNode(this.wireShape,values);this.validateNode(node);return new ParameterChangeAction(node); } }
-export class PoolMetadata extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): PoolMetadata { const node=modelNode(this.wireShape,values);this.validateNode(node);return new PoolMetadata(node); } }
+export class PoolMetadata extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): PoolMetadata { const node=modelNode(this.wireShape,values);this.validateNode(node);return new PoolMetadata(node); } public url():Url{return decodeField(this.arrayField(0),Url);} public pool_metadata_hash():PoolMetadataHash{const node=this.arrayField(1);if(node.kind!=="bytes"||node.value.length!==32)throw new TypeError("pool metadata hash must be 32 bytes");return PoolMetadataHash.from_raw_bytes(node.value);} }
 export class PoolParams extends ConwayData {
   protected static override readonly wireShape: ConwayWireShape = "array";
   public static new(...values: ConwayInput[]): PoolParams { const node=modelNode(this.wireShape,values);this.validateNode(node);return new PoolParams(node); }
   public operator(): Ed25519KeyHash { return Ed25519KeyHash.from_raw_bytes(hash28Field(this.arrayField(0),"pool operator")); }
+  public vrf_keyhash(): VRFKeyHash { const node=this.arrayField(1);if(node.kind!=="bytes"||node.value.length!==32)throw new TypeError("pool VRF key hash must be 32 bytes");return VRFKeyHash.from_raw_bytes(node.value); }
+  public pledge(): bigint { return uintField(this.arrayField(2),"pool pledge"); }
+  public cost(): bigint { return uintField(this.arrayField(3),"pool cost"); }
+  public margin(): UnitInterval { return decodeField(this.arrayField(4),UnitInterval); }
+  public reward_account(): RewardAddress { const node=this.arrayField(5);if(node.kind!=="bytes")throw new TypeError("pool reward account must be bytes");const value=RewardAddress.from_address(Address.from_raw_bytes(node.value));if(value===undefined)throw new TypeError("pool reward account must be a reward address");return value; }
   public pool_owners(): Ed25519KeyHash[] {
     const field=this.arrayField(6),values=field.kind==="tag"&&field.tag===258n?field.value:field;
     if(values.kind!=="array")throw new TypeError("pool owners must be a set");
     return values.values.map((value)=>Ed25519KeyHash.from_raw_bytes(hash28Field(value,"pool owner")));
   }
+  public relays(): RelayList { const node=this.arrayField(7);if(node.kind!=="array")throw new TypeError("pool relays must be an array");const result=RelayList.new();for(const relay of node.values)result.add(Relay.from_cbor_bytes(encodeCbor(relay)));return result; }
+  public pool_metadata(): PoolMetadata | undefined { const node=this.arrayField(8);return node.kind==="null"?undefined:decodeField(node,PoolMetadata); }
 }
 export class PoolRegistration extends ConwayData {
   public static new(poolParams: PoolParams): PoolRegistration;
@@ -763,6 +822,7 @@ export class RequiredSigners extends ConwayData {
     this.validateNode(node);
     return new RequiredSigners(node);
   }
+  public hashes(): Ed25519KeyHash[] { const node=this.cborNode(),values=node.kind==="tag"&&node.tag===258n?node.value:node;if(values.kind!=="array")throw new TypeError("required signers must be a set");return values.values.map((value)=>Ed25519KeyHash.from_raw_bytes(hash28Field(value,"required signer"))); }
 }
 export class ResignCommitteeColdCert extends ConwayData {
   public static new(coldCredential: Credential, anchor: Anchor | null): ResignCommitteeColdCert;
@@ -895,7 +955,20 @@ export class TransactionOutput extends ConwayData {
   public as_alonzo_format_tx_out(): AlonzoFormatTxOut | undefined { return this.kind()===TransactionOutputKind.AlonzoFormatTxOut?AlonzoFormatTxOut.from_cbor_bytes(this.to_cbor_bytes()):undefined; }
   public as_conway_format_tx_out(): ConwayFormatTxOut | undefined { return this.kind()===TransactionOutputKind.ConwayFormatTxOut?ConwayFormatTxOut.from_cbor_bytes(this.to_cbor_bytes()):undefined; }
 }
-export class TransactionWitnessSet extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "map"; public static new(...values: ConwayInput[]): TransactionWitnessSet { const node=modelNode(this.wireShape,values);this.validateNode(node);return new TransactionWitnessSet(node); } }
+export class TransactionWitnessSet extends ConwayData {
+  protected static override readonly wireShape: ConwayWireShape = "map";
+  public static new(...values: ConwayInput[]): TransactionWitnessSet { const node=modelNode(this.wireShape,values);this.validateNode(node);return new TransactionWitnessSet(node); }
+  private component(key: bigint): CborValue | undefined { return mapFieldNode(this.cborNode(),key); }
+  public vkeywitnesses(): VkeywitnessList | undefined { return typedList(this.component(0n),VkeywitnessList.new(),Vkeywitness) as VkeywitnessList|undefined; }
+  public native_scripts(): NativeScriptList | undefined { return typedList(this.component(1n),NativeScriptList.new(),NativeScript) as NativeScriptList|undefined; }
+  public bootstrap_witnesses(): BootstrapWitnessList | undefined { const node=this.component(2n);const values=node===undefined?undefined:collectionNode(node);if(values?.kind!=="array")return undefined;const out=BootstrapWitnessList.new();for(const value of values.values)out.add(BootstrapWitness.from_cbor_bytes(encodeCbor(value)));return out; }
+  public plutus_v1_scripts(): PlutusV1ScriptList | undefined { return typedList(this.component(3n),PlutusV1ScriptList.new(),PlutusV1Script) as PlutusV1ScriptList|undefined; }
+  public plutus_data(): PlutusDataList | undefined { return typedList(this.component(4n),PlutusDataList.new(),PlutusData) as PlutusDataList|undefined; }
+  public redeemers(): Redeemers | undefined { const node=this.component(5n);return node===undefined?undefined:Redeemers.from_cbor_bytes(encodeCbor(node)); }
+  public plutus_v2_scripts(): PlutusV2ScriptList | undefined { return typedList(this.component(6n),PlutusV2ScriptList.new(),PlutusV2Script) as PlutusV2ScriptList|undefined; }
+  public plutus_v3_scripts(): PlutusV3ScriptList | undefined { return typedList(this.component(7n),PlutusV3ScriptList.new(),PlutusV3Script) as PlutusV3ScriptList|undefined; }
+  public unknown_fields(): readonly UnknownCborField[] { const node=this.cborNode();if(node.kind!=="map")return [];return node.entries.filter(([key])=>key.kind!=="unsigned"||key.value>7n).map(([key,value])=>new UnknownCborField(key,value)); }
+}
 export class TreasuryWithdrawalsAction extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): TreasuryWithdrawalsAction { const node=modelNode(this.wireShape,values);this.validateNode(node);return new TreasuryWithdrawalsAction(node); } }
 export class UnregCert extends ConwayData {
   public static new(stakeCredential: Credential, deposit: bigint): UnregCert;
@@ -919,7 +992,7 @@ export class UpdateDrepCert extends ConwayData {
   public drep_credential(): Credential { return decodeField(this.arrayField(1),Credential); }
   public anchor(): Anchor | undefined { const value=this.arrayField(2);return value.kind==="null"?undefined:decodeField(value,Anchor); }
 }
-export class Vkeywitness extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): Vkeywitness { const node=modelNode(this.wireShape,values);this.validateNode(node);return new Vkeywitness(node); } }
+export class Vkeywitness extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "array"; public static new(...values: ConwayInput[]): Vkeywitness { const node=modelNode(this.wireShape,values);this.validateNode(node);return new Vkeywitness(node); } public vkey():PublicKey{const node=this.arrayField(0);if(node.kind!=="bytes")throw new TypeError("vkey witness public key must be bytes");return PublicKey.from_bytes(node.value);} public signature():Ed25519Signature{const node=this.arrayField(1);if(node.kind!=="bytes")throw new TypeError("vkey witness signature must be bytes");return Ed25519Signature.from_raw_bytes(node.value);} }
 export class VoteDelegCert extends ConwayData {
   public static new(stakeCredential: Credential, drep: DRep): VoteDelegCert;
   public static new(...values: ConwayInput[]): VoteDelegCert;
@@ -974,18 +1047,18 @@ export class VotingProcedures extends ConwayData {
   }
   public get(voter: Voter, actionId: GovActionId): VotingProcedure | undefined { const node=this.cborNode();if(node.kind!=="map")throw new TypeError("VotingProcedures requires a map");const voterHex=voter.to_canonical_cbor_hex(),actionHex=actionId.to_canonical_cbor_hex();const inner=node.entries.find(([key])=>bytesToHex(encodeCbor(key,{mode:"canonical"}))===voterHex)?.[1];if(inner?.kind!=="map")return undefined;const value=inner.entries.find(([key])=>bytesToHex(encodeCbor(key,{mode:"canonical"}))===actionHex)?.[1];return value===undefined?undefined:VotingProcedure.from_cbor_bytes(encodeCbor(value)); }
 }
-export class Withdrawals extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "map"; public static new(...values: ConwayInput[]): Withdrawals { const node=modelNode(this.wireShape,values);this.validateNode(node);return new Withdrawals(node); } }
+export class Withdrawals extends ConwayData { protected static override readonly wireShape: ConwayWireShape = "map"; public static new(...values: ConwayInput[]): Withdrawals { const node=modelNode(this.wireShape,values);this.validateNode(node);return new Withdrawals(node); } public entries():ReadonlyArray<readonly [RewardAddress,bigint]>{const node=this.cborNode();if(node.kind!=="map")throw new TypeError("withdrawals must be a map");return node.entries.map(([account,amount])=>{if(account.kind!=="bytes"||amount.kind!=="unsigned")throw new TypeError("invalid withdrawal");const reward=RewardAddress.from_address(Address.from_raw_bytes(account.value));if(reward===undefined)throw new TypeError("withdrawal key must be a reward address");return [reward,amount.value] as const;});} }
 
 export class AlonzoFormatTxOutList extends ConwayList<ConwayData> {}
 export class AssetNameList extends ConwayList<ConwayData> {}
-export class BootstrapWitnessList extends ConwayList<ConwayData> {}
+export class BootstrapWitnessList extends ConwayList<BootstrapWitness> {}
 export class CertificateList extends ConwayList<ConwayData> {}
 export class CommitteeColdCredentialList extends ConwayList<ConwayData> {}
 export class GenesisHashList extends ConwayList<ConwayData> {}
 export class GovActionIdList extends ConwayList<ConwayData> {}
 export class LanguageList extends ConwayList<ConwayData> {}
 export class LegacyRedeemerList extends ConwayList<ConwayData> {}
-export class NonEmptyBootstrapWitnessList extends ConwayList<ConwayData> {}
+export class NonEmptyBootstrapWitnessList extends ConwayList<BootstrapWitness> {}
 export class NonEmptyCertificateList extends ConwayList<ConwayData> {}
 export class NonEmptyLegacyRedeemerList extends ConwayList<ConwayData> {}
 export class NonEmptyNativeScriptList extends ConwayList<ConwayData> {}
@@ -1002,7 +1075,7 @@ export class PlutusV3ScriptList extends ConwayList<ConwayData> {}
 export class PolicyIdList extends ConwayList<ConwayData> {}
 export class ProposalProcedureList extends ConwayList<ConwayData> {}
 export class RedeemerKeyList extends ConwayList<ConwayData> {}
-export class RelayList extends ConwayList<ConwayData> {}
+export class RelayList extends ConwayList<Relay> {}
 export class RewardAccountList extends ConwayList<ConwayData> {}
 export class StakeCredentialList extends ConwayList<ConwayData> {}
 export class TransactionBodyList extends ConwayList<ConwayData> {}

@@ -48,6 +48,11 @@ The aggregate root owns no independent implementation and deliberately has no fl
 aliases. This prevents collisions between ledger `chain.PlutusData`, typed `plutus.Data`, and
 generic proposal names.
 
+Transaction inspection bindings exposed through `chain` are the exact nominal bindings from the
+chain package. Standalone multi-era transaction bodies retain an unknown era until authoritative
+block context supplies one, and intrinsic accessors preserve original CBOR while exposing exact
+ledger values without UTxO resolution or signedness inference.
+
 ## Development
 
 Run workspace commands from the repository root:

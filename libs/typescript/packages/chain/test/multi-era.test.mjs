@@ -11,7 +11,9 @@ import {
   MultiEraBlockKind,
   MultiEraCertificate,
   MultiEraCertificateKind,
+  MultiEraTransactionBody,
 } from "@xray-network/xray-cardano-lib-chain/multi-era";
+import { AuxiliaryData, TransactionWitnessSet } from "@xray-network/xray-cardano-lib-chain/conway";
 import {
   BabbageBlock,
   BabbageTransactionBody,
@@ -177,4 +179,38 @@ test("Byron, historical-era, certificate, and hash facade helpers are usable", a
   const hash256 = Blake2b256.from_raw_bytes(new Uint8Array(32).fill(0x22));
   assert.equal(Blake2b224.from_hex(hash224.to_hex()).to_bech32("hash").startsWith("hash1"), true);
   assert.deepEqual(Blake2b256.from_bech32(hash256.to_bech32("digest")).to_raw_bytes(), hash256.to_raw_bytes());
+});
+
+test("standalone bodies and future extension fields remain losslessly inspectable", () => {
+  const uint = (value) => ({ kind: "unsigned", value, encoding: { width: 0 } });
+  const text = (value) => ({ kind: "text", value, encoding: { kind: "definite", width: 0 } });
+  const array = (values) => ({ kind: "array", values, encoding: { kind: "definite", width: 0 } });
+  const map = (entries) => ({ kind: "map", entries, encoding: { kind: "definite", width: 0 } });
+  const bodyBytes = encodeCbor(map([
+    [uint(0n), array([])],
+    [uint(1n), array([])],
+    [uint(2n), uint(9_007_199_254_740_993n)],
+    [uint(99n), text("future-body")],
+  ]));
+  const body = MultiEraTransactionBody.from_cbor_bytes(bodyBytes);
+  assert.equal(body.kind(), undefined);
+  assert.equal(body.fee(), 9_007_199_254_740_993n);
+  assert.equal(body.as_conway(), undefined);
+  assert.equal(body.unknown_fields()[0].unsigned_key(), 99n);
+  assert.deepEqual(body.to_cbor_bytes(), bodyBytes);
+
+  const futureCertificate = MultiEraCertificate.from_cbor_bytes(encodeCbor(array([uint(19n), text("future")])));
+  assert.equal(futureCertificate.raw_tag(), 19n);
+  assert.equal(futureCertificate.known_kind(), undefined);
+  assert.equal(futureCertificate.as_conway(), undefined);
+
+  const witness = TransactionWitnessSet.from_cbor_bytes(encodeCbor(map([[uint(99n), text("future-witness")]])));
+  assert.equal(witness.unknown_fields()[0].unsigned_key(), 99n);
+  const auxiliary = AuxiliaryData.from_cbor_bytes(encodeCbor({
+    kind: "tag",
+    tag: 259n,
+    value: map([[uint(99n), text("future-auxiliary")]]),
+    encoding: { width: 2 },
+  }));
+  assert.equal(auxiliary.unknown_fields()[0].unsigned_key(), 99n);
 });

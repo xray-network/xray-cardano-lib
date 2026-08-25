@@ -102,6 +102,14 @@ export function inspectBlock(bytes: Uint8Array) {
 }
 ```
 
+`MultiEraTransactionBody.from_cbor_bytes(bytes)` provides an era-neutral, intrinsic transaction
+view without inventing an era for standalone bodies. Its accessors cover inputs, complete outputs
+(including datum and reference scripts), certificates, validity, value operations, collateral,
+governance, and protocol fields using `bigint` for ledger integers. Witness sets and auxiliary data
+likewise expose their typed components. Unknown future map fields and certificate tags retain owned
+CBOR bytes, while recognized fields remain strictly validated. These APIs never resolve an input,
+infer signature completeness, or convert the transaction into an application JSON model.
+
 ## Source layout
 
 ```text

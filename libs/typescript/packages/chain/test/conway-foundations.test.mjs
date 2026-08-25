@@ -166,7 +166,7 @@ test("certificate, governance, crypto, and block family representatives round-tr
   }
 });
 
-test("typed Conway certificates cover every official discriminator and reject gaps", () => {
+test("typed Conway certificates cover current constructors and retain historical or future tags", () => {
   const keyHash = Ed25519KeyHash.from_hex("11".repeat(28));
   const scriptHash = ScriptHash.from_hex("22".repeat(28));
   const keyCredential = Credential.new_pub_key(keyHash);
@@ -215,7 +215,17 @@ test("typed Conway certificates cover every official discriminator and reject ga
   assert.deepEqual(PoolRegistration.new(poolParams).pool_params().pool_owners().map((owner) => owner.to_hex()), [keyHash.to_hex()]);
   assert.equal(PoolRetirement.new(keyHash, 0xffff_ffff_ffff_ffffn).epoch(), 0xffff_ffff_ffff_ffffn);
   assert.throws(() => PoolRetirement.new(keyHash, 0x1_0000_0000_0000_0000n));
-  for (const tag of [5n, 6n, 19n]) assert.throws(() => Certificate.from_cbor_bytes(encodeCbor(array([uint(tag)]))));
+  const historicalGenesis = Certificate.from_cbor_bytes(encodeCbor(array([
+    uint(5n), byteNode(keyHash.to_raw_bytes()), byteNode(keyHash.to_raw_bytes()), byteNode(new Uint8Array(32)),
+  ])));
+  const historicalMir = Certificate.from_cbor_bytes(encodeCbor(array([
+    uint(6n), array([uint(0n), { kind: "map", entries: [], encoding: { kind: "definite", width: 0 } }]),
+  ])));
+  const future = Certificate.from_cbor_bytes(encodeCbor(array([uint(19n)])));
+  assert.equal(historicalGenesis.kind(), 5);
+  assert.equal(historicalMir.kind(), 6);
+  assert.equal(future.kind(), 19);
+  for (const tag of [5n, 6n]) assert.throws(() => Certificate.from_cbor_bytes(encodeCbor(array([uint(tag)]))));
 
   const canonical = Certificate.new_stake_registration(StakeRegistration.new(keyCredential)).to_cbor_hex();
   const noncanonical = Certificate.from_cbor_hex(`9f${canonical.slice(2)}ff`);

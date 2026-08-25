@@ -110,13 +110,16 @@ const poolFields: readonly CborValidator[] = [
   arrayOf(relay),
   optional(poolMetadata),
 ];
+const mir = tuple(unsigned(1n), oneOf(mapOf(credential, integer), coin));
 
-const certificate = discriminated({
+const knownCertificate = discriminated({
   0: [credential],
   1: [credential],
   2: [credential, hash28],
   3: poolFields,
   4: [hash28, uint64],
+  5: [hash28, hash28, hash32],
+  6: [mir],
   7: [credential, coin],
   8: [credential, coin],
   9: [credential, drep],
@@ -130,6 +133,13 @@ const certificate = discriminated({
   17: [credential, coin],
   18: [credential, optional(anchor)],
 });
+const certificate: CborValidator = (node, path = "certificate") => {
+  if (node.kind !== "array" || node.values.length === 0 || node.values[0]?.kind !== "unsigned") {
+    invalid(path, "a certificate array with an unsigned tag");
+  }
+  const tag = node.values[0].value;
+  if (tag <= 18n) knownCertificate(node, path);
+};
 
 const govActionId = tuple(hash32, uint16);
 const voter = discriminated({
@@ -264,7 +274,7 @@ const transactionWitnessSet = fixedMap({
   5: { validate: redeemers },
   6: { validate: taggedSet(bytes(), true) },
   7: { validate: taggedSet(bytes(), true) },
-});
+}, true);
 
 let metadatum: CborValidator;
 metadatum = (node, path) => oneOf(
@@ -282,7 +292,7 @@ const conwayAux = tagged(259n, fixedMap({
   2: { validate: arrayOf(bytes()) },
   3: { validate: arrayOf(bytes()) },
   4: { validate: arrayOf(bytes()) },
-}));
+}, true));
 const auxiliaryData = oneOf(metadata, shelleyMaAux, conwayAux);
 
 const transactionBodyFields: Record<number, MapField> = {
@@ -307,11 +317,11 @@ const transactionBodyFields: Record<number, MapField> = {
   21: { validate: coin },
   22: { validate: strictlyPositiveCoin },
 };
-const transactionBody = fixedMap(transactionBodyFields);
+const transactionBody = fixedMap(transactionBodyFields, true);
 const historicalBlockTransactionBody = fixedMap({
   ...transactionBodyFields,
   20: { validate: historicalProposalProcedures },
-});
+}, true);
 const transaction = tuple(transactionBody, transactionWitnessSet, boolean, optional(auxiliaryData));
 
 const operationalCert = tuple(bytes(32), uint64, uint64, signature64);

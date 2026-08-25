@@ -193,6 +193,13 @@
                   "impl/typescript/0023-IMPL-INSTR",
                   "impl/typescript/0023-IMPL-RESULT"
                 ]
+              },
+              {
+                "group": "0024 — Complete transaction inspection accessors",
+                "pages": [
+                  "impl/typescript/0024-IMPL-INSTR",
+                  "impl/typescript/0024-IMPL-RESULT"
+                ]
               }
             ]
           },

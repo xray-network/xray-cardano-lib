@@ -1,4 +1,5 @@
 import {
+  bytesToHex,
   copyBytes,
   decodeCbor,
   encodeCbor,
@@ -9,6 +10,8 @@ import {
   AuxiliaryDataHash,
   BlockBodyHash,
   BlockHeaderHash,
+  DatumHash,
+  GenesisHash,
   ScriptDataHash,
   ScriptHash,
   TransactionHash,
@@ -19,17 +22,22 @@ import {
   AssetName,
   AuthCommitteeHotCert,
   AuxiliaryData,
+  DatumOption,
   Block as ConwayBlock,
   Certificate as ConwayCertificate,
   MapAssetNameToNonZeroInt64,
   MapTransactionIndexToAuxiliaryData,
   Mint,
   NetworkId,
+  ProposalProcedure,
+  ProposalProcedureList,
   PoolRegistration,
   PoolRetirement,
   RegCert,
   RegDrepCert,
   ResignCommitteeColdCert,
+  RequiredSigners,
+  ScriptRef,
   StakeDelegation,
   StakeDeregistration,
   StakeRegDelegCert,
@@ -40,14 +48,16 @@ import {
   TransactionOutput as ConwayTransactionOutput,
   TransactionWitnessSet,
   TransactionWitnessSetList,
+  UnknownCborField,
   UnregCert,
   UnregDrepCert,
   UpdateDrepCert,
   Value,
   VoteDelegCert,
   VoteRegDelegCert,
+  VotingProcedures,
+  Withdrawals,
 } from "../conway/model.js";
-import { TransactionInput, TransactionInputList } from "../shared/index.js";
 import {
   arrayValue,
   HistoricalData,
@@ -376,6 +386,27 @@ export class MultiEraTransactionOutput {
     }
     return Value.from_cbor_bytes(encodeCbor(amount));
   }
+  public datum_hash(): DatumHash | undefined {
+    if (this.#byron) return undefined;
+    const output = ConwayTransactionOutput.from_cbor_bytes(encodeCbor(this.#node));
+    const legacy = output.datum_hash();
+    if (legacy !== undefined) return legacy;
+    const datum = output.datum();
+    if (datum === undefined) return undefined;
+    const node = decodeCbor(datum.to_cbor_bytes());
+    const tag = arrayValue(node, 0);
+    const hash = arrayValue(node, 1);
+    return tag?.kind === "unsigned" && tag.value === 0n && hash?.kind === "bytes"
+      ? DatumHash.from_raw_bytes(hash.value)
+      : undefined;
+  }
+  public datum(): DatumOption | undefined {
+    return this.#byron ? undefined : ConwayTransactionOutput.from_cbor_bytes(encodeCbor(this.#node)).datum();
+  }
+  public script_ref(): ScriptRef | undefined {
+    return this.#byron ? undefined : ConwayTransactionOutput.from_cbor_bytes(encodeCbor(this.#node)).script_ref();
+  }
+  public to_cbor_bytes(): Uint8Array { return encodeCbor(this.#node); }
   public cbor_node(): CborValue { return this.#node; }
 }
 
@@ -394,11 +425,13 @@ export class MultiEraTransactionOutputList {
 export class MultiEraCertificate {
   readonly #node: CborValue;
   public constructor(node: CborValue) { this.#node = node; }
-  public kind(): number {
+  public raw_tag(): bigint {
     const tag = arrayValue(this.#node, 0);
-    if (tag?.kind !== "unsigned" || tag.value > 18n) throw new TypeError("Invalid certificate tag");
-    return Number(tag.value);
+    if (tag?.kind !== "unsigned") throw new TypeError("Invalid certificate tag");
+    return tag.value;
   }
+  public known_kind(): number | undefined { const tag=this.raw_tag();return tag<=18n?Number(tag):undefined; }
+  public kind(): number | undefined { return this.known_kind(); }
   public static from_json(json: string): MultiEraCertificate {
     return new MultiEraCertificate(inputNode(JSON.parse(json)));
   }
@@ -410,7 +443,7 @@ export class MultiEraCertificate {
     return this.from_cbor_bytes(hexToBytes(hex));
   }
   private variant<T>(tag: number, owner: { new(node: CborValue): T; validateNode(node: CborValue): void }): T | undefined {
-    if(this.kind()!==tag)return undefined;
+    if(this.known_kind()!==tag)return undefined;
     owner.validateNode(this.#node);
     return new owner(this.#node);
   }
@@ -433,10 +466,11 @@ export class MultiEraCertificate {
   public as_reg_drep_cert(): RegDrepCert | undefined { return this.variant(16, RegDrepCert); }
   public as_unreg_drep_cert(): UnregDrepCert | undefined { return this.variant(17, UnregDrepCert); }
   public as_update_drep_cert(): UpdateDrepCert | undefined { return this.variant(18, UpdateDrepCert); }
-  public as_conway(): ConwayCertificate { return ConwayCertificate.from_cbor_bytes(encodeCbor(this.#node)); }
+  public as_conway(): ConwayCertificate | undefined { return this.known_kind()===undefined?undefined:ConwayCertificate.from_cbor_bytes(encodeCbor(this.#node)); }
   public to_js_value(): unknown { return nodeJson(this.#node); }
   public to_json(): string { return JSON.stringify(this.to_js_value()); }
   public cbor_node(): CborValue { return this.#node; }
+  public to_cbor_bytes(): Uint8Array { return encodeCbor(this.#node); }
 }
 
 export class MultiEraCertificateList {
@@ -459,21 +493,23 @@ export class MultiEraUpdate {
     if (epoch?.kind !== "unsigned") throw new TypeError("Update has no epoch");
     return epoch.value;
   }
-  public proposed_protocol_parameter_updates(): HistoricalData {
+  public proposed_protocol_parameter_updates(): MapGenesisHashToMultiEraProtocolParamUpdate {
     const updates = arrayValue(this.#node, 0);
     if (updates === undefined) throw new TypeError("Update has no proposed updates");
-    return new HistoricalData(updates);
+    return new MapGenesisHashToMultiEraProtocolParamUpdate(updates);
   }
 }
 
 export class MultiEraTransactionBody extends HistoricalData {
-  readonly #kind: number;
-  public constructor(node: CborValue, kind: number = MultiEraTransactionBodyKind.Conway) {
+  readonly #kind: number | undefined;
+  public constructor(node: CborValue, kind?: number) {
     super(node);
     this.#kind = kind;
   }
   public static override from_cbor_bytes(bytes: Uint8Array): MultiEraTransactionBody {
-    return new MultiEraTransactionBody(decodeCbor(bytes));
+    const node = decodeCbor(bytes);
+    ConwayTransactionBody.validateNode(node);
+    return new MultiEraTransactionBody(node);
   }
   private static create(kind: number, value: { to_cbor_bytes(): Uint8Array }): MultiEraTransactionBody {
     return new MultiEraTransactionBody(decodeCbor(value.to_cbor_bytes()), kind);
@@ -485,7 +521,7 @@ export class MultiEraTransactionBody extends HistoricalData {
   public static new_alonzo(value: AlonzoTransactionBody): MultiEraTransactionBody { return this.create(4, value); }
   public static new_babbage(value: BabbageTransactionBody): MultiEraTransactionBody { return this.create(5, value); }
   public static new_conway(value: ConwayTransactionBody): MultiEraTransactionBody { return this.create(6, value); }
-  public kind(): number { return this.#kind; }
+  public kind(): number | undefined { return this.#kind; }
   private asHistorical(kind: number, owner: typeof HistoricalData): HistoricalData | undefined {
     return this.#kind === kind ? owner.from_cbor_bytes(this.to_cbor_bytes()) : undefined;
   }
@@ -531,15 +567,16 @@ export class MultiEraTransactionBody extends HistoricalData {
     for (const certificate of node.values) result.add(new MultiEraCertificate(certificate));
     return result;
   }
-  private transactionInputs(key: bigint): TransactionInputList | undefined {
+  private transactionInputs(key: bigint): MultiEraTransactionInputList | undefined {
     const node = this.field(key);
-    if (node?.kind !== "array") return undefined;
-    const result = TransactionInputList.new();
-    for (const input of node.values) result.add(TransactionInput.from_cbor_bytes(encodeCbor(input)));
+    const values = node?.kind === "tag" && node.tag === 258n ? node.value : node;
+    if (values?.kind !== "array") return undefined;
+    const result = MultiEraTransactionInputList.new();
+    for (const input of values.values) result.add(new MultiEraTransactionInput(input));
     return result;
   }
-  public collateral_inputs(): TransactionInputList | undefined { return this.transactionInputs(13n); }
-  public reference_inputs(): TransactionInputList | undefined { return this.transactionInputs(18n); }
+  public collateral_inputs(): MultiEraTransactionInputList | undefined { return this.transactionInputs(13n); }
+  public reference_inputs(): MultiEraTransactionInputList | undefined { return this.transactionInputs(18n); }
   public collateral_return(): MultiEraTransactionOutput | undefined {
     const node = this.field(16n);
     return node === undefined ? undefined : new MultiEraTransactionOutput(node);
@@ -580,13 +617,18 @@ export class MultiEraTransactionBody extends HistoricalData {
     const node = this.field(6n);
     return node === undefined ? undefined : new MultiEraUpdate(node);
   }
-  public withdrawals(): HistoricalData | undefined { return this.optional(5n); }
-  public required_signers(): HistoricalData | undefined { return this.optional(14n); }
-  public voting_procedures(): HistoricalData | undefined { return this.optional(19n); }
-  public proposal_procedures(): HistoricalData | undefined { return this.optional(20n); }
-  private optional(key: bigint): HistoricalData | undefined {
-    const node = this.field(key);
-    return node === undefined ? undefined : new HistoricalData(node);
+  public withdrawals(): Withdrawals | undefined { const node=this.field(5n);return node===undefined?undefined:Withdrawals.from_cbor_bytes(encodeCbor(node)); }
+  public required_signers(): RequiredSigners | undefined { const node=this.field(14n);return node===undefined?undefined:RequiredSigners.from_cbor_bytes(encodeCbor(node)); }
+  public voting_procedures(): VotingProcedures | undefined { const node=this.field(19n);return node===undefined?undefined:VotingProcedures.from_cbor_bytes(encodeCbor(node)); }
+  public proposal_procedures(): ProposalProcedureList | undefined {
+    const node=this.field(20n);const values=node?.kind==="tag"&&node.tag===258n?node.value:node;
+    if(values?.kind!=="array")return undefined;
+    const result=ProposalProcedureList.new();for(const value of values.values)result.add(ProposalProcedure.from_cbor_bytes(encodeCbor(value)));return result;
+  }
+  public unknown_fields(): readonly UnknownCborField[] {
+    const node=this.cbor_node();if(node.kind!=="map")return [];
+    const known=new Set([0n,1n,2n,3n,4n,5n,6n,7n,8n,9n,11n,13n,14n,15n,16n,17n,18n,19n,20n,21n,22n]);
+    return node.entries.filter(([key])=>key.kind!=="unsigned"||!known.has(key.value)).map(([key,value])=>new UnknownCborField(key,value));
   }
   public hash(): TransactionHash { return TransactionHash.from_raw_bytes(blake2b256(this.to_cbor_bytes())); }
 }
@@ -629,6 +671,18 @@ export class MultiEraProtocolParamUpdate extends HistoricalData {
   public governance_action_deposit(): bigint | undefined { return this.numeric(30n); }
   public d_rep_deposit(): bigint | undefined { return this.numeric(31n); }
   public d_rep_inactivity_period(): bigint | undefined { return this.numeric(32n); }
+  public parameter(key: bigint): MultiEraProtocolParameterValue | undefined { const node=mapValue(this.cbor_node(),key);return node===undefined?undefined:new MultiEraProtocolParameterValue(node); }
+  public parameters(): ReadonlyArray<readonly [bigint,MultiEraProtocolParameterValue]> { const node=this.cbor_node();if(node.kind!=="map")throw new TypeError("Protocol parameter update requires a map");return node.entries.map(([key,value])=>{if(key.kind!=="unsigned")throw new TypeError("Protocol parameter key must be unsigned");return [key.value,new MultiEraProtocolParameterValue(value)] as const;}); }
 }
 
-export class MapGenesisHashToMultiEraProtocolParamUpdate extends HistoricalData {}
+export class MultiEraProtocolParameterValue extends HistoricalData {
+  public integer(): bigint | undefined { const node=this.cbor_node();return node.kind==="unsigned"||node.kind==="negative"?node.value:undefined; }
+  public rational(): readonly [bigint,bigint] | undefined { const node=this.cbor_node(),value=node.kind==="tag"&&node.tag===30n?node.value:node;if(value.kind!=="array"||value.values.length!==2||value.values[0]?.kind!=="unsigned"||value.values[1]?.kind!=="unsigned")return undefined;return [value.values[0].value,value.values[1].value]; }
+  public array_values(): readonly MultiEraProtocolParameterValue[] | undefined { const node=this.cbor_node();if(node.kind!=="array")return undefined;return node.values.map((value)=>new MultiEraProtocolParameterValue(value)); }
+  public map_entries(): ReadonlyArray<readonly [Uint8Array,MultiEraProtocolParameterValue]> | undefined { const node=this.cbor_node();if(node.kind!=="map")return undefined;return node.entries.map(([key,value])=>[encodeCbor(key),new MultiEraProtocolParameterValue(value)] as const); }
+}
+
+export class MapGenesisHashToMultiEraProtocolParamUpdate extends HistoricalData {
+  public keys(): GenesisHash[] { const node=this.cbor_node();if(node.kind!=="map")throw new TypeError("Protocol updates require a map");return node.entries.map(([key])=>{if(key.kind!=="bytes"||key.value.length!==28)throw new TypeError("Protocol update genesis hash must be 28 bytes");return GenesisHash.from_raw_bytes(key.value);}); }
+  public get(key: GenesisHash): MultiEraProtocolParamUpdate | undefined { const node=this.cbor_node();if(node.kind!=="map")throw new TypeError("Protocol updates require a map");const hex=key.to_hex();const value=node.entries.find(([candidate])=>candidate.kind==="bytes"&&bytesToHex(candidate.value)===hex)?.[1];return value===undefined?undefined:new MultiEraProtocolParamUpdate(value); }
+}
