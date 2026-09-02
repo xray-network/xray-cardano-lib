@@ -24,9 +24,9 @@ This repository uses the following XRAY standards:
   portable semantic change contract.
 - Shared provider contracts and captured evidence live below `.xray/updates/providers/`. Provider
   records provenance and selection; consuming instructions remain library-owned.
-- `docs/` is the Mintlify documentation root. `docs/docs.json` defines its navigation.
-- Repository ADRs live under `docs/adr/repository/`; language ADRs live below
-  `docs/adr/<language>/`.
+- `docs/` is the standalone Rspress documentation package. `docs/rspress.config.ts` defines its site configuration and navigation.
+- Repository ADRs live under `docs/src/adr/repository/`; language ADRs live below
+  `docs/src/adr/<language>/`.
 
 There is no root package-manager manifest, language registry, or command proxy.
 
@@ -75,34 +75,32 @@ types.
 
 ## Documentation work
 
-- Keep Mintlify-published pages under `docs/`.
-- Keep `docs/docs.json` navigation synchronized with added, moved, or removed pages.
-- Put repository-wide decisions in `docs/adr/repository/` and language decisions in
-  `docs/adr/<language>/`.
+- Keep Rspress-published pages under `docs/src/`.
+- Keep `docs/rspress.config.ts` navigation synchronized with added, moved, or removed pages.
+- Put repository-wide decisions in `docs/src/adr/repository/` and language decisions in
+  `docs/src/adr/<language>/`.
 - Keep the root README general and language details in the owning language README.
 - Do not copy canonical provider evidence, implementation instructions, results, or status records
-  into ordinary documentation pages. The Mintlify implementation mirrors below `docs/impl/` are
+  into ordinary documentation pages. The implementation mirrors below `docs/src/impl/` are
   the only exception.
 - Update repository-relative links when files move.
 
-## Mintlify implementation mirrors
+## Documentation implementation mirrors
 
 - Files below `.xray/updates/implementations/` are canonical.
 - Every `.xray/updates/implementations/<target>/*-IMPL-INSTR.md` and
   `.xray/updates/implementations/<target>/*-IMPL-RESULT.md` file is mirrored below
-  `docs/impl/<target>/` with the same filename.
+  `docs/src/impl/<target>/` with the same filename.
 - `.xray/updates/XRAY-UPDATES-STATUS.md` is mirrored at
-  `docs/impl/XRAY-UPDATES-STATUS.md` with target-record links made local to `docs/impl/`.
+  `docs/src/impl/XRAY-UPDATES-STATUS.md` with target-record links made local to `docs/src/impl/`.
 - Do not mirror provider documents, provider artifacts, record templates, or `.xray/updates/README.md`.
-- Never edit a file below `docs/impl/` independently.
+- Never edit a file below `docs/src/impl/` independently.
 - After changing the aggregate status or creating, changing, moving, or deleting a canonical
   implementation instruction or result, apply the corresponding operation to its documentation
   mirror in the same change.
 - Preserve canonical text exactly except that relative links to updates outside the mirrored
   library directory must become absolute links to the canonical file in the repository.
-- Keep relative links between mirrored instructions and results local to `docs/impl/`.
-- Keep `docs/docs.json` navigation synchronized with the mirrored aggregate status and every
-  mirrored instruction and result.
+- Keep relative links between mirrored instructions and results local to `docs/src/impl/`.
 - Before finishing, verify that the aggregate status and every canonical implementation file have
   exactly one mirror, no additional mirror exists, local links resolve, and external
   canonical-record links use the repository URL.
@@ -145,7 +143,7 @@ Use this order when repository instructions conflict:
 1. system, developer, and current user instructions;
 2. this `AGENTS.md`;
 3. `CONTRIBUTING.md`;
-4. active decisions under `docs/adr/`;
+4. active decisions under `docs/src/adr/`;
 5. `.xray/updates/XRAY-UPDATES.md`;
 6. `.xray/updates/templates/TEMPLATE_IMPL.md` and
    `.xray/updates/templates/TEMPLATE_STATUS.md`;

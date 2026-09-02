@@ -28,8 +28,8 @@ Repository-wide guidance for contributors and coding agents is documented in
   results.
 - `.xray/updates/XRAY-UPDATES-STATUS.md` is the aggregate lifecycle and decision-proof ledger.
 - `.xray/updates/providers/` contains shared provider contracts and immutable captured evidence.
-- `docs/` contains published architecture documentation, decisions, and implementation
-  instruction/result mirrors for Mintlify.
+- `docs/` contains the Rspress documentation package, architecture decisions, and implementation
+  instruction/result mirrors.
 
 Every implementation change uses a pair directly below the library's update directory:
 
@@ -100,8 +100,10 @@ libs/
           artifacts/
 
 docs/
-  impl/
-    typescript/
-      0001-IMPL-INSTR.md
-      0001-IMPL-RESULT.md
+  src/
+    adr/
+    impl/
+      typescript/
+        0001-IMPL-INSTR.md
+        0001-IMPL-RESULT.md
 ```

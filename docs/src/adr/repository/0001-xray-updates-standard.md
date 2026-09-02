@@ -33,7 +33,7 @@ product source.
 - Preserve existing implementation IDs, lifecycle decisions, provider snapshots, library
   ownership, and public APIs.
 - Keep the XRAY standards pointer in `AGENTS.md`, including the silent-mode instruction.
-- Keep Mintlify implementation mirrors below `docs/impl/` as noncanonical repository
+- Keep Rspress implementation mirrors below `docs/src/impl/` as noncanonical repository
   integrations synchronized with their canonical records.
 
 ## Consequences

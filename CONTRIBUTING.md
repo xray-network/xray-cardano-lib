@@ -7,7 +7,7 @@ history have separate ownership:
 - `.xray/updates/implementations/<language>/` owns that library's numbered instructions and results.
 - `.xray/updates/XRAY-UPDATES-STATUS.md` owns aggregate lifecycle state for every target.
 - `.xray/updates/providers/` owns shared provider contracts and captured evidence.
-- `docs/` owns the Mintlify site and architecture decisions.
+- `docs/` owns the Rspress site and architecture decisions.
 
 The maintained implementations are TypeScript under `libs/typescript/` and C++ under `libs/cpp/`.
 Each owns an independent implementation sequence represented in the aggregate lifecycle ledger.
@@ -72,14 +72,14 @@ records owned by that target.
 
 ## Documentation and ADRs
 
-- Add Mintlify pages below `docs/` and update `docs/docs.json` navigation.
-- Put shared decisions in `docs/adr/repository/` and language decisions in
-  `docs/adr/<language>/`.
+- Add Rspress pages below `docs/src/` and update `docs/rspress.config.ts` navigation.
+- Put shared decisions in `docs/src/adr/repository/` and language decisions in
+  `docs/src/adr/<language>/`.
 - Keep the root README focused on the repository and implementation model.
 - Keep package details in their owning README.
 - Keep canonical implementation records under `.xray/updates/implementations/`.
-- Mirror the aggregate status at `docs/impl/XRAY-UPDATES-STATUS.md` and numbered instructions and
-  results from `.xray/updates/implementations/<target>/` below `docs/impl/<target>/` for Mintlify.
+- Mirror the aggregate status at `docs/src/impl/XRAY-UPDATES-STATUS.md` and numbered instructions and
+  results from `.xray/updates/implementations/<target>/` below `docs/src/impl/<target>/` for documentation.
 - Never mirror providers, artifacts, or record templates.
 - Never edit a documentation mirror independently. Update it in the same change as its canonical
   source. Preserve canonical text except for deterministic link changes required to reach
