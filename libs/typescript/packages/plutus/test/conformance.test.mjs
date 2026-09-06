@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const corpusPath = new URL(
-  "../../../../../.xray/updates/providers/uplc/0001-uplc/artifacts/conformance/corpus.json",
+  "../../../../../.agents/spectre/providers/uplc/0001-uplc/artifacts/conformance/corpus.json",
   import.meta.url,
 );
 

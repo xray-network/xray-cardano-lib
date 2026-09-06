@@ -7,16 +7,13 @@ description: Architecture decisions for the XRAY Cardano Lib polyglot repository
 
 This directory is the Rspress documentation package. Run `npm install` and `npm run dev` here for local development, or `npm run deploy` to build and deploy the `wiki-xray-cardano-lib-docs` Worker.
 
-Architecture decisions are grouped by their scope. Canonical implementation records live below
-`.xray/updates/implementations/`, while their workflow templates live below
-`.xray/updates/templates/` and aggregate lifecycle state lives in
-`.xray/updates/XRAY-UPDATES-STATUS.md`. Shared provider evidence lives below
-`.xray/updates/providers/`, and any implementation may consume it through declared inputs.
+Architecture decisions are grouped by their scope. Active implementation records live below
+`.agents/spectre/implementations/`, terminal history lives below `.agents/spectre/archive/`, workflow
+templates live below `.agents/spectre/templates/`, and aggregate active lifecycle state lives in
+`SPECTRE.md`. Shared provider evidence lives below `.agents/spectre/providers/`.
 
-The documentation aggregate status copy lives at `docs/src/impl/XRAY-UPDATES-STATUS.md`, and copies
-of numbered implementation instructions and results live below `docs/src/impl/<target>/`. Canonical
-records remain below `.xray/updates/`; providers, artifacts, and templates are not copied into the
-documentation tree.
+The pages below `docs/src/impl/` preserve the former XRAY Updates documentation snapshot. They are
+historical mirrors, not active SPECTRE lifecycle records.
 
 ## Repository decisions
 

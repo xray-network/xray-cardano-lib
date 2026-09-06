@@ -24,14 +24,14 @@ import { encodeCbor } from "@xray-network/xray-cardano-lib-core";
 const inventory = JSON.parse(
   await readFile(
     new URL(
-      "../../../../../.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/manifest.json",
+      "../../../../../.agents/spectre/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/manifest.json",
       import.meta.url,
     ),
     "utf8",
   ),
 );
 const fixtureRoot = fileURLToPath(new URL(
-  "../../../../../.xray/updates/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/",
+  "../../../../../.agents/spectre/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/",
   import.meta.url,
 ));
 

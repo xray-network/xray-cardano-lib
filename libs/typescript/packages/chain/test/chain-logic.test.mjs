@@ -174,7 +174,7 @@ test("address Bech32 parsing enforces canonical CIP-5 HRPs and encoding families
 
 test("all captured CIP-0019 mainnet and testnet Shelley address vectors are canonical", async () => {
   const source = await readFile(new URL(
-    "../../../../../.xray/updates/providers/cardano-cips/0001-cardano-cips/artifacts/upstream/CIP-0019/README.md",
+    "../../../../../.agents/spectre/providers/cardano-cips/0001-cardano-cips/artifacts/upstream/CIP-0019/README.md",
     import.meta.url,
   ), "utf8");
   const vectors = [...source.matchAll(/type-\d+: ((?:addr|stake)(?:_test)?1[a-z0-9]+)/gu)].map((match) => match[1]);

@@ -2,7 +2,7 @@
 
 This file maps the frozen C++ 0001 instruction to independently owned C++ bindings and validation.
 It is completed alongside the implementation. The canonical implementation status remains in
-`.xray/updates/implementations/cpp/STATUS.md`.
+`.agents/spectre/archive/20260906T201907Z/ARCHIVE.md`.
 
 | Change | Owner | Current mapping | Validation |
 | --- | --- | --- | --- |

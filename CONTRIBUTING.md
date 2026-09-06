@@ -4,9 +4,9 @@ XRAY Cardano Lib is a language-first polyglot repository. Source, provider evide
 history have separate ownership:
 
 - `libs/<language>/` owns implementation source, packages, tests, manifests, and validation.
-- `.xray/updates/implementations/<language>/` owns that library's numbered instructions and results.
-- `.xray/updates/XRAY-UPDATES-STATUS.md` owns aggregate lifecycle state for every target.
-- `.xray/updates/providers/` owns shared provider contracts and captured evidence.
+- `.agents/spectre/implementations/<language>/` owns active numbered instructions and results.
+- `SPECTRE.md` owns aggregate active lifecycle state; `.agents/spectre/archive/` owns terminal history.
+- `.agents/spectre/providers/` owns shared provider contracts and captured evidence.
 - `docs/` owns the Rspress site and architecture decisions.
 
 The maintained implementations are TypeScript under `libs/typescript/` and C++ under `libs/cpp/`.
@@ -14,13 +14,13 @@ Each owns an independent implementation sequence represented in the aggregate li
 
 ## Before making a change
 
-1. Read the root `README.md` and `.xray/updates/XRAY-UPDATES.md`.
+1. Read the root `README.md`; on an explicit SPECTRE invocation, follow `.agents/skills/spectre/SKILL.md`.
 2. Read `docs/README.md` and relevant active ADRs.
-3. Read `.xray/updates/templates/TEMPLATE_IMPL.md` and
-   `.xray/updates/templates/TEMPLATE_STATUS.md` for
+3. Read `.agents/spectre/templates/TEMPLATE_IMPL.md` and
+   `.agents/spectre/templates/TEMPLATE_STATUS.md` for
    implementation-ledger work.
 4. Read the owning library or package README, manifest, source, and tests.
-5. For provider work, read `.xray/updates/templates/TEMPLATE_PROVIDER.md` and the selected provider
+5. For provider work, read `.agents/spectre/templates/TEMPLATE_PROVIDER.md` and the selected provider
    contract.
 
 There is no root build command. Each language owns its workspace and completion gate.
@@ -39,9 +39,9 @@ There is no root build command. Each language owns its workspace and completion 
 
 ## Implementation records
 
-- `.xray/updates/XRAY-UPDATES-STATUS.md` is the sole lifecycle and decision-proof authority for
-  every library target and follows `.xray/updates/templates/TEMPLATE_STATUS.md`.
-- Each bounded change uses a matching pair directly under `.xray/updates/implementations/<language>/`:
+- `SPECTRE.md` is the sole active lifecycle and decision-proof authority for every library target
+  and follows `.agents/spectre/templates/TEMPLATE_STATUS.md`.
+- Each bounded active change uses a matching pair directly under `.agents/spectre/implementations/<language>/`:
   `NNNN-IMPL-INSTR.md` and `NNNN-IMPL-RESULT.md`.
 - The instruction declares `DIRECT`, `DERIVED`, `HYBRID`, or `LOCAL` evidence mode.
 - Preparation creates the complete instruction and `PLANNED` row without changing source.
@@ -60,7 +60,7 @@ records owned by that target.
 
 ## Provider evidence
 
-- Provider contracts live below `.xray/updates/providers/<provider>/`.
+- Provider contracts live below `.agents/spectre/providers/<provider>/`.
 - Any library may consume shared provider evidence. Provider contracts and snapshots record
   provenance; consuming instructions and results record library-local use.
 - A provider snapshot contains immutable `SNAPSHOT.md` and nonempty `artifacts/`.
@@ -77,13 +77,9 @@ records owned by that target.
   `docs/src/adr/<language>/`.
 - Keep the root README focused on the repository and implementation model.
 - Keep package details in their owning README.
-- Keep canonical implementation records under `.xray/updates/implementations/`.
-- Mirror the aggregate status at `docs/src/impl/XRAY-UPDATES-STATUS.md` and numbered instructions and
-  results from `.xray/updates/implementations/<target>/` below `docs/src/impl/<target>/` for documentation.
-- Never mirror providers, artifacts, or record templates.
-- Never edit a documentation mirror independently. Update it in the same change as its canonical
-  source. Preserve canonical text except for deterministic link changes required to reach
-  non-mirrored canonical records.
+- Keep active implementation records under `.agents/spectre/implementations/` and terminal records
+  under immutable `.agents/spectre/archive/` batches.
+- Treat existing `docs/src/impl/` pages as historical XRAY Updates mirrors, not active SPECTRE records.
 - Update relative links when content moves.
 
 ## TypeScript implementation

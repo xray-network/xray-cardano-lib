@@ -23,7 +23,7 @@ export const documentationSections = [
         text: "Repository",
         collapsed: true,
         items: [
-          { text: "XRAY Updates v1 installation", link: "/adr/repository/0001-xray-updates-standard" }
+          { text: "Legacy XRAY adoption", link: "/adr/repository/0001-xray-updates-standard" }
         ]
       },
       {
@@ -36,12 +36,12 @@ export const documentationSections = [
           { text: "Cryptography primitives", link: "/adr/typescript/0004-cryptography-primitives" }
         ]
       },
-      { sectionHeaderText: "Implementation history" },
-      { text: "Aggregate status", link: "/impl/XRAY-UPDATES-STATUS" },
+      { sectionHeaderText: "Legacy documentation snapshot" },
+      { text: "Former aggregate status", link: "/impl/XRAY-UPDATES-STATUS" },
       {
         text: "Repository",
         collapsed: true,
-        items: [implementation("repository", "0001", "Install XRAY Updates")]
+        items: [implementation("repository", "0001", "Install XRAY Updates (legacy)")]
       },
       {
         text: "TypeScript",
