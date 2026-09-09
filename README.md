@@ -27,7 +27,7 @@ Repository-wide guidance for contributors and coding agents is documented in
 - `.agents/spectre/implementations/<language>/` contains active numbered instructions and results.
 - `SPECTRE.md` is the aggregate active lifecycle ledger; terminal history is preserved below
   `.agents/spectre/archive/`.
-- `.agents/spectre/providers/` contains shared provider contracts and immutable captured evidence.
+- `.agents/spectre/providers/` contains shared provider guides and immutable captured evidence.
 - `docs/` contains the Rspress documentation package, architecture decisions, and implementation
   instruction/result mirrors.
 
@@ -56,8 +56,11 @@ implementation target. Historical C++ records and source remain available as con
 without an ongoing maintenance or parity commitment.
 
 Provider evidence is language-neutral and may be consumed by any implementation. Provider
-contracts and snapshots record capture provenance; instructions and results record library-local
-consumption. Captured artifacts remain evidence rather than generated source or runtime
+guides describe upstream sources; SNAPSHOT.md records each numbered capture’s complete specification
+and resolved inventory; CAPTURE.md summarizes its changes and maintained-library impact. The first
+capture stores a full baseline; later captures reuse unchanged earlier files and store only new
+bytes. Capture automatically detects changes and validates evidence; no changes creates no folder.
+Instructions and results record library-local consumption. Captured artifacts remain evidence rather than generated source or runtime
 dependencies.
 
 See the [implementation overview](./.agents/spectre/README.md),
@@ -87,9 +90,10 @@ libs/
     providers/
       <provider>/
         PROVIDER.md
-        <snapshot>/
-          SNAPSHOT.md
-          artifacts/
+        <NNNN>/
+          SNAPSHOT.md              # complete inventory, including earlier artifact references
+          CAPTURE.md               # baseline/update summary
+          artifacts/               # full first baseline; only new bytes thereafter
 
 docs/
   src/

@@ -778,13 +778,15 @@ interface RedeemerSource { readonly tag: RedeemerTag; readonly sortKey: string; 
 export class RedeemerSetBuilder {
   readonly #sources: RedeemerSource[] = [];
   readonly #overrides = new Map<string, ExUnits>();
+  #certificateCount = 0;
+  #proposalCount = 0;
   public static new(): RedeemerSetBuilder { return new RedeemerSetBuilder(); }
   private add(tag: RedeemerTag, sortKey: string, aggregate: InputAggregateWitnessData | undefined): void { if (aggregate?.state.kind === "plutus") this.#sources.push({ tag, sortKey, aggregate }); }
   public add_spend(result: InputBuilderResult): void { this.add(RedeemerTag.Spend, canonicalHex(result.inputValue), result.aggregate); }
   public add_mint(result: MintBuilderResult): void { this.add(RedeemerTag.Mint, result.policyId.to_hex(), result.aggregate); }
   public add_reward(result: WithdrawalBuilderResult): void { this.add(RedeemerTag.Reward, bytesToHex(result.address.to_address().to_raw_bytes()), result.aggregate); }
-  public add_cert(result: CertificateBuilderResult): void { this.add(RedeemerTag.Cert, String(this.#sources.filter((value) => value.tag === RedeemerTag.Cert).length).padStart(10, "0"), result.aggregate); }
-  public add_proposal(result: ProposalBuilderResult): void { for (const [index, entry] of result.entries.entries()) this.add(RedeemerTag.Proposing, String(index).padStart(10, "0"), entry.aggregate); }
+  public add_cert(result: CertificateBuilderResult): void { this.add(RedeemerTag.Cert, String(this.#certificateCount++).padStart(10, "0"), result.aggregate); }
+  public add_proposal(result: ProposalBuilderResult): void { for (const entry of result.entries) this.add(RedeemerTag.Proposing, String(this.#proposalCount++).padStart(10, "0"), entry.aggregate); }
   public add_vote(result: VoteBuilderResult): void { for (const entry of result.entries) this.add(RedeemerTag.Voting, `${canonicalHex(entry.voter)}:${canonicalHex(entry.action)}`, entry.aggregate); }
   public is_empty(): boolean { return this.#sources.length === 0; }
   public update_ex_units(key: RedeemerWitnessKey, exUnits: ExUnits): void { this.#overrides.set(key.key(), clone(exUnits, ExUnits)); }
@@ -792,12 +794,15 @@ export class RedeemerSetBuilder {
     const output = LegacyRedeemerList.new();
     for (const tag of [RedeemerTag.Spend, RedeemerTag.Mint, RedeemerTag.Cert, RedeemerTag.Reward, RedeemerTag.Voting, RedeemerTag.Proposing]) {
       const values = this.#sources.filter((source) => source.tag === tag).sort((left, right) => left.sortKey.localeCompare(right.sortKey));
-      for (const [index, source] of values.entries()) {
+      for (const [position, source] of values.entries()) {
         if (source.aggregate.state.kind !== "plutus") throw new TypeError("redeemer source must be Plutus");
-        const key = RedeemerWitnessKey.new(tag, BigInt(index));
+        // Certificates and proposals are indexed in the complete body collection,
+        // including entries that do not need a Plutus redeemer.
+        const index = tag === RedeemerTag.Cert || tag === RedeemerTag.Proposing ? BigInt(source.sortKey) : BigInt(position);
+        const key = RedeemerWitnessKey.new(tag, index);
         const exUnits = this.#overrides.get(key.key()) ?? (defaultToDummyExUnits ? ExUnits.new(0n, 0n) : undefined);
         if (exUnits === undefined) throw new TypeError(`missing execution units for redeemer ${key.key()}`);
-        output.add(LegacyRedeemer.from_cbor_bytes(encodeCbor(array([uint(BigInt(tag)), uint(BigInt(index)), node(source.aggregate.state.partial.data()), node(exUnits)]))));
+        output.add(LegacyRedeemer.from_cbor_bytes(encodeCbor(array([uint(BigInt(tag)), uint(index), node(source.aggregate.state.partial.data()), node(exUnits)]))));
       }
     }
     return output;
@@ -805,6 +810,8 @@ export class RedeemerSetBuilder {
   public copy(): RedeemerSetBuilder {
     const output = RedeemerSetBuilder.new();
     output.#sources.push(...this.#sources);
+    output.#certificateCount = this.#certificateCount;
+    output.#proposalCount = this.#proposalCount;
     for (const [key, value] of this.#overrides) output.#overrides.set(key, clone(value, ExUnits));
     return output;
   }
@@ -1135,12 +1142,24 @@ export class TransactionBuilder {
     }
     this.#witnesses.add_required_wits(result.required); this.#redeemers.add_mint(result); this.addAggregate(result.aggregate);
   }
-  public add_cert(result: CertificateBuilderResult): void { this.#certificates.push(result); this.#witnesses.add_required_wits(result.required); this.#redeemers.add_cert(result); this.addAggregate(result.aggregate); }
+  public add_cert(result: CertificateBuilderResult): void {
+    const id = canonicalHex(result.certificate);
+    if (this.#certificates.some((entry) => canonicalHex(entry.certificate) === id)) throw new TypeError("duplicate certificate");
+    this.#certificates.push(result); this.#witnesses.add_required_wits(result.required); this.#redeemers.add_cert(result); this.addAggregate(result.aggregate);
+  }
   public add_withdrawal(result: WithdrawalBuilderResult): void {
     const key = result.address.to_address().to_hex(); if (this.#withdrawals.some((value) => value.address.to_address().to_hex() === key)) throw new TypeError("duplicate withdrawal");
     this.#withdrawals.push(result); this.#witnesses.add_required_wits(result.required); this.#redeemers.add_reward(result); this.addAggregate(result.aggregate);
   }
-  public add_proposal(result: ProposalBuilderResult): void { this.#proposals.push(...result.entries); this.#redeemers.add_proposal(result); for (const entry of result.entries) this.addAggregate(entry.aggregate); }
+  public add_proposal(result: ProposalBuilderResult): void {
+    const seen = new Set(this.#proposals.map((entry) => canonicalHex(entry.proposal)));
+    for (const entry of result.entries) {
+      const id = canonicalHex(entry.proposal);
+      if (seen.has(id)) throw new TypeError("duplicate proposal");
+      seen.add(id);
+    }
+    this.#proposals.push(...result.entries); this.#redeemers.add_proposal(result); for (const entry of result.entries) this.addAggregate(entry.aggregate);
+  }
   public add_vote(result: VoteBuilderResult): void { this.#votes.push(...result.entries); this.#redeemers.add_vote(result); for (const entry of result.entries) this.addAggregate(entry.aggregate); }
   public add_collateral(result: InputBuilderResult): void {
     const id = canonicalHex(result.inputValue); this.assertUnusedInput(id, "collateral input");

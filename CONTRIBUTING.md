@@ -6,22 +6,22 @@ history have separate ownership:
 - `libs/<language>/` owns implementation source, packages, tests, manifests, and validation.
 - `.agents/spectre/implementations/<language>/` owns active numbered instructions and results.
 - `SPECTRE.md` owns aggregate active lifecycle state; `.agents/spectre/archive/` owns terminal history.
-- `.agents/spectre/providers/` owns shared provider contracts and captured evidence.
+- `.agents/spectre/providers/` owns shared provider guides and captured evidence.
 - `docs/` owns the Rspress site and architecture decisions.
 
-The maintained implementations are TypeScript under `libs/typescript/` and C++ under `libs/cpp/`.
-Each owns an independent implementation sequence represented in the aggregate lifecycle ledger.
+TypeScript under `libs/typescript/` is maintained. C++ under `libs/cpp/` is an unmaintained, opt-in
+concept. Each target owns an independent sequence represented in the aggregate lifecycle ledger.
 
 ## Before making a change
 
-1. Read the root `README.md`; on an explicit SPECTRE invocation, follow `.agents/skills/spectre/SKILL.md`.
+1. Read the root `README.md`; on a SPECTRE command or authorized implementation continuation, follow `.agents/skills/spectre/SKILL.md`.
 2. Read `docs/README.md` and relevant active ADRs.
 3. Read `.agents/spectre/templates/TEMPLATE_IMPL.md` and
    `.agents/spectre/templates/TEMPLATE_STATUS.md` for
    implementation-ledger work.
 4. Read the owning library or package README, manifest, source, and tests.
 5. For provider work, read `.agents/spectre/templates/TEMPLATE_PROVIDER.md` and the selected provider
-   contract.
+   guide.
 
 There is no root build command. Each language owns its workspace and completion gate.
 
@@ -60,11 +60,17 @@ records owned by that target.
 
 ## Provider evidence
 
-- Provider contracts live below `.agents/spectre/providers/<provider>/`.
-- Any library may consume shared provider evidence. Provider contracts and snapshots record
+- Provider guides live below `.agents/spectre/providers/<provider>/`.
+- Any library may consume shared provider evidence. Provider guides and snapshots record
   provenance; consuming instructions and results record library-local use.
-- A provider snapshot contains immutable `SNAPSHOT.md` and nonempty `artifacts/`.
-- Provider snapshots contain no implementation instruction, result, status, or changelog.
+- Each numbered capture contains immutable `SNAPSHOT.md` and `CAPTURE.md`. The first artifact tree
+  is a full baseline; later captures store only new bytes and reference unchanged earlier files.
+  A removal-only or specification-only update may have no local artifact files.
+- Provider guides are unversioned source/tracking and summary guidance. Each snapshot freezes its
+  complete selection, transformations, inventories, counts, formats, licensing and validation rules
+  in SNAPSHOT.md. CAPTURE.md holds the advisory summary and recommendations. No provider version
+  directory exists. Capture includes discovery and validation; no-change capture writes nothing.
+- Provider snapshots contain no implementation instruction, result, status, or separate changelog.
 - Preparation never changes implementation source.
 - Direct and hybrid implementations consume captured evidence without fetching, refreshing,
   executing, or substituting upstream material.

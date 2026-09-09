@@ -26,7 +26,7 @@ import {
 const hex = (value) => Uint8Array.from(Buffer.from(value, "hex"));
 const toHex = (value) => Buffer.from(value).toString("hex");
 const vectorUrls = [1, 2, 3, 4].map((number) => new URL(
-  `../../../../../.agents/spectre/providers/cardano-cips/0001-cardano-cips/artifacts/upstream/CIP-0105/test-vectors/test-vector-${number}.md`,
+  `../../../../../.agents/spectre/providers/cardano-cips/0001/artifacts/upstream/CIP-0105/test-vectors/test-vector-${number}.md`,
   import.meta.url,
 ));
 

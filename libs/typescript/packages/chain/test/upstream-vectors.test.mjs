@@ -12,7 +12,7 @@ const fixtureRoot = path.join(
   "spectre",
   "providers",
   "cardano-multiplatform-lib",
-  "0001-cardano-multiplatform-lib",
+  "0001",
   "artifacts",
   "test-vectors",
 );

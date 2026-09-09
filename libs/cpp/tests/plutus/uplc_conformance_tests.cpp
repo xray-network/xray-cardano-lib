@@ -36,7 +36,7 @@ std::string decode_base64(std::string_view input) {
 
 std::map<std::string, std::string> conformance_files() {
   const auto path = std::string(CARDANO_REPOSITORY_ROOT) +
-                    "/.agents/spectre/providers/uplc/0001-uplc/"
+                    "/.agents/spectre/providers/uplc/0001/"
                     "artifacts/conformance/corpus.json";
   std::ifstream stream(path);
   REQUIRE(stream.good());

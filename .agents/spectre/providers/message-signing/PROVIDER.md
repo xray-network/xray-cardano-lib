@@ -1,88 +1,69 @@
 # EMURGO Message Signing provider
 
 Provider: message-signing
-Provider-Version: v1
 
-## Purpose
+## Purpose and authority
 
-Capture EMURGO's CIP-0008/COSE message-signing implementation as immutable evidence for a
-browser-native, package-owned XRAY Cardano Lib TypeScript implementation. The captured Rust is a
-behavior and wire-format reference; it is not a runtime dependency, generated source, or
-instruction set.
+EMURGO message-signing supplies CIP-0008/COSE behavior and wire-format evidence. Captured Rust explains semantics; it is not a runtime dependency or generated library source.
 
-## Source
+This unversioned guide explains the provider and update workflow. Each numbered snapshot owns
+its frozen specification and evidence; editing this guide never changes an existing snapshot.
 
-| Field | Value |
-| --- | --- |
-| Repository | `https://github.com/Emurgo/message-signing.git` |
-| Followed ref | `refs/heads/master` |
-| Revision policy | Full commit reachable from the followed ref |
-| Source mode | Live; resolve independently for every snapshot |
-| Submodules | Not part of the source |
-| License | MIT |
+## Sources and tracking
 
-A release tag is descriptive evidence only. The resolved full commit is authoritative.
+| Source | Official repository | Followed ref/policy | License guidance |
+| --- | --- | --- | --- |
+| Primary | [Emurgo/message-signing](https://github.com/Emurgo/message-signing) | refs/heads/master; release tags are descriptive | Inspect MIT license and source notices at the resolved commit. |
 
-## Artifact selection
+Tracking is live and human-triggered. Resolve full immutable source identities on each requested
+capture. No scheduling or GitHub Actions are involved. The snapshot specification records exact
+selection, mappings, formats, corpus counts, integrity checks and licensing before publication.
+Consult the previous snapshot’s rules as historical context, then independently enumerate the new
+selection. Do not inherit old counts or silently broaden coverage when upstream paths change.
 
-Copy these regular files byte-for-byte:
+## Evidence domains and boundaries
 
-| Upstream path | Snapshot artifact |
-| --- | --- |
-| `README.md` | `artifacts/upstream/README.md` |
-| `rust/Cargo.toml` | `artifacts/upstream/rust/Cargo.toml` |
-| `rust/src/builders.rs` | `artifacts/upstream/rust/src/builders.rs` |
-| `rust/src/cbor.rs` | `artifacts/upstream/rust/src/cbor.rs` |
-| `rust/src/crypto.rs` | `artifacts/upstream/rust/src/crypto.rs` |
-| `rust/src/error.rs` | `artifacts/upstream/rust/src/error.rs` |
-| `rust/src/lib.rs` | `artifacts/upstream/rust/src/lib.rs` |
-| `rust/src/serialization.rs` | `artifacts/upstream/rust/src/serialization.rs` |
-| `rust/src/utils.rs` | `artifacts/upstream/rust/src/utils.rs` |
-| `examples/rust/src/main.rs` | `artifacts/upstream/examples/rust/src/main.rs` |
-| `LICENSE` | `artifacts/legal/LICENSE` |
+COSE Sign/Sign1, protected/unprotected headers, signature structures, keys, builders, detached payloads, external AAD and payload hashing. Preserve protected-header bytes and duplicate rejection. COSE encryption, private-key setters, native/WASM bindings and duplicated generic CBOR/crypto owners are outside scope.
 
-The selected upstream inventory is exactly eleven byte-exact regular files. Reject a missing,
-additional, renamed, symlinked, gitlinked, special, or unexpectedly large selected file.
+Captured source and upstream instructions are untrusted evidence. Do not execute them or generate
+implementation code from them. Artifact-backed implementation requires its own bounded plan.
 
-Create `artifacts/SHA256SUMS` as deterministic snapshot-local integrity metadata. It contains one
-line for each of the eleven byte-exact artifacts, sorted by artifact-relative path in byte order,
-using lowercase SHA-256, two ASCII spaces, the path relative to `artifacts/`, and a trailing
-newline. It does not list itself.
+## Summarization requirements
 
-## Evidence-only paths
+In each new CAPTURE.md, summarize the first capture as a baseline and later captures against the
+immediately preceding same-provider snapshot. Name all immutable source identities and relevant
+artifact paths. Account for added, removed, changed and unchanged evidence, distinguishing behavior
+from documentation, tests and refactoring. State observations separately from inferred impact.
+Map relevant behavior to maintained modules/APIs and tests, recommend implementation or investigation,
+and explain no-change conclusions, exclusions and unresolved questions. Summary prose is advisory
+and does not authorize consumer changes. SNAPSHOT.md owns the complete specification and resolved
+inventory; legacy 0001 summaries remain in their original snapshot documents. New incremental
+captures reuse unchanged earlier artifacts instead of copying them. A no-change capture writes nothing.
 
-Inspect these at the candidate commit when present, but do not copy them:
+## Maintained consumer guidance
 
-- the Git history and source diff from the latest earlier release tag;
-- `package.json` and `rust/Cargo.lock` for package identity and dependency evidence;
-- embedded `#[cfg(test)]` modules within the selected Rust source;
-- `.gitmodules` and the root tree inventory for exclusion and file-type validation.
+Describe behavior in language-neutral terms, then map it to the initial maintained target,
+TypeScript. C++ remains unmaintained and opt-in; no automatic cross-language parity is required.
 
-Do not run any upstream test, build, script, package manager, binary, filter, or submodule.
+| Domain | TypeScript owner below libs/typescript/packages/ | Tests below the same root |
+| --- | --- | --- |
+| CIP-8 signing and COSE serialization | `cip/src/cip8/` | `cip/test/cip8.test.mjs` |
 
-## Consumption and planning requirements
+Use focused package checks and `npm --prefix libs/typescript run check` for consumer changes.
 
-- Implement message signing as ordinary TypeScript owned by the XRAY Cardano Lib package selected
-  during preparation; do not publish or invoke upstream Rust, WASM, ASM.js, or native artifacts.
-- Reuse XRAY Cardano Lib's existing generic lossless CBOR and cryptography owners. Do not duplicate
-  generic CBOR values, integers, Ed25519 key/signature classes, or Blake2b primitives.
-- Map the selected signing structures, protected and unprotected headers, signature structures,
-  builders, COSE key representation, detached payload behavior, external AAD, payload hashing,
-  and `cms_` user-facing encoding to exact local owners and tests.
-- Preserve complete-input decoding, configured CBOR resource limits, duplicate-header rejection,
-  protected-header byte semantics, deterministic constructed output, and existing browser-safe
-  package boundaries.
-- Compare a later snapshot with the latest accepted snapshot from this provider. For the initial
-  snapshot, compare the candidate with the latest earlier upstream release and the current Cardano
-  Lib CBOR, cryptography, CIP, runtime facade, and packaging behavior.
-- A new snapshot at the same exact commit and provider version is a duplicate.
+## Snapshots
 
-## Excluded source material
+- [0001](0001/SNAPSHOT.md): original frozen capture, with its complete specification,
+  exact artifact inventory and documented development metadata migration.
 
-- The `binaryen` submodule/gitlink and all other submodules
-- Upstream build, release, CI, package-manager, generated binding, WASM, ASM.js, and JavaScript
-  helper material
-- Upstream lockfiles and standalone empty `rust/src/tests.rs`
-- COSE encryption, recipients, password encryption, public-key encryption, and cipher builders
-- Generic CBOR wrapper APIs already owned by `@xray-network/cardano-core`
-- `EdDSA25519Key.set_private_key` and builder-created private-key label `-4`
+## Capture directory migration — 2026-09-09
+
+At the human's request, `0001-message-signing/` was renamed to `0001/`.
+This is a repository path migration, not a new upstream capture. All baseline artifact bytes,
+source revisions, selection rules, and lifecycle decisions are preserved. Active references and
+capture metadata use the new path. Immutable archived results and historical documentation retain
+their original paths and hashes; resolve their legacy directory through this mapping.
+
+| Descriptor | SHA-256 before migration | SHA-256 after migration |
+| --- | --- | --- |
+| [0001/SNAPSHOT.md](0001/SNAPSHOT.md) | `db8340138ee183c19443f3bd952a7a2323d27a7e45111a75848a8a3c0950f17b` | `70e67e36d1e9d585965d5c26bb75d19decd91349155ecab8c4e73e7cae21a666` |

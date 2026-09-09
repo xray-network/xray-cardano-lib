@@ -52,6 +52,7 @@ import {
   SingleMintBuilder,
   SingleWithdrawalBuilder,
   StakeDeregistration,
+  StakeRegistration,
   TransactionBuilder,
   TransactionBuilderConfigBuilder,
   TransactionInput,
@@ -268,6 +269,149 @@ test("build_tx_with_certs, withdrawals, proposals, and votes", () => {
   for (const field of [4, 5, 19, 20]) assert.ok(bodyField(signed.body(), field));
   assert.equal(builder.get_deposit(), 200n);
   assert.equal(builder.get_implicit_input().coin(), 1_100n);
+});
+
+function fundedBuilder() {
+  const builder = TransactionBuilder.new(config());
+  builder.add_input(input(70, 8_000_000n).result);
+  builder.add_collateral(input(71, 2_000_000n).result);
+  builder.add_output(output(2_000_000n));
+  return builder;
+}
+
+function builderState(builder) {
+  const draft = builder.build_for_evaluation(ChangeSelectionAlgo.Default, address);
+  return {
+    deposit: builder.get_deposit(),
+    implicit: builder.get_implicit_input().to_cbor_bytes(),
+    body: draft.draft_body().to_cbor_bytes(),
+    transaction: draft.draft_tx().to_cbor_bytes(),
+  };
+}
+
+function proposal(deposit) {
+  return ProposalProcedure.new(deposit, reward, GovAction.new_info_action(), Anchor.new(Url.new(""), AnchorDocHash.from_raw_bytes(new Uint8Array(32))));
+}
+
+test("certificate duplicates fail before changing refunds, body, or witnesses", () => {
+  const builder = fundedBuilder();
+  const certificate = Certificate.new_stake_deregistration(StakeDeregistration.new(Credential.new_pub_key(paymentHash)));
+  const result = SingleCertificateBuilder.new(certificate).payment_key();
+  builder.add_cert(result);
+  const before = builderState(builder);
+  const node = decodeCbor(certificate.to_cbor_bytes());
+  node.encoding = { kind: "indefinite" };
+  node.values[0].encoding = { width: 2 };
+  const equivalent = SingleCertificateBuilder.new(Certificate.from_cbor_bytes(encodeCbor(node))).payment_key();
+  for (const duplicate of [result, equivalent]) {
+    assert.throws(() => builder.add_cert(duplicate), { name: "TypeError", message: "duplicate certificate" });
+    assert.deepEqual(builderState(builder), before);
+  }
+  // Sharing a credential does not make distinct complete certificates equal.
+  builder.add_cert(SingleCertificateBuilder.new(Certificate.new_stake_registration(StakeRegistration.new(Credential.new_pub_key(paymentHash)))).payment_key());
+  // Earlier drafts already allocated change; fund the newly added deposit and fee.
+  builder.add_input(input(72, 2_000_000n).result);
+  const field = bodyField(builder.build_for_evaluation(ChangeSelectionAlgo.Default, address).draft_body(), 4);
+  assert.equal(field.value.values.length, 2);
+  assert.equal(builder.get_implicit_input().coin(), 100n);
+  assert.equal(builder.get_deposit(), 100n);
+});
+
+test("proposal duplicates reject entire batches before deposits or witnesses change", () => {
+  const builder = fundedBuilder();
+  const first = proposal(200n), second = proposal(201n), third = proposal(202n);
+  builder.add_proposal(ProposalBuilder.new().with_proposal(first).build());
+  const before = builderState(builder);
+  const node = decodeCbor(first.to_cbor_bytes());
+  node.encoding = { kind: "indefinite" }; node.values[0].encoding = { width: 8 };
+  const equivalent = ProposalProcedure.from_cbor_bytes(encodeCbor(node));
+  for (const batch of [[first], [equivalent], [second, first], [second, third, second]]) {
+    const proposals = ProposalBuilder.new();
+    for (const value of batch) proposals.with_proposal(value);
+    assert.throws(() => builder.add_proposal(proposals.build()), { name: "TypeError", message: "duplicate proposal" });
+    assert.deepEqual(builderState(builder), before);
+  }
+  builder.add_proposal(ProposalBuilder.new().with_proposal(second).with_proposal(third).build());
+  builder.add_input(input(72, 2_000_000n).result);
+  assert.equal(builder.get_deposit(), 603n);
+  const field = bodyField(builder.build_for_evaluation(ChangeSelectionAlgo.Default, address).draft_body(), 20);
+  assert.deepEqual(field.value.values.map((value) => value.values[0].value), [200n, 201n, 202n]);
+});
+
+function scriptBuilderFixtures() {
+  const script = PlutusScript.from_v1(PlutusV1Script.new(Uint8Array.of(1, 2, 3)));
+  const partial = PartialPlutusWitness.new(PlutusScriptWitness.new_script(script), PlutusData.from_cbor_hex("00"));
+  const signers = requiredSigners(paymentHash);
+  const plainCert = SingleCertificateBuilder.new(Certificate.new_stake_registration(StakeRegistration.new(Credential.new_pub_key(paymentHash)))).payment_key();
+  const scriptCert = SingleCertificateBuilder.new(Certificate.new_stake_deregistration(StakeDeregistration.new(Credential.new_script(script.hash())))).plutus_script(partial, signers);
+  const plainProposal = (deposit) => ProposalBuilder.new().with_proposal(proposal(deposit)).build();
+  const scriptProposal = (deposit) => ProposalBuilder.new().with_plutus_proposal_inline_datum(proposal(deposit), partial, signers).build();
+  return { partial, signers, plainCert, scriptCert, plainProposal, scriptProposal };
+}
+
+function redeemerPointers(list) {
+  return Array.from({ length: list.len() }, (_, index) => {
+    const value = decodeCbor(list.get(index).to_cbor_bytes());
+    return value.values.slice(0, 2).map((field) => field.value);
+  });
+}
+
+test("certificate and proposal redeemers retain positions across non-script entries and copies", () => {
+  const { plainCert, scriptCert, plainProposal, scriptProposal, partial, signers } = scriptBuilderFixtures();
+  const redeemers = RedeemerSetBuilder.new();
+  redeemers.add_cert(plainCert); redeemers.add_cert(scriptCert);
+  redeemers.add_cert(plainCert); redeemers.add_cert(scriptCert);
+  redeemers.add_proposal(plainProposal(200n));
+  redeemers.add_proposal(scriptProposal(201n));
+  redeemers.add_proposal(ProposalBuilder.new().with_proposal(proposal(202n)).with_plutus_proposal_inline_datum(proposal(203n), partial, signers).build());
+  const expected = [[2n, 1n], [2n, 3n], [5n, 1n], [5n, 3n]];
+  assert.deepEqual(redeemerPointers(redeemers.build(true)), expected);
+  for (const [tag, index] of expected) redeemers.update_ex_units(RedeemerWitnessKey.new(Number(tag), index), ExUnits.new(index, index + 10n));
+  const copy = redeemers.copy();
+  for (let index = 0; index < expected.length; index += 1) {
+    assert.deepEqual(copy.build(false).get(index).to_cbor_bytes(), redeemers.build(false).get(index).to_cbor_bytes());
+  }
+  copy.add_cert(plainCert); copy.add_cert(scriptCert);
+  copy.add_proposal(plainProposal(204n)); copy.add_proposal(scriptProposal(205n));
+  assert.deepEqual(redeemerPointers(copy.build(true)), [[2n, 1n], [2n, 3n], [2n, 5n], [5n, 1n], [5n, 3n], [5n, 5n]]);
+  assert.deepEqual(redeemerPointers(redeemers.build(false)), expected);
+  for (let index = 0; index < expected.length; index += 1) {
+    const node = decodeCbor(copy.build(true).get(index < 2 ? index : index + 1).to_cbor_bytes());
+    assert.deepEqual(node.values[3].values.map((value) => value.value), [expected[index][1], expected[index][1] + 10n]);
+  }
+});
+
+test("rejected script-bearing additions leave transaction redeemers and witnesses unchanged", () => {
+  const { plainCert, scriptCert, plainProposal, scriptProposal, partial, signers } = scriptBuilderFixtures();
+  const builder = fundedBuilder();
+  builder.add_cert(plainCert); builder.add_cert(scriptCert);
+  builder.add_proposal(plainProposal(200n)); builder.add_proposal(scriptProposal(201n));
+  const before = builderState(builder);
+  assert.throws(() => builder.add_cert(scriptCert), /duplicate certificate/);
+  assert.deepEqual(builderState(builder), before);
+  const failedBatch = ProposalBuilder.new()
+    .with_plutus_proposal_inline_datum(proposal(202n), partial, signers)
+    .with_proposal(proposal(200n)).build();
+  assert.throws(() => builder.add_proposal(failedBatch), /duplicate proposal/);
+  assert.deepEqual(builderState(builder), before);
+  builder.add_proposal(plainProposal(202n)); builder.add_proposal(scriptProposal(203n));
+  builder.add_input(input(72, 2_000_000n).result);
+  const draft = builder.build_for_evaluation(ChangeSelectionAlgo.Default, address);
+  for (const [tag, index] of [[2, 1n], [5, 1n], [5, 3n]]) draft.set_exunits(RedeemerWitnessKey.new(tag, index), ExUnits.new(1n, 2n));
+  assert.deepEqual(redeemerPointers(draft.build()), [[2n, 1n], [5n, 1n], [5n, 3n]]);
+});
+
+test("witness unions keep scripts and datums unique through repeat merges", () => {
+  const builder = TransactionWitnessSetBuilder.new();
+  const script = PlutusScript.from_v1(PlutusV1Script.new(Uint8Array.of(1, 2, 3)));
+  const datum = PlutusData.from_cbor_hex("1801");
+  builder.add_script(script.to_script()); builder.add_script(script.to_script());
+  builder.add_plutus_datum(datum); builder.add_plutus_datum(datum);
+  const before = builder.build();
+  builder.add_existing(before); builder.add_existing(before);
+  assert.equal(witnessFieldLength(decodeCbor(builder.build().to_cbor_bytes()), 3), 1);
+  assert.equal(witnessFieldLength(decodeCbor(builder.build().to_cbor_bytes()), 4), 1);
+  assert.deepEqual(builder.copy().build().to_cbor_bytes(), before.to_cbor_bytes());
 });
 
 test("test_collateral and build_tx_with_ref_input avoid double counting", () => {

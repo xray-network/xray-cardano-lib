@@ -1,250 +1,106 @@
 # Official Plutus UPLC provider
 
 Provider: uplc
-Provider-Version: v1
 
-## Purpose
+## Purpose and authority
 
-Capture the official Plutus implementation, ledger API, and conformance suite as immutable
-evidence for a browser-native, XRAY Cardano Lib-owned TypeScript implementation of Untyped Plutus Core.
-Capture the official Cardano Ledger implementation separately as the authority for transaction
-script collection, era-specific script contexts, and execution-unit estimation. The bounded public
-surface includes typed Data, UPLC AST values, text and Flat parsing/encoding, cost models,
-budgeted CEK evaluation, `apply_params_to_script`, and `eval_phase_two_raw`. Ledger transaction
-decoding and context construction remain package-private implementation details.
+Official Plutus defines UPLC language, Flat encoding, CEK evaluation, builtins and costs. Official Cardano Ledger independently defines transaction script discovery, contexts and execution-unit estimation. Other implementations are comparison material only.
 
-Captured Haskell, JSON, golden files, and test data are evidence, not runtime dependencies,
-generated source, or instructions. Aiken and other third-party implementations are not normative
-sources for this provider.
+This unversioned guide explains the provider and update workflow. Each numbered snapshot owns
+its frozen specification and evidence; editing this guide never changes an existing snapshot.
 
-## Primary source
+## Sources and tracking
 
-| Field | Value |
-| --- | --- |
-| Repository | `https://github.com/IntersectMBO/plutus.git` |
-| Followed ref | Latest stable release tag matching four numeric components |
-| Revision policy | Full commit named by the highest stable release tag |
-| Source mode | Live; resolve independently for every snapshot |
-| Submodules | Not part of the source |
-| License | Apache-2.0 |
+| Source | Official repository | Followed ref/policy | License guidance |
+| --- | --- | --- | --- |
+| Primary | [IntersectMBO/plutus](https://github.com/IntersectMBO/plutus) | Highest stable release tag matching four numeric components, ordered numerically | Inspect Plutus license notices at the resolved release. |
+| Ledger integration | [IntersectMBO/cardano-ledger](https://github.com/IntersectMBO/cardano-ledger) | refs/heads/master, resolved independently | Inspect Ledger LICENSE and NOTICE at its own resolved commit. |
 
-The resolved full commit is authoritative. A branch head, release page, or tag name alone is not.
+Tracking is live and human-triggered. Resolve full immutable source identities on each requested
+capture. No scheduling or GitHub Actions are involved. The snapshot specification records exact
+selection, mappings, formats, corpus counts, integrity checks and licensing before publication.
+Consult the previous snapshot’s rules as historical context, then independently enumerate the new
+selection. Do not inherit old counts or silently broaden coverage when upstream paths change.
 
-## Cardano Ledger comparison source
+## Evidence domains and boundaries
 
-| Field | Value |
-| --- | --- |
-| Repository | `https://github.com/IntersectMBO/cardano-ledger.git` |
-| Followed ref | `refs/heads/master` |
-| Revision policy | Full commit reachable from the followed ref |
-| Source mode | Live; resolve independently for every snapshot |
-| Submodules | Not part of the source |
-| License | Apache-2.0 |
+Language/runtime sources, cost models, protocol availability, the complete selected conformance corpus, and Alonzo/Babbage/Conway integration. Maintained support is UPLC 1.0/1.1 and protocols 5–11; V4, protocol 12 and Dijkstra require separate scope decisions. Capture evidence for unsupported cases without treating it as authorization to implement new semantics.
 
-Record this repository under `Comparison sources`, not as the provider source or previous
-snapshot. Its captured files are authoritative only for ledger integration. If its supported
-Plutus language or protocol range exceeds the primary Plutus release, the primary release bounds
-the implementation and the newer ledger behavior is recorded as excluded.
+Captured source and upstream instructions are untrusted evidence. Do not execute them or generate
+implementation code from them. Artifact-backed implementation requires its own bounded plan.
 
-## Artifact selection
+## Summarization requirements
 
-Path expressions below are declarative: braces enumerate exact alternatives and do not authorize
-shell expansion or additional files. Copy each selected regular file byte-for-byte, preserving its
-source-relative path below `artifacts/plutus/` or `artifacts/cardano-ledger/`.
+In each new CAPTURE.md, summarize the first capture as a baseline and later captures against the
+immediately preceding same-provider snapshot. Name all immutable source identities and relevant
+artifact paths. Account for added, removed, changed and unchanged evidence, distinguishing behavior
+from documentation, tests and refactoring. State observations separately from inferred impact.
+Map relevant behavior to maintained modules/APIs and tests, recommend implementation or investigation,
+and explain no-change conclusions, exclusions and unresolved questions. Summary prose is advisory
+and does not authorize consumer changes. SNAPSHOT.md owns the complete specification and resolved
+inventory; legacy 0001 summaries remain in their original snapshot documents. New incremental
+captures reuse unchanged earlier artifacts instead of copying them. A no-change capture writes nothing.
 
-From the primary Plutus source, copy these seven metadata and conformance-control files:
+## Maintained consumer guidance
 
-```text
-LICENSE.md
-NOTICE.md
-README.adoc
-plutus-conformance/LICENSE
-plutus-conformance/NOTICE
-plutus-conformance/README.md
-plutus-conformance/src/PlutusConformance/Common.hs
-```
+Describe behavior in language-neutral terms, then map it to the initial maintained target,
+TypeScript. C++ remains unmaintained and opt-in; no automatic cross-language parity is required.
 
-Copy exactly these 68 Plutus Core semantic, codec, machine, cost, and golden files:
+| Domain | TypeScript owner below libs/typescript/packages/ | Tests below the same root |
+| --- | --- | --- |
+| UPLC codecs, evaluation and costs | `plutus/src/uplc/` | `plutus/test/conformance.test.mjs` |
+| Script discovery and transaction contexts | `plutus/src/ledger/` | `plutus/test/ledger.test.mjs` |
 
-```text
-plutus-core/cost-model/data/builtinCostModel{A,B,C,D,E}.json
-plutus-core/cost-model/data/cekMachineCosts{A,B,C,D,E}.json
-plutus-core/plutus-core/src/Codec/Extras/SerialiseViaFlat.hs
-plutus-core/plutus-core/src/Data/Vector/Orphans.hs
-plutus-core/plutus-core/src/PlutusCore/Bitwise.hs
-plutus-core/plutus-core/src/PlutusCore/Builtin.hs
-plutus-core/plutus-core/src/PlutusCore/Builtin/{KnownType,Meaning,Result,Runtime,TypeScheme}.hs
-plutus-core/plutus-core/src/PlutusCore/Crypto/BLS12_381/{Bounds,Error,G1,G2,Pairing}.hs
-plutus-core/plutus-core/src/PlutusCore/Crypto/{Ed25519,ExpMod,Hash,Secp256k1,Utils}.hs
-plutus-core/plutus-core/src/PlutusCore/Data.hs
-plutus-core/plutus-core/src/PlutusCore/DeBruijn.hs
-plutus-core/plutus-core/src/PlutusCore/DeBruijn/Internal.hs
-plutus-core/plutus-core/src/PlutusCore/Default.hs
-plutus-core/plutus-core/src/PlutusCore/Default/Builtins.hs
-plutus-core/plutus-core/src/PlutusCore/Default/Universe.hs
-plutus-core/plutus-core/src/PlutusCore/Default/Universe/Cardano.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Error.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/BuiltinCostModel.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/CostModelInterface.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/CostStream.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/CostingFun/Core.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/ExBudget.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/ExBudgetStream.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/ExBudgetingDefaults.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/ExMemory.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/ExMemoryUsage.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/Exception.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/MachineParameters.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/MachineParameters/Default.hs
-plutus-core/plutus-core/src/PlutusCore/Evaluation/Machine/SimpleBuiltinCostModel.hs
-plutus-core/plutus-core/src/PlutusCore/FlatInstances.hs
-plutus-core/plutus-core/src/PlutusCore/MkPlc.hs
-plutus-core/plutus-core/src/PlutusCore/Value.hs
-plutus-core/plutus-core/src/PlutusCore/Version.hs
-plutus-core/plutus-core/test/CostModelInterface/Spec.hs
-plutus-core/plutus-core/test/CostModelInterface/defaultCostModelParams.json
-plutus-core/plutus-core/test/Flat/golden/encoding-stability.golden
-plutus-core/untyped-plutus-core/src/UntypedPlutusCore/Check/Scope.hs
-plutus-core/untyped-plutus-core/src/UntypedPlutusCore/Core/Instance/Flat.hs
-plutus-core/untyped-plutus-core/src/UntypedPlutusCore/Core/Type.hs
-plutus-core/untyped-plutus-core/src/UntypedPlutusCore/DeBruijn.hs
-plutus-core/untyped-plutus-core/src/UntypedPlutusCore/Evaluation/Machine/Cek.hs
-plutus-core/untyped-plutus-core/src/UntypedPlutusCore/Evaluation/Machine/Cek/{CekMachineCosts,EmitterMode,ExBudgetMode,Internal}.hs
-plutus-core/untyped-plutus-core/src/UntypedPlutusCore/Evaluation/Machine/CommonAPI.hs
-plutus-core/untyped-plutus-core/src/UntypedPlutusCore/MkUPlc.hs
-```
+Use focused package checks and `npm --prefix libs/typescript run check` for consumer changes.
 
-Copy exactly these 38 Plutus Ledger API files:
+Use the [0002 findings](0002/CAPTURE.md) for release and Ledger comparison, keeping the original
+corpus coverage. In conformance.test.mjs, pin the exact corpus and account for each text/Flat case
+as executed or outside supported availability with an exact captured rule and reason. Do not infer
+exclusions from failures, loosen counts, or conflate parser and evaluator failures. Report old/new
+results separately; no release-compatibility claim follows from capture alone.
 
-```text
-plutus-ledger-api/CostModel/Params/CostModelParams/costModelParamNames.golden.txt
-plutus-ledger-api/src/PlutusLedgerApi/Common/{Eval,ParamName,ProtocolVersions,SerialisedScript,Versions}.hs
-plutus-ledger-api/src/PlutusLedgerApi/Data/{V1,V2,V3}.hs
-plutus-ledger-api/src/PlutusLedgerApi/MachineParameters.hs
-plutus-ledger-api/src/PlutusLedgerApi/V1/Contexts.hs
-plutus-ledger-api/src/PlutusLedgerApi/V1/Data/{Address,Contexts,Credential,DCert,Interval,Time,Tx,Value}.hs
-plutus-ledger-api/src/PlutusLedgerApi/V1/{EvaluationContext,ParamName,Scripts,Tx,Value}.hs
-plutus-ledger-api/src/PlutusLedgerApi/V2/Contexts.hs
-plutus-ledger-api/src/PlutusLedgerApi/V2/Data/{Contexts,Tx}.hs
-plutus-ledger-api/src/PlutusLedgerApi/V2/{EvaluationContext,ParamName,Tx}.hs
-plutus-ledger-api/src/PlutusLedgerApi/V3/Contexts.hs
-plutus-ledger-api/src/PlutusLedgerApi/V3/Data/{Contexts,MintValue,Tx}.hs
-plutus-ledger-api/src/PlutusLedgerApi/V3/{EvaluationContext,MintValue,ParamName,Tx}.hs
-```
+Map demonstrated codec/evaluator/cost differences to the existing flat.ts, text.ts, machine.ts,
+cost-model.ts and cost-model-data.ts owners. Establish expected behavior and classify unexpected
+conformance failures during planning, then create bounded instructions for verified differences.
+Plutus V4, protocol 12, Dijkstra and future-gated MultiIndexArray/Policies/AssetCount remain outside
+the maintained scope. Source presence does not establish protocol availability.
 
-From the Cardano Ledger comparison source, copy exactly these 24 files:
+For phase-two comparison, evaluate.ts owns script discovery/resolution and protocol-aware decoding;
+context.ts owns datum lookup, V1/V2 arguments, V3 ScriptInfo and redeemer-purpose/context construction.
+Use ledger.test.mjs and api.test.mjs. Cover Alonzo 5–6, Babbage 7–8 and Conway 9–11; witness/reference
+scripts; missing, inline and hashed datums; spending/non-spending purposes; redeemer ordering;
+missing active-language costs; independent maximum budgets; and CPU/memory versus ledger ExUnits
+order. Preserve hashing of original transaction bytes and nominal chain ownership. Distinguish
+Haskell refactors/future-era extensions from observable maintained behavior. Each proposed change
+needs an exact captured rule, owner, expected output/error, compatibility decision and focused test;
+if no observable difference remains, recommend no implementation change.
 
-```text
-LICENSE
-NOTICE
-libs/cardano-ledger-core/src/Cardano/Ledger/Plutus.hs
-libs/cardano-ledger-core/src/Cardano/Ledger/Plutus/{CostModels,Data,Evaluate,ExUnits,Language,ToPlutusData,TxInfo}.hs
-eras/alonzo/impl/src/Cardano/Ledger/Alonzo/Plutus/{Context,Evaluate,TxInfo}.hs
-eras/alonzo/impl/src/Cardano/Ledger/Alonzo/Rules/Utxos.hs
-eras/alonzo/impl/src/Cardano/Ledger/Alonzo/Scripts.hs
-eras/alonzo/impl/test/Test/Cardano/Ledger/Alonzo/Imp/TxInfoSpec.hs
-eras/babbage/impl/src/Cardano/Ledger/Babbage/Rules/Utxos.hs
-eras/babbage/impl/src/Cardano/Ledger/Babbage/Scripts.hs
-eras/babbage/impl/src/Cardano/Ledger/Babbage/TxInfo.hs
-eras/babbage/impl/testlib/Test/Cardano/Ledger/Babbage/TxInfoSpec.hs
-eras/conway/impl/src/Cardano/Ledger/Conway/Rules/Utxos.hs
-eras/conway/impl/src/Cardano/Ledger/Conway/Scripts.hs
-eras/conway/impl/src/Cardano/Ledger/Conway/TxInfo.hs
-eras/conway/impl/testlib/Test/Cardano/Ledger/Conway/TxInfoSpec.hs
-```
+## Snapshots
 
-Reject a missing, additional, renamed, symlinked, gitlinked, special, or unexpectedly large
-selected file.
+- [0001](0001/SNAPSHOT.md): original frozen capture, with its complete specification,
+  exact artifact inventory and documented development metadata migration.
 
-Transform every regular file below `plutus-conformance/test-cases/` into the single deterministic
-artifact `artifacts/conformance/corpus.json`. The artifact is UTF-8 JSON with a trailing newline
-and this fixed structure:
+- [0002](0002/SNAPSHOT.md): complete incremental specification and resolved inventory;
+  [capture summary](0002/CAPTURE.md) compares with 0001 and the maintained TypeScript implementation.
 
-```json
-{
-  "schemaVersion": 1,
-  "source": {
-    "repository": "https://github.com/IntersectMBO/plutus.git",
-    "commit": "<full source commit>",
-    "tag": "<release tag>",
-    "root": "plutus-conformance/test-cases",
-    "licensePath": "artifacts/plutus/plutus-conformance/LICENSE"
-  },
-  "entries": [
-    {
-      "path": "<path relative to the source root>",
-      "size": 0,
-      "sha256": "<lowercase SHA-256>",
-      "contentBase64": "<RFC 4648 padded base64>"
-    }
-  ]
-}
-```
+## Capture directory migration — 2026-09-09
 
-Use the displayed object and entry key order. Sort entries by the UTF-8 bytes of `path`, reject
-duplicate or unsafe relative paths, and require exactly 3,013 regular files. `size`, `sha256`, and
-`contentBase64` preserve each source blob exactly. Reject any source entry larger than 16 MiB.
+At the human's request, `0001-uplc/` was renamed to `0001/`.
+This is a repository path migration, not a new upstream capture. All baseline artifact bytes,
+source revisions, selection rules, and lifecycle decisions are preserved. Active references and
+capture metadata use the new path. Immutable archived results and historical documentation retain
+their original paths and hashes; resolve their legacy directory through this mapping.
 
-Create `artifacts/conformance/README.md` as snapshot-local documentation of the corpus mapping,
-provenance, license, and consumer procedure.
+| Descriptor | SHA-256 before migration | SHA-256 after migration |
+| --- | --- | --- |
+| [0001/SNAPSHOT.md](0001/SNAPSHOT.md) | `614c88a7ae99d209e8328caa873eefa7db6a9140cea8bd9131ec2f4f34a674e5` | `b74c009eb9ebd6f42ae8e63c7fc902dc477a50b9d38563b3fda9bf2c8a82db5d` |
+| [0002/SNAPSHOT.md](0002/SNAPSHOT.md) | `a222826872ecc1138d407621da713f4ace5c8744525a70ecf1cab5dc74e13f44` | `63404d662cf7a1b4c069afc50f4f46ccd8dbb1f427ca485ebb9c29cda0b3731f` |
 
-Create `artifacts/SHA256SUMS` as deterministic snapshot-local integrity metadata. It contains one
-line for every final artifact other than itself, sorted by artifact-relative path in byte order,
-using lowercase SHA-256, two ASCII spaces, the path relative to `artifacts/`, and a trailing
-newline. The final artifact inventory is exactly 140 regular files including `SHA256SUMS`.
+Only path-bearing generated controls changed; captured upstream sources, vectors, licenses, and
+corpus payloads remain byte-identical. Resolved inventories, summary hashes, predecessor pins,
+and checksum inventories were refreshed for the renamed paths.
 
-## Evidence-only paths
-
-Inspect, but do not copy:
-
-- release metadata, Git history, Cabal/Nix files, lockfiles, and dependency manifests;
-- formal specifications and metatheory for terminology and exclusion review;
-- parsers, pretty-printers, optimizers, compilers, plugins, and code generators;
-- Cardano Ledger era modules outside the selected phase-two/context paths;
-- `.gitmodules` and both source-tree inventories for file-type validation.
-
-Do not run any upstream hook, test, build, script, package manager, executable, generated program,
-filter, or submodule.
-
-## Consumption and planning requirements
-
-- Implement a complete UPLC 1.0.0/1.1.0 runtime needed by protocol majors 5 through
-  11: Flat codec, De Bruijn scope handling, CEK evaluation, memory accounting, cost formulas,
-  builtins with stable tags 0 through 100, default-universe constants, and semantics variants A
-  through E.
-- Expose immutable UPLC AST types, text and Flat codecs, serialized-script codecs, cost-model
-  construction, default machine costs, and budgeted evaluation from `@xray-network/cardano-plutus`
-  and its `./uplc` subpath. Expose typed Data through the root and `./data`.
-- Expose `apply_params_to_script` and `eval_phase_two_raw` plus their result contracts from the
-  Cardano Plutus root.
-- Treat the primary Plutus source as authoritative for language/Flat/machine behavior and Cardano
-  Ledger as authoritative for Alonzo, Babbage, and Conway script discovery, arguments, contexts,
-  cost-model selection, valuation, and errors. Where they differ from Aiken, follow the two official
-  sources.
-- Make protocol major version explicit. Support majors 5 through 11 and derive the raw transaction
-  era as Alonzo for 5-6, Babbage for 7-8, and Conway for 9-11.
-- Evaluate every redeemer independently with the supplied maximum transaction budget, ignoring its
-  encoded ExUnits when calculating the replacement. Return calculated cost in CPU-then-memory
-  order and encode ledger ExUnits as memory-then-steps.
-- Require caller-supplied cost models. Preserve official current-model behavior: signed 64-bit
-  values, ordered parameter names, ignore extra tail values with a warning, and fill missing tail
-  values with `INT64_MAX` with a warning. A missing active-language model is an error.
-- Preserve protocol/language availability, successful-return rules, the V1/V2 historical script
-  CBOR-remainder compatibility exception, V2+ constant wire-size checks, and protocol-11 universe
-  header and constructor-field limits exactly.
-- Reuse XRAY Cardano Lib's lossless CBOR, Plutus Data, transactions, scripts, cost models, redeemers,
-  hashes, and builder owners. Do not create competing public nominal ledger types.
-- Keep all runtime code browser-safe TypeScript. Additional SHA-2, Keccak, RIPEMD, secp256k1, and
-  BLS12-381 operations belong to the crypto package and follow ADR 0004.
-- Keep Plutus tests below `libs/typescript/packages/plutus/test/` and ensure the root test command discovers them.
-
-## Excluded source material
-
-- Aiken or any other third-party implementation as normative or captured evidence
-- PlutusV4, protocol major 12, Dijkstra-era nested transactions, and provisional ledger behavior
-  absent from the primary Plutus release
-- UPLC pretty-printer, optimizer, compiler, debugger, or protocol override APIs
-- Upstream Haskell, Rust, native code, WASM, generated JavaScript, bindings, binaries, or runtime
-  data loading
-- Full ledger phase-one validation, balancing, fee selection, and transaction construction
-- Generic Cardano CBOR, ledger, Data, key, hash, or signature wrappers already owned by XRAY Cardano Lib
+| Generated control | Previous SHA-256 | Current SHA-256 |
+| --- | --- | --- |
+| [0002/artifacts/SHA256SUMS](0002/artifacts/SHA256SUMS) | `aebab3c73e8c4f4351ac1acedee5a66c656d765d022cc1866f225738bbe18948` | `f34a243d66e20c9ae7dd03a1fcdd7ada482f0a95a1d57cd4bf7b3e0900290f9b` |
+| [0002/artifacts/conformance/README.md](0002/artifacts/conformance/README.md) | `128328b95a79d686a899110856c29142a3d61bda80f1b07f0f7dc4f2003a30eb` | `e78b63737bfe74dd37c4bb46b512699fdcd15f508df235e5ff7bec15b7a1062c` |
