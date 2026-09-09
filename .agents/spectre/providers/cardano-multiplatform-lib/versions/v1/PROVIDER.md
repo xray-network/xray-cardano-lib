@@ -1,41 +1,27 @@
 # Cardano Multiplatform Lib provider
 
 Provider: cardano-multiplatform-lib
-Provider-Version: v2
+Provider-Version: v1
 
 ## Purpose
 
-Capture CML CDDL and test-vector evidence for future XRAY Cardano Lib updates. Resolve upstream
-independently for each new snapshot, while preserving existing snapshots as immutable historical
-comparison sources. Captured artifacts are evidence, not runtime dependencies or source generators.
+Preserve the frozen CDDL comparison baseline and test-vector artifacts required by XRAY Cardano Lib's
+compatibility tests. This provider is historical evidence, not a live update source or a runtime
+code generator.
 
 ## Source
 
 | Field | Value |
 | --- | --- |
 | Repository | `https://github.com/dcSpark/cardano-multiplatform-lib.git` |
-| Followed ref | `refs/heads/develop` |
-| Revision policy | Full commit reachable from the followed ref |
-| Source mode | Live; resolve independently for every snapshot |
+| Exact commit | `39681e0d435a71f7c47a2601507ab16e691abb9e` |
+| Git tree | `172d2a1d1b47968592ec408ea0411ee108ae47fe` |
+| Revision policy | Exact; never follow a branch or newer commit |
+| Source mode | Frozen |
 | Submodules | Not part of the source |
 | License | MIT |
 
-A branch is discovery metadata only. Every new snapshot records the resolved full commit as
-`Source-Commit` and `refs/heads/develop` as `Source-Ref`; record its Git tree in the provenance.
-Never capture from a moving branch after resolution or substitute newer bytes during consumption.
-
 The three CML license artifacts are `LICENSE`, `LICENSE-EMURGO`, and `LICENSE-IOHK`.
-
-## Historical contract and baseline
-
-Snapshots declaring `Provider-Version: v1` are interpreted using the preserved
-[v1 contract](versions/v1/PROVIDER.md), with paths based at this provider directory. This v2
-contract governs new snapshots; it does not retroactively change historical capture rules.
-
-The existing [0001 snapshot](0001-cardano-multiplatform-lib/SNAPSHOT.md) remains pinned to commit
-`39681e0d435a71f7c47a2601507ab16e691abb9e`, tree `172d2a1d1b47968592ec408ea0411ee108ae47fe`.
-Preserve its document, CDDL, vector bytes, manifest, provenance, licenses, and existing consumer
-references. These identities describe the historical baseline, not a restriction on future sources.
 
 ## CDDL and legal artifact selection
 
@@ -99,7 +85,7 @@ reference-only `specs/byron.cddl`, `specs/byron_minimal.cddl`, `specs/shelley.cd
 
 ## Test-vector artifact selection
 
-Copy these regular files byte-for-byte from the resolved full CML commit, using this deterministic mapping:
+Copy these regular files byte-for-byte from the exact CML commit, using this deterministic mapping:
 
 | Upstream selection | Files | Snapshot destination |
 | --- | ---: | --- |
@@ -129,17 +115,6 @@ Create these snapshot-local control artifacts:
 These five files are deterministic snapshot metadata rather than byte-exact CML source. Package
 tests must validate the manifest, provenance, licenses, and local Git attributes.
 
-## Evidence-only sources
-
-At the resolved commit, inspect selected-file diffs, commit/release metadata, and relevant Rust
-changes under `core/rust/`, `chain/rust/`, `multi-era/rust/`, `cip25/rust/`, `cip36/rust/`, and
-`crypto/rust/` to identify possible wire-format or behavior changes. This is inspection only:
-these additional files are not part of the captured artifact selection or normative inputs to
-library implementation. A behavior change requiring additional captured source needs a separate
-provider-selection revision before implementation can consume it.
-
-Never execute upstream code, hooks, tests, builds, generators, package managers, or submodules.
-
 ## Consumption and planning requirements
 
 - Preserve the stable logical `specs/` prefix and the
@@ -150,16 +125,7 @@ Never execute upstream code, hooks, tests, builds, generators, package managers,
   below packages, a root fixture directory, or another provider.
 - Later snapshots may reuse this corpus only by its full immutable snapshot path and must name it
   under `Comparison sources` and in the artifact/change map.
-- Compare each candidate with the latest earlier same-provider snapshot, including v1 when it
-  is the latest baseline. Separate selected CDDL/vector changes from advisory Rust or tooling
-  changes, and map relevant findings to the consuming library's modules, APIs, risks, and tests.
-- A new upstream revision does not automatically require a library update. New captures and
-  bounded library implementation plans remain separate, explicitly requested operations.
-- Preserve the exact artifact selections and counts in this provider version. If upstream
-  moves, removes, adds within a selected scope, or changes the required provenance/license
-  structure, require a reviewed provider-version change instead of silently broadening selection.
-- Existing library consumers keep their declared immutable inputs until a separate implementation
-  deliberately adopts newer captured evidence.
+- Replacing the frozen CML baseline requires an explicit new snapshot plan.
 - A new snapshot at the same exact commit and provider version is a duplicate.
 
 The `plutus.cddl` files describe ledger data and transaction wire grammar. They do not define or
