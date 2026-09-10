@@ -22,16 +22,17 @@ available as `shared.hpp`, `byron.hpp`, `shelley.hpp`, `allegra.hpp`, `mary.hpp`
 
 Install the following tools on the host:
 
-- macOS on ARM64 with Apple Clang and a C++23 standard library containing `std::expected`.
+- A supported matrix host: macOS 26/ARM64 with Apple Clang 21, Ubuntu 24.04/x86-64 with
+  GCC 14 or Clang 18, or Windows Server 2025/x86-64 with MSVC 19.4x.
 - CMake 3.28 or newer.
 - Ninja 1.11 or newer.
 - Git.
 - pkg-config, Autoconf, Automake, GNU libtool, and GNU M4 for dependency ports that use
   Autotools.
 
-Implementation 0001 is intentionally macOS-only. Its frozen validation environment is macOS 26.5
-on ARM64 with Apple Clang 21.0. Linux, Windows, x86-64, GCC, upstream Clang, and MSVC support are
-deferred to later implementation records.
+Configuration probes the C++23 library facilities actually used instead of accepting a host from
+an OS or compiler version string. Other hosts may be buildable, but are not in the supported
+validation matrix. Static archives and C++ ABI are not portable between toolchains.
 
 Install the Xcode command-line tools:
 
@@ -82,7 +83,21 @@ cmake --install build/release --prefix /path/to/install
 ```
 
 Consumers can then use `find_package(XRAYCardanoLib CONFIG REQUIRED)` with that prefix on
-`CMAKE_PREFIX_PATH`.
+`CMAKE_PREFIX_PATH`. Components can be requested independently; `core` has no external crypto
+discovery, while every other component loads its exact transitive static-link dependency closure.
+
+## Benchmarks
+
+Benchmarks are opt-in and never affect semantic test results:
+
+```sh
+cmake --preset benchmarks
+cmake --build --preset benchmarks
+```
+
+Benchmark inputs must be explicit captured-snapshot paths in the build tree. Reports are
+schema-versioned JSON, remain untracked, and are not installed. Timing is descriptive only; it is
+never a correctness or release threshold.
 
 ## Build and run tests
 

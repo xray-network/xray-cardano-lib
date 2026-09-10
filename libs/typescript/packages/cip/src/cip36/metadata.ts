@@ -160,38 +160,52 @@ export class CIP36KeyDeregistration extends Cip36Data {
 }
 
 abstract class Cip36MetadataView {
+  readonly #metadata: Uint8Array | undefined;
+  protected constructor(metadata?: Uint8Array) { this.#metadata = metadata?.slice(); }
+  protected preservedMetadataBytes(): Uint8Array | undefined { return this.#metadata?.slice(); }
   public abstract to_js_value(): unknown;
   public to_json(): string { return JSON.stringify(this.to_js_value(), null, 2); }
 }
 
 export class CIP36RegistrationCbor extends Cip36MetadataView {
   readonly #registration: CIP36KeyRegistration; readonly #witness: CIP36RegistrationWitness;
-  private constructor(registration: CIP36KeyRegistration, witness: CIP36RegistrationWitness) { super(); this.#registration = CIP36KeyRegistration.from_cbor_bytes(registration.to_cbor_bytes()); this.#witness = CIP36RegistrationWitness.from_cbor_bytes(witness.to_cbor_bytes()); }
+  private constructor(registration: CIP36KeyRegistration, witness: CIP36RegistrationWitness, metadata?: Uint8Array) { super(metadata); this.#registration = CIP36KeyRegistration.from_cbor_bytes(registration.to_cbor_bytes()); this.#witness = CIP36RegistrationWitness.from_cbor_bytes(witness.to_cbor_bytes()); }
   public static new(registration: CIP36KeyRegistration, witness: CIP36RegistrationWitness): CIP36RegistrationCbor { return new CIP36RegistrationCbor(registration, witness); }
   public static from_json(value: string): CIP36RegistrationCbor { const parsed = object(JSON.parse(value), "CIP36RegistrationCbor"); return this.new(CIP36KeyRegistration.from_json(JSON.stringify(parsed["key_registration"])), CIP36RegistrationWitness.from_json(JSON.stringify(parsed["registration_witness"]))); }
-  public static from_metadata_bytes(value: Uint8Array): CIP36RegistrationCbor { const fields = metadataFields(value); return this.new(CIP36KeyRegistration.parse(required(fields, KEY_REGISTRATION_LABEL)), CIP36RegistrationWitness.parse(required(fields, REGISTRATION_WITNESS_LABEL))); }
-  public static try_from_metadata(value: Metadata): CIP36RegistrationCbor { const registration = value.get(KEY_REGISTRATION_LABEL), witness = value.get(REGISTRATION_WITNESS_LABEL); if (registration === undefined || witness === undefined) throw new TypeError("CIP36 registration metadata labels are missing"); return this.new(CIP36KeyRegistration.from_cbor_bytes(registration.to_cbor_bytes()), CIP36RegistrationWitness.from_cbor_bytes(witness.to_cbor_bytes())); }
+  public static from_metadata_bytes(value: Uint8Array): CIP36RegistrationCbor { const fields = metadataFields(value); return new CIP36RegistrationCbor(CIP36KeyRegistration.parse(required(fields, KEY_REGISTRATION_LABEL)), CIP36RegistrationWitness.parse(required(fields, REGISTRATION_WITNESS_LABEL)), value); }
+  public static try_from_metadata(value: Metadata): CIP36RegistrationCbor { if (value.get(KEY_REGISTRATION_LABEL) === undefined || value.get(REGISTRATION_WITNESS_LABEL) === undefined) throw new TypeError("CIP36 registration metadata labels are missing"); return this.from_metadata_bytes(value.to_cbor_bytes()); }
   public key_registration(): CIP36KeyRegistration { return CIP36KeyRegistration.from_cbor_bytes(this.#registration.to_cbor_bytes()); }
   public registration_witness(): CIP36RegistrationWitness { return CIP36RegistrationWitness.from_cbor_bytes(this.#witness.to_cbor_bytes()); }
-  public verify(): void { const weighted = this.#registration.delegation().as_weighted(); if (weighted !== undefined) for (let index = 0; index < weighted.len(); index += 1) if (weighted.get(index).weight() !== 0) throw new TypeError("Invalid delegation weights"); }
-  public to_metadata_bytes(): Uint8Array { this.verify(); return encodeCbor(map([[uint(KEY_REGISTRATION_LABEL), this.#registration.toNode()], [uint(REGISTRATION_WITNESS_LABEL), this.#witness.toNode()]])); }
+  public verify(): void {
+    const weighted = this.#registration.delegation().as_weighted();
+    if (weighted === undefined) return;
+    for (let index = 0; index < weighted.len(); index += 1) {
+      if (weighted.get(index).weight() !== 0) return;
+    }
+    throw new TypeError("Invalid delegation weights");
+  }
+  public to_metadata_bytes(): Uint8Array { this.verify(); return this.preservedMetadataBytes() ?? encodeCbor(map([[uint(KEY_REGISTRATION_LABEL), this.#registration.toNode()], [uint(REGISTRATION_WITNESS_LABEL), this.#witness.toNode()]])); }
   public add_to_metadata(value: Metadata): void { this.verify(); value.set(KEY_REGISTRATION_LABEL, TransactionMetadatum.from_cbor_bytes(this.#registration.to_cbor_bytes())); value.set(REGISTRATION_WITNESS_LABEL, TransactionMetadatum.from_cbor_bytes(this.#witness.to_cbor_bytes())); }
-  public try_into_metadata(): Metadata { const output = Metadata.new(); this.add_to_metadata(output); return output; }
+  public try_into_metadata(): Metadata { return Metadata.from_cbor_bytes(this.to_metadata_bytes()); }
   public to_js_value(): unknown { return { key_registration: this.#registration.to_js_value(), registration_witness: this.#witness.to_js_value() }; }
 }
 
 export class CIP36DeregistrationCbor extends Cip36MetadataView {
   readonly #deregistration: CIP36KeyDeregistration; readonly #witness: CIP36DeregistrationWitness;
-  private constructor(deregistration: CIP36KeyDeregistration, witness: CIP36DeregistrationWitness) { super(); this.#deregistration = CIP36KeyDeregistration.from_cbor_bytes(deregistration.to_cbor_bytes()); this.#witness = CIP36DeregistrationWitness.from_cbor_bytes(witness.to_cbor_bytes()); }
+  private constructor(deregistration: CIP36KeyDeregistration, witness: CIP36DeregistrationWitness, metadata?: Uint8Array) { super(metadata); this.#deregistration = CIP36KeyDeregistration.from_cbor_bytes(deregistration.to_cbor_bytes()); this.#witness = CIP36DeregistrationWitness.from_cbor_bytes(witness.to_cbor_bytes()); }
   public static new(deregistration: CIP36KeyDeregistration, witness: CIP36DeregistrationWitness): CIP36DeregistrationCbor { return new CIP36DeregistrationCbor(deregistration, witness); }
   public static from_json(value: string): CIP36DeregistrationCbor { const parsed = object(JSON.parse(value), "CIP36DeregistrationCbor"); return this.new(CIP36KeyDeregistration.from_json(JSON.stringify(parsed["key_deregistration"])), CIP36DeregistrationWitness.from_json(JSON.stringify(parsed["deregistration_witness"]))); }
-  public static from_metadata_bytes(value: Uint8Array): CIP36DeregistrationCbor { const fields = metadataFields(value); return this.new(CIP36KeyDeregistration.parse(required(fields, KEY_DEREGISTRATION_LABEL)), CIP36DeregistrationWitness.parse(required(fields, REGISTRATION_WITNESS_LABEL))); }
-  public static try_from_metadata(value: Metadata): CIP36DeregistrationCbor { const deregistration = value.get(KEY_DEREGISTRATION_LABEL), witness = value.get(REGISTRATION_WITNESS_LABEL); if (deregistration === undefined || witness === undefined) throw new TypeError("CIP36 deregistration metadata labels are missing"); return this.new(CIP36KeyDeregistration.from_cbor_bytes(deregistration.to_cbor_bytes()), CIP36DeregistrationWitness.from_cbor_bytes(witness.to_cbor_bytes())); }
+  public static from_metadata_bytes(value: Uint8Array): CIP36DeregistrationCbor { const fields = metadataFields(value); return new CIP36DeregistrationCbor(CIP36KeyDeregistration.parse(required(fields, KEY_DEREGISTRATION_LABEL)), CIP36DeregistrationWitness.parse(required(fields, REGISTRATION_WITNESS_LABEL)), value); }
+  public static try_from_metadata(value: Metadata): CIP36DeregistrationCbor { if (value.get(KEY_DEREGISTRATION_LABEL) === undefined || value.get(REGISTRATION_WITNESS_LABEL) === undefined) throw new TypeError("CIP36 deregistration metadata labels are missing"); return this.from_metadata_bytes(value.to_cbor_bytes()); }
   public key_deregistration(): CIP36KeyDeregistration { return CIP36KeyDeregistration.from_cbor_bytes(this.#deregistration.to_cbor_bytes()); }
   public deregistration_witness(): CIP36DeregistrationWitness { return CIP36DeregistrationWitness.from_cbor_bytes(this.#witness.to_cbor_bytes()); }
-  public to_metadata_bytes(): Uint8Array { return encodeCbor(map([[uint(REGISTRATION_WITNESS_LABEL), this.#witness.toNode()], [uint(KEY_DEREGISTRATION_LABEL), this.#deregistration.toNode()]])); }
+  public to_metadata_bytes(): Uint8Array { return this.preservedMetadataBytes() ?? encodeCbor(map([[uint(REGISTRATION_WITNESS_LABEL), this.#witness.toNode()], [uint(KEY_DEREGISTRATION_LABEL), this.#deregistration.toNode()]])); }
   public add_to_metadata(value: Metadata): void { value.set(KEY_DEREGISTRATION_LABEL, TransactionMetadatum.from_cbor_bytes(this.#deregistration.to_cbor_bytes())); value.set(REGISTRATION_WITNESS_LABEL, TransactionMetadatum.from_cbor_bytes(this.#witness.to_cbor_bytes())); }
-  public try_into_metadata(): Metadata { const output = Metadata.new(); this.add_to_metadata(output); return output; }
+  public try_into_metadata(): Metadata {
+    const preserved = this.preservedMetadataBytes();
+    if (preserved !== undefined) return Metadata.from_cbor_bytes(preserved);
+    const output = Metadata.new(); this.add_to_metadata(output); return output;
+  }
   public to_js_value(): unknown { return { key_deregistration: this.#deregistration.to_js_value(), deregistration_witness: this.#witness.to_js_value() }; }
 }
 
@@ -201,7 +215,15 @@ function numericFields(value: Extract<CborValue, { kind: "map" }>, allowed: read
   return output;
 }
 function required(fields: Map<bigint, CborValue>, key: bigint): CborValue { const value = fields.get(key); if (value === undefined) throw new TypeError(`missing CIP36 map key ${key}`); return value; }
-function metadataFields(value: Uint8Array): Map<bigint, CborValue> { const node = expectMap(decodeCbor(value), "CIP36 metadata view"), output = new Map<bigint, CborValue>(); for (const [key, item] of node.entries) if (key.kind === "unsigned") { if (output.has(key.value)) throw new TypeError(`duplicate metadata label ${key.value}`); output.set(key.value, item); } return output; }
+function metadataFields(value: Uint8Array): Map<bigint, CborValue> {
+  const node = expectMap(decodeCbor(value), "CIP36 metadata view"), output = new Map<bigint, CborValue>();
+  for (const [key, item] of node.entries) if (key.kind === "unsigned") {
+    if (output.has(key.value)) throw new TypeError(`duplicate metadata label ${key.value}`);
+    output.set(key.value, item);
+  }
+  Metadata.validateNode(node);
+  return output;
+}
 
 export { Address as PaymentAddress, Metadata, NetworkId, TransactionMetadatum } from "@xray-network/xray-cardano-lib-chain";
 export { Ed25519Signature, PublicKey } from "@xray-network/xray-cardano-lib-crypto";

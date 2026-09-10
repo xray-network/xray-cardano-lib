@@ -20,7 +20,7 @@ Node.js 20.19 or newer is required.
 import { Address, NetworkInfo } from "@xray-network/xray-cardano-lib-chain";
 
 const address = Address.from_bech32(
-  "addr1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8sxy9w7g",
+  "stake1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8squng76",
 );
 
 console.log(address.network_id() === NetworkInfo.mainnet().network_id());
@@ -45,6 +45,47 @@ Import from an era entry point when an application only needs that era's runtime
 | `@xray-network/xray-cardano-lib-chain/conway` | Conway ledger and governance models |
 | `@xray-network/xray-cardano-lib-chain/multi-era` | Era detection and a common view across all supported eras |
 
+Conway certificates and governance values should normally be created with their typed factories:
+
+```ts
+import {
+  Certificate,
+  Credential,
+  StakeDeregistration,
+} from "@xray-network/xray-cardano-lib-chain/conway";
+
+const certificate = Certificate.new_stake_deregistration(
+  StakeDeregistration.new(Credential.new_pub_key(stakeKeyHash)),
+);
+```
+
+The generic `new(...ConwayInput[])` constructors remain available as advanced raw compatibility
+APIs. They validate against the same Conway wire rules; typed factories and field accessors are the
+preferred application surface.
+
+`discover_required_witnesses(transaction, resolvedInputs)` analyzes an existing transaction with
+its structurally resolved spending, collateral, and reference inputs. It returns nominal key,
+bootstrap, script, datum, redeemer, and reference-script requirements without performing account
+ownership or key-derivation work.
+
+`Script.new_native`, `new_plutus_v1`, `new_plutus_v2`, and `new_plutus_v3` construct every ledger
+script variant without numeric discriminants. `ScriptRef.new(script)` creates the exact tag-24
+ledger reference, and `script()` recovers its typed defensive payload.
+
+`CostModels.from_json('{"0":[...],"1":[...],"2":[...]}')` consumes numeric ledger language IDs;
+`to_json()` returns the symmetric object form. Conway, chain-root, and aggregate imports all expose
+this same nominal owner.
+
+`Value.new(coin, assets)` and transaction-output builders encode absent or empty multi-assets as the
+coin-only CBOR form. Token-bearing values retain the `[coin, multiasset]` form. Decoded values remain
+lossless: an existing `[coin, {}]` value re-encodes byte-for-byte until an application explicitly
+rebuilds it.
+
+`Address.from_bech32` validates the canonical CIP-5 address HRP against both address kind and
+network. `Address.to_bech32()` always emits that canonical form. Existing custom-prefix calls are
+retained as compatibility forwarders to the explicit low-level
+`Address.to_bech32_unchecked(hrp)` API; Byron addresses remain Base58.
+
 For example, an indexer can decode the explicit network envelope without selecting an era first:
 
 ```ts
@@ -60,6 +101,14 @@ export function inspectBlock(bytes: Uint8Array) {
   };
 }
 ```
+
+`MultiEraTransactionBody.from_cbor_bytes(bytes)` provides an era-neutral, intrinsic transaction
+view without inventing an era for standalone bodies. Its accessors cover inputs, complete outputs
+(including datum and reference scripts), certificates, validity, value operations, collateral,
+governance, and protocol fields using `bigint` for ledger integers. Witness sets and auxiliary data
+likewise expose their typed components. Unknown future map fields and certificate tags retain owned
+CBOR bytes, while recognized fields remain strictly validated. These APIs never resolve an input,
+infer signature completeness, or convert the transaction into an application JSON model.
 
 ## Source layout
 

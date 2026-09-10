@@ -1,0 +1,18 @@
+{
+  "name": "wiki-xray-cardano-lib-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.8.2",
+  "scripts": {
+    "dev": "rspress dev --host 0.0.0.0 --port 10007",
+    "build": "rspress build",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "rspress preview --host 0.0.0.0 --port 10007"
+  },
+  "devDependencies": {
+    "@rspress/core": "2.0.21",
+    "typescript": "5.9.3",
+    "wrangler": "4.54.0"
+  }
+}

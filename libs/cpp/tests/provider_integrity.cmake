@@ -40,19 +40,19 @@ function(check_sha256_inventory sums_file expected_count)
   endforeach()
 endfunction()
 
-set(provider_root "${CARDANO_REPOSITORY_ROOT}/.xray/updates/providers")
+set(provider_root "${CARDANO_REPOSITORY_ROOT}/.agents/spectre/providers")
 
 check_sha256_inventory(
-  "${provider_root}/message-signing/0001-message-signing/artifacts/SHA256SUMS"
+  "${provider_root}/message-signing/0001/artifacts/SHA256SUMS"
   11
 )
 check_sha256_inventory(
-  "${provider_root}/uplc/0001-uplc/artifacts/SHA256SUMS"
+  "${provider_root}/uplc/0001/artifacts/SHA256SUMS"
   139
 )
 
 set(cml_root
-  "${provider_root}/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors")
+  "${provider_root}/cardano-multiplatform-lib/0001/artifacts/test-vectors")
 set(cml_manifest_path "${cml_root}/manifest.json")
 require_regular_nonempty("${cml_manifest_path}")
 file(READ "${cml_manifest_path}" cml_manifest)
@@ -93,7 +93,7 @@ foreach(group IN ITEMS genesisJson goldenBlocks)
 endforeach()
 
 set(ledger_root
-  "${provider_root}/cardano-ledger/0001-cardano-ledger/artifacts")
+  "${provider_root}/cardano-ledger/0001/artifacts")
 set(ledger_files
   "${ledger_root}/cddl/eras/byron.cddl"
   "${ledger_root}/cddl/eras/shelley.cddl"

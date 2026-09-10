@@ -34,6 +34,14 @@ struct LinearFee {
   std::uint64_t constant{};
 };
 
+struct NonnegativeRational {
+  std::uint64_t numerator{};
+  std::uint64_t denominator{1};
+  [[nodiscard]] static core::Result<NonnegativeRational> make(std::uint64_t numerator,
+                                                              std::uint64_t denominator);
+  friend bool operator==(const NonnegativeRational&, const NonnegativeRational&) = default;
+};
+
 struct ExUnits {
   std::int64_t memory{};
   std::int64_t steps{};
@@ -74,6 +82,8 @@ enum class CardanoNodePlutusDatumSchema : std::uint8_t { basic = 0, detailed = 1
 [[nodiscard]] core::Result<std::uint64_t> min_script_fee(ExUnits total, ExUnitPrices prices);
 [[nodiscard]] core::Result<std::uint64_t> min_reference_script_fee(std::uint64_t script_size,
                                                                    std::uint64_t cost_per_byte);
+[[nodiscard]] core::Result<std::uint64_t> min_reference_script_fee(
+    std::uint64_t script_size, NonnegativeRational cost_per_byte);
 [[nodiscard]] core::Result<std::uint64_t> min_fee(const core::cbor::Value& transaction,
                                                   LinearFee fee, std::uint64_t script_fee,
                                                   std::uint64_t reference_script_fee);

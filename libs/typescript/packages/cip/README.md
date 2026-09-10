@@ -12,11 +12,23 @@ npm install @xray-network/xray-cardano-lib-cip
 Import the proposal-specific entry point:
 
 ```ts
-import { CIP25Metadata } from "@xray-network/xray-cardano-lib-cip/cip25";
-import { CIP36KeyDeregistration } from "@xray-network/xray-cardano-lib-cip/cip36";
 import { CIP4 } from "@xray-network/xray-cardano-lib-cip/cip4";
 import { CIP8Message, COSESign1Builder } from "@xray-network/xray-cardano-lib-cip/cip8";
+import { AssetFingerprint } from "@xray-network/xray-cardano-lib-cip/cip14";
+import { diagnose_cip21_transaction } from "@xray-network/xray-cardano-lib-cip/cip21";
+import { CIP25Metadata } from "@xray-network/xray-cardano-lib-cip/cip25";
+import { CIP36KeyDeregistration } from "@xray-network/xray-cardano-lib-cip/cip36";
+import { make_labeled_asset_name } from "@xray-network/xray-cardano-lib-cip/cip67";
+import { CIP68Datum } from "@xray-network/xray-cardano-lib-cip/cip68";
 ```
+
+CIP-129 is still Proposed. Its explicitly provisional governance identifier bindings are
+available only from `@xray-network/xray-cardano-lib-cip/cip129`; they are intentionally absent
+from the stable CIP root and aggregate runtime.
+
+`AssetFingerprint.from_parts(policyId, assetName)` uses the existing chain `AssetName` and crypto
+`ScriptHash` owners and produces the CIP-14 Bech32 display fingerprint. Its 160-bit digest is a
+user-facing comparison aid, not a reversible ledger identity or authorization primitive.
 
 `CIP4.calculateChecksum` accepts the canonical CIP-4 input: a lowercase hexadecimal 28-byte
 public-key hash. SDKs that expose xpub-based APIs decode or derive the raw public key, hash it, and
@@ -26,21 +38,26 @@ pass that hash to this facade.
 facade used by application integrations. Lower-level COSE builders remain available for custom
 header and detached-payload workflows.
 
-The root package exposes proposal namespaces:
+The root package exposes every stable implemented proposal as a numerically ordered namespace:
 
 ```ts
-import { cip4, cip8, cip25, cip36 } from "@xray-network/xray-cardano-lib-cip";
+import { cip4, cip8, cip14, cip21, cip25, cip36, cip67, cip68 } from "@xray-network/xray-cardano-lib-cip";
 ```
 
 ## Entry points
 
 | Entry point | Domain |
 | --- | --- |
-| `@xray-network/xray-cardano-lib-cip` | CIP-4, CIP-8, CIP-25, and CIP-36 namespaces |
+| `@xray-network/xray-cardano-lib-cip` | Stable CIP-4, CIP-8, CIP-14, CIP-21, CIP-25, CIP-36, CIP-67, and CIP-68 namespaces |
+| `@xray-network/xray-cardano-lib-cip/cip14` | User-facing asset fingerprints |
+| `@xray-network/xray-cardano-lib-cip/cip21` | Bounded, pure compatibility diagnostics over preserved CBOR |
+| `@xray-network/xray-cardano-lib-cip/cip67` | CRC-8 labelled asset-name codec |
+| `@xray-network/xray-cardano-lib-cip/cip68` | Token-pair relationships and versioned datum metadata |
 | `@xray-network/xray-cardano-lib-cip/cip4` | Wallet checksum image and text identifier |
 | `@xray-network/xray-cardano-lib-cip/cip8` | COSE signing structures, keys, and builders |
 | `@xray-network/xray-cardano-lib-cip/cip25` | NFT metadata and label 721 conversion |
 | `@xray-network/xray-cardano-lib-cip/cip36` | Voting registration and deregistration metadata |
+| `@xray-network/xray-cardano-lib-cip/cip129` | Provisional governance credential/action identifiers |
 
 CIP metadata uses the chain package's existing metadata owners; CIP-8 re-exports the existing core
 `Int` and crypto public-key/signature owners by identity. The package uses `Uint8Array` and Web

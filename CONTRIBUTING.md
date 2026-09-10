@@ -4,24 +4,24 @@ XRAY Cardano Lib is a language-first polyglot repository. Source, provider evide
 history have separate ownership:
 
 - `libs/<language>/` owns implementation source, packages, tests, manifests, and validation.
-- `.xray/updates/implementations/<language>/` owns that library's numbered instructions and results.
-- `.xray/updates/XRAY-UPDATES-STATUS.md` owns aggregate lifecycle state for every target.
-- `.xray/updates/providers/` owns shared provider contracts and captured evidence.
-- `docs/` owns the Mintlify site and architecture decisions.
+- `.agents/spectre/implementations/<language>/` owns active numbered instructions and results.
+- `SPECTRE.md` owns aggregate active lifecycle state; `.agents/spectre/archive/` owns terminal history.
+- `.agents/spectre/providers/` owns shared provider guides and captured evidence.
+- `docs/` owns the Rspress site and architecture decisions.
 
-The maintained implementations are TypeScript under `libs/typescript/` and C++ under `libs/cpp/`.
-Each owns an independent implementation sequence represented in the aggregate lifecycle ledger.
+TypeScript under `libs/typescript/` is maintained. C++ under `libs/cpp/` is an unmaintained, opt-in
+concept. Each target owns an independent sequence represented in the aggregate lifecycle ledger.
 
 ## Before making a change
 
-1. Read the root `README.md` and `.xray/updates/XRAY-UPDATES.md`.
+1. Read the root `README.md`; on a SPECTRE command or authorized implementation continuation, follow `.agents/skills/spectre/SKILL.md`.
 2. Read `docs/README.md` and relevant active ADRs.
-3. Read `.xray/updates/templates/TEMPLATE_IMPL.md` and
-   `.xray/updates/templates/TEMPLATE_STATUS.md` for
+3. Read `.agents/spectre/templates/TEMPLATE_IMPL.md` and
+   `.agents/spectre/templates/TEMPLATE_STATUS.md` for
    implementation-ledger work.
 4. Read the owning library or package README, manifest, source, and tests.
-5. For provider work, read `.xray/updates/templates/TEMPLATE_PROVIDER.md` and the selected provider
-   contract.
+5. For provider work, read `.agents/spectre/templates/TEMPLATE_PROVIDER.md` and the selected provider
+   guide.
 
 There is no root build command. Each language owns its workspace and completion gate.
 
@@ -39,9 +39,9 @@ There is no root build command. Each language owns its workspace and completion 
 
 ## Implementation records
 
-- `.xray/updates/XRAY-UPDATES-STATUS.md` is the sole lifecycle and decision-proof authority for
-  every library target and follows `.xray/updates/templates/TEMPLATE_STATUS.md`.
-- Each bounded change uses a matching pair directly under `.xray/updates/implementations/<language>/`:
+- `SPECTRE.md` is the sole active lifecycle and decision-proof authority for every library target
+  and follows `.agents/spectre/templates/TEMPLATE_STATUS.md`.
+- Each bounded active change uses a matching pair directly under `.agents/spectre/implementations/<language>/`:
   `NNNN-IMPL-INSTR.md` and `NNNN-IMPL-RESULT.md`.
 - The instruction declares `DIRECT`, `DERIVED`, `HYBRID`, or `LOCAL` evidence mode.
 - Preparation creates the complete instruction and `PLANNED` row without changing source.
@@ -60,11 +60,17 @@ records owned by that target.
 
 ## Provider evidence
 
-- Provider contracts live below `.xray/updates/providers/<provider>/`.
-- Any library may consume shared provider evidence. Provider contracts and snapshots record
+- Provider guides live below `.agents/spectre/providers/<provider>/`.
+- Any library may consume shared provider evidence. Provider guides and snapshots record
   provenance; consuming instructions and results record library-local use.
-- A provider snapshot contains immutable `SNAPSHOT.md` and nonempty `artifacts/`.
-- Provider snapshots contain no implementation instruction, result, status, or changelog.
+- Each numbered capture contains immutable `SNAPSHOT.md` and `CAPTURE.md`. The first artifact tree
+  is a full baseline; later captures store only new bytes and reference unchanged earlier files.
+  A removal-only or specification-only update may have no local artifact files.
+- Provider guides are unversioned source/tracking and summary guidance. Each snapshot freezes its
+  complete selection, transformations, inventories, counts, formats, licensing and validation rules
+  in SNAPSHOT.md. CAPTURE.md holds the advisory summary and recommendations. No provider version
+  directory exists. Capture includes discovery and validation; no-change capture writes nothing.
+- Provider snapshots contain no implementation instruction, result, status, or separate changelog.
 - Preparation never changes implementation source.
 - Direct and hybrid implementations consume captured evidence without fetching, refreshing,
   executing, or substituting upstream material.
@@ -72,18 +78,14 @@ records owned by that target.
 
 ## Documentation and ADRs
 
-- Add Mintlify pages below `docs/` and update `docs/docs.json` navigation.
-- Put shared decisions in `docs/adr/repository/` and language decisions in
-  `docs/adr/<language>/`.
+- Add Rspress pages below `docs/src/` and update `docs/rspress.config.ts` navigation.
+- Put shared decisions in `docs/src/adr/repository/` and language decisions in
+  `docs/src/adr/<language>/`.
 - Keep the root README focused on the repository and implementation model.
 - Keep package details in their owning README.
-- Keep canonical implementation records under `.xray/updates/implementations/`.
-- Mirror the aggregate status at `docs/impl/XRAY-UPDATES-STATUS.md` and numbered instructions and
-  results from `.xray/updates/implementations/<target>/` below `docs/impl/<target>/` for Mintlify.
-- Never mirror providers, artifacts, or record templates.
-- Never edit a documentation mirror independently. Update it in the same change as its canonical
-  source. Preserve canonical text except for deterministic link changes required to reach
-  non-mirrored canonical records.
+- Keep active implementation records under `.agents/spectre/implementations/` and terminal records
+  under immutable `.agents/spectre/archive/` batches.
+- Treat existing `docs/src/impl/` pages as historical XRAY Updates mirrors, not active SPECTRE records.
 - Update relative links when content moves.
 
 ## TypeScript implementation

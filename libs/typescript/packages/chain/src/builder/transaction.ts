@@ -22,6 +22,7 @@ import {
   AuxiliaryData,
   AssetName,
   Certificate,
+  CertificateKind,
   CostModels,
   DatumOption,
   ExUnitPrices,
@@ -44,6 +45,7 @@ import {
   RedeemerTag,
   RequiredSigners,
   Script,
+  ScriptKind,
   ScriptRef,
   Transaction,
   TransactionBody,
@@ -160,7 +162,7 @@ function outputParts(output: TransactionOutput): {
 function makeOutput(address: Address, amount: Value, datum?: DatumOption, scriptRef?: ScriptRef): TransactionOutput {
   const entries: Array<readonly [CborValue, CborValue]> = [
     [uint(0n), bytes(address.to_raw_bytes())],
-    [uint(1n), node(amount)],
+    [uint(1n), amount.has_multiassets() ? node(amount) : uint(amount.coin())],
   ];
   if (datum !== undefined) entries.push([uint(2n), node(datum)]);
   if (scriptRef !== undefined) entries.push([uint(3n), node(scriptRef)]);
@@ -174,7 +176,7 @@ function requiredSignerHashes(value: RequiredSigners): Ed25519KeyHash[] {
   });
 }
 
-function scriptFromNative(value: NativeScript): Script { return Script.from_cbor_bytes(encodeCbor(array([uint(0n), node(value)]))); }
+function scriptFromNative(value: NativeScript): Script { return Script.new_native(value); }
 
 function scriptParts(value: Script): { kind: number; payload: CborValue } {
   const decoded = node(value);
@@ -197,7 +199,11 @@ export class PlutusScript {
   public as_v3(): PlutusV3Script | undefined { return this.#version === Language.PlutusV3 ? PlutusV3Script.from_raw_bytes(this.#bytes) : undefined; }
   public version(): Language { return this.#version; }
   public hash(): ScriptHash { return ScriptHash.from_raw_bytes(blake2b224(Uint8Array.from([this.#version + 1, ...this.#bytes]))); }
-  public to_script(): Script { return Script.from_cbor_bytes(encodeCbor(array([uint(BigInt(this.#version + 1)), bytes(this.#bytes)]))); }
+  public to_script(): Script {
+    if(this.#version===Language.PlutusV1)return Script.new_plutus_v1(PlutusV1Script.from_raw_bytes(this.#bytes));
+    if(this.#version===Language.PlutusV2)return Script.new_plutus_v2(PlutusV2Script.from_raw_bytes(this.#bytes));
+    return Script.new_plutus_v3(PlutusV3Script.from_raw_bytes(this.#bytes));
+  }
 }
 
 export class PlutusScriptWitness {
@@ -237,7 +243,11 @@ export class NativeScriptWitnessInfo {
 export class RedeemerWitnessKey {
   readonly #tag: RedeemerTag;
   readonly #index: bigint;
-  private constructor(tag: RedeemerTag, index: bigint) { this.#tag = tag; this.#index = checkedCoin(index, "redeemer index"); }
+  private constructor(tag: RedeemerTag, index: bigint) {
+    if(!Number.isInteger(tag)||tag<RedeemerTag.Spend||tag>RedeemerTag.Proposing)throw new RangeError("redeemer tag must be in 0..5");
+    if(index<0n||index>0xffff_ffffn)throw new RangeError("redeemer index must fit uint32");
+    this.#tag = tag; this.#index = index;
+  }
   public static new(tag: RedeemerTag, index: bigint): RedeemerWitnessKey { return new RedeemerWitnessKey(tag, index); }
   public static from_redeemer(redeemer: LegacyRedeemer): RedeemerWitnessKey {
     const decoded = node(redeemer);
@@ -359,6 +369,148 @@ export class TransactionUnspentOutput {
   public output(): TransactionOutput { return clone(this.#output, TransactionOutput); }
   public to_cbor_bytes(): Uint8Array { return encodeCbor(array([node(this.#input), node(this.#output)])); }
   public to_cbor_hex(): string { return bytesToHex(this.to_cbor_bytes()); }
+}
+
+type DiscoveredScript = { native?: NativeScript; plutus: boolean };
+
+function discoveredScript(value: Script): { hash: ScriptHash; kind: DiscoveredScript } {
+  if (value.kind() === ScriptKind.Native) {
+    const native = value.as_native();
+    if(native===undefined)throw new TypeError("native script payload is absent");
+    return { hash: native.hash(), kind: { native, plutus: false } };
+  }
+  if (value.kind() === ScriptKind.PlutusV1) {
+    const script = PlutusScript.from_v1(value.as_plutus_v1() as PlutusV1Script);
+    return { hash: script.hash(), kind: { plutus: true } };
+  }
+  if (value.kind() === ScriptKind.PlutusV2) {
+    const script = PlutusScript.from_v2(value.as_plutus_v2() as PlutusV2Script);
+    return { hash: script.hash(), kind: { plutus: true } };
+  }
+  if (value.kind() === ScriptKind.PlutusV3) {
+    const script = PlutusScript.from_v3(value.as_plutus_v3() as PlutusV3Script);
+    return { hash: script.hash(), kind: { plutus: true } };
+  }
+  throw new TypeError(`unsupported script language ${value.kind()}`);
+}
+
+function sortedCollectionValues(value: CborValue | undefined): CborValue[] {
+  return collectionValues(value).sort((left, right) => compareBytes(
+    encodeCbor(left, { mode: "canonical" }),
+    encodeCbor(right, { mode: "canonical" }),
+  ));
+}
+
+/** Discover the ledger witnesses required by a transaction and its resolved inputs. */
+export function discover_required_witnesses(
+  transaction: Transaction,
+  resolvedInputs: readonly TransactionUnspentOutput[],
+): RequiredWitnessSet {
+  const required = RequiredWitnessSet.new();
+  const resolved = new Map<string, TransactionUnspentOutput>();
+  for (const utxo of resolvedInputs) {
+    const key = canonicalHex(utxo.input()), previous = resolved.get(key);
+    if (previous !== undefined && canonicalHex(previous.output()) !== canonicalHex(utxo.output())) {
+      throw new TypeError(`conflicting resolved transaction input ${key}`);
+    }
+    resolved.set(key, utxo);
+  }
+
+  const body = transaction.body(), witnessSet = transaction.witness_set();
+  const witnessScripts = new Map<string, DiscoveredScript>();
+  for (const value of collectionValues(mapField(witnessSet, 1n))) {
+    const native = NativeScript.from_cbor_bytes(encodeCbor(value));
+    const entry = { native, plutus: false };
+    witnessScripts.set(native.hash().to_hex(), entry);
+  }
+  for (const [field, language] of [[3n, Language.PlutusV1], [6n, Language.PlutusV2], [7n, Language.PlutusV3]] as const) {
+    for (const value of collectionValues(mapField(witnessSet, field))) {
+      if (value.kind !== "bytes") throw new TypeError("Plutus witness must be bytes");
+      const script = language === Language.PlutusV1
+        ? PlutusScript.from_v1(PlutusV1Script.from_raw_bytes(value.value))
+        : language === Language.PlutusV2
+          ? PlutusScript.from_v2(PlutusV2Script.from_raw_bytes(value.value))
+          : PlutusScript.from_v3(PlutusV3Script.from_raw_bytes(value.value));
+      witnessScripts.set(script.hash().to_hex(), { plutus: true });
+    }
+  }
+
+  const referenceScripts = new Map<string, DiscoveredScript>();
+  const resolve = (value: CborValue): TransactionUnspentOutput => {
+    const input = TransactionInput.from_cbor_bytes(encodeCbor(value));
+    const key = canonicalHex(input), utxo = resolved.get(key);
+    if (utxo === undefined) throw new TypeError(`missing resolved transaction input ${key}`);
+    return utxo;
+  };
+  for (const value of sortedCollectionValues(mapField(body, 18n))) {
+    const reference = outputParts(resolve(value).output()).scriptRef;
+    if (reference !== undefined) {
+      const entry = discoveredScript(reference.script());
+      referenceScripts.set(entry.hash.to_hex(), entry.kind);
+    }
+  }
+
+  const requireScript = (hash: ScriptHash, redeemer?: RedeemerWitnessKey): void => {
+    const key = hash.to_hex(), reference = referenceScripts.get(key), witness = witnessScripts.get(key);
+    if (reference !== undefined) required.add_script_ref(hash); else required.add_script_hash(hash);
+    const kind = reference ?? witness;
+    if (kind?.native !== undefined) {
+      const signers = kind.native.get_required_signers();
+      for (let index = 0; index < signers.len(); index += 1) required.add_vkey_key_hash(signers.get(index));
+    } else if (kind?.plutus === true && redeemer !== undefined) required.add_redeemer_tag(redeemer);
+  };
+  const addOutput = (output: TransactionOutput, redeemer?: RedeemerWitnessKey): void => {
+    const outputRequirements = requirementsForOutput(output);
+    required.add_all(outputRequirements);
+    for (const hash of outputRequirements.scripts.values()) requireScript(hash, redeemer);
+  };
+
+  for (const [index, value] of sortedCollectionValues(mapField(body, 0n)).entries()) {
+    addOutput(resolve(value).output(), RedeemerWitnessKey.new(RedeemerTag.Spend, BigInt(index)));
+  }
+  for (const value of sortedCollectionValues(mapField(body, 13n))) addOutput(resolve(value).output());
+
+  for (const [index, value] of collectionValues(mapField(body, 4n)).entries()) {
+    const certificate = Certificate.from_cbor_bytes(encodeCbor(value));
+    const certificateRequired = certificateRequirements(certificate);
+    required.add_all(certificateRequired);
+    for (const hash of certificateRequired.scripts.values()) requireScript(hash, RedeemerWitnessKey.new(RedeemerTag.Cert, BigInt(index)));
+  }
+
+  const withdrawals = mapField(body, 5n);
+  if (withdrawals !== undefined) {
+    if (withdrawals.kind !== "map") throw new TypeError("withdrawals must be a CBOR map");
+    const entries = [...withdrawals.entries].sort((left, right) => compareBytes(
+      encodeCbor(left[0], { mode: "canonical" }),
+      encodeCbor(right[0], { mode: "canonical" }),
+    ));
+    for (const [index, [address]] of entries.entries()) {
+      if (address.kind !== "bytes") throw new TypeError("withdrawal account must be bytes");
+      const reward = RewardAddress.from_address(Address.from_raw_bytes(address.value));
+      if (reward === undefined) throw new TypeError("withdrawal account must be a reward address");
+      const withdrawalRequired = RequiredWitnessSet.new();
+      withdrawalRequired.withdrawal_required_wits(reward);
+      required.add_all(withdrawalRequired);
+      for (const hash of withdrawalRequired.scripts.values()) requireScript(hash, RedeemerWitnessKey.new(RedeemerTag.Reward, BigInt(index)));
+    }
+  }
+
+  for (const signer of collectionValues(mapField(body, 14n))) {
+    if (signer.kind !== "bytes") throw new TypeError("required signer must be a key hash");
+    required.add_vkey_key_hash(Ed25519KeyHash.from_raw_bytes(signer.value));
+  }
+
+  const redeemers = mapField(witnessSet, 5n);
+  if (redeemers?.kind === "array") {
+    for (const value of redeemers.values) required.add_redeemer_tag(RedeemerWitnessKey.from_redeemer(LegacyRedeemer.from_cbor_bytes(encodeCbor(value))));
+  } else if (redeemers?.kind === "map") {
+    for (const [key] of redeemers.entries) {
+      if (key.kind !== "array" || key.values[0]?.kind !== "unsigned" || key.values[1]?.kind !== "unsigned") throw new TypeError("invalid redeemer key");
+      required.add_redeemer_tag(RedeemerWitnessKey.new(Number(key.values[0].value), key.values[1].value));
+    }
+  } else if (redeemers !== undefined) throw new TypeError("redeemers must be an array or map");
+
+  return required;
 }
 
 export class SingleInputBuilder {
@@ -516,31 +668,36 @@ export class SingleWithdrawalBuilder {
 }
 
 function certificateCredential(value: Certificate): { as_pub_key(): Ed25519KeyHash | undefined; as_script(): ScriptHash | undefined } | undefined {
-  const decoded = node(value);
-  if (decoded.kind !== "array" || decoded.values[0]?.kind !== "unsigned") throw new TypeError("invalid certificate");
-  const tag = Number(decoded.values[0].value);
-  if (tag === 0) return undefined;
-  const position = new Map<number, number>([[1,1],[2,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[15,1],[16,1]]).get(tag);
-  const credential = position === undefined ? undefined : decoded.values[position];
-  if (credential?.kind !== "array" || credential.values[0]?.kind !== "unsigned" || credential.values[1]?.kind !== "bytes") return undefined;
-  const hashBytes = copyBytes(credential.values[1].value);
-  return credential.values[0].value === 0n
-    ? { as_pub_key: () => Ed25519KeyHash.from_raw_bytes(hashBytes), as_script: () => undefined }
-    : { as_pub_key: () => undefined, as_script: () => ScriptHash.from_raw_bytes(hashBytes) };
+  switch (value.kind()) {
+    case CertificateKind.StakeRegistration: return undefined;
+    case CertificateKind.StakeDeregistration: return value.as_stake_deregistration()?.stake_credential();
+    case CertificateKind.StakeDelegation: return value.as_stake_delegation()?.stake_credential();
+    case CertificateKind.RegCert: return value.as_reg_cert()?.stake_credential();
+    case CertificateKind.UnregCert: return value.as_unreg_cert()?.stake_credential();
+    case CertificateKind.VoteDelegCert: return value.as_vote_deleg_cert()?.stake_credential();
+    case CertificateKind.StakeVoteDelegCert: return value.as_stake_vote_deleg_cert()?.stake_credential();
+    case CertificateKind.StakeRegDelegCert: return value.as_stake_reg_deleg_cert()?.stake_credential();
+    case CertificateKind.VoteRegDelegCert: return value.as_vote_reg_deleg_cert()?.stake_credential();
+    case CertificateKind.StakeVoteRegDelegCert: return value.as_stake_vote_reg_deleg_cert()?.stake_credential();
+    case CertificateKind.AuthCommitteeHotCert: return value.as_auth_committee_hot_cert()?.cold_credential();
+    case CertificateKind.ResignCommitteeColdCert: return value.as_resign_committee_cold_cert()?.cold_credential();
+    case CertificateKind.RegDrepCert: return value.as_reg_drep_cert()?.drep_credential();
+    case CertificateKind.UnregDrepCert: return value.as_unreg_drep_cert()?.drep_credential();
+    case CertificateKind.UpdateDrepCert: return value.as_update_drep_cert()?.drep_credential();
+    case CertificateKind.PoolRegistration:
+    case CertificateKind.PoolRetirement: return undefined;
+  }
 }
 
 function certificateRequirements(value: Certificate): RequiredWitnessSet {
   const required = RequiredWitnessSet.new(), credential = certificateCredential(value);
   if (credential !== undefined) required.addCredential(credential);
-  const decoded = node(value);
-  if (decoded.kind === "array" && decoded.values[0]?.kind === "unsigned") {
-    if (decoded.values[0].value === 4n && decoded.values[1]?.kind === "bytes") required.add_vkey_key_hash(Ed25519KeyHash.from_raw_bytes(decoded.values[1].value));
-    if (decoded.values[0].value === 3n && decoded.values[1]?.kind === "array") {
-      const pool = decoded.values[1];
-      if (pool.values[0]?.kind === "bytes") required.add_vkey_key_hash(Ed25519KeyHash.from_raw_bytes(pool.values[0].value));
-      const owners = pool.values[6];
-      for (const owner of collectionValues(owners)) if (owner.kind === "bytes") required.add_vkey_key_hash(Ed25519KeyHash.from_raw_bytes(owner.value));
-    }
+  const retirement=value.as_pool_retirement();
+  if(retirement!==undefined)required.add_vkey_key_hash(retirement.pool_key_hash());
+  const registration=value.as_pool_registration();
+  if(registration!==undefined){
+    const parameters=registration.pool_params();required.add_vkey_key_hash(parameters.operator());
+    for(const owner of parameters.pool_owners())required.add_vkey_key_hash(owner);
   }
   return required;
 }
@@ -621,13 +778,15 @@ interface RedeemerSource { readonly tag: RedeemerTag; readonly sortKey: string; 
 export class RedeemerSetBuilder {
   readonly #sources: RedeemerSource[] = [];
   readonly #overrides = new Map<string, ExUnits>();
+  #certificateCount = 0;
+  #proposalCount = 0;
   public static new(): RedeemerSetBuilder { return new RedeemerSetBuilder(); }
   private add(tag: RedeemerTag, sortKey: string, aggregate: InputAggregateWitnessData | undefined): void { if (aggregate?.state.kind === "plutus") this.#sources.push({ tag, sortKey, aggregate }); }
   public add_spend(result: InputBuilderResult): void { this.add(RedeemerTag.Spend, canonicalHex(result.inputValue), result.aggregate); }
   public add_mint(result: MintBuilderResult): void { this.add(RedeemerTag.Mint, result.policyId.to_hex(), result.aggregate); }
   public add_reward(result: WithdrawalBuilderResult): void { this.add(RedeemerTag.Reward, bytesToHex(result.address.to_address().to_raw_bytes()), result.aggregate); }
-  public add_cert(result: CertificateBuilderResult): void { this.add(RedeemerTag.Cert, String(this.#sources.filter((value) => value.tag === RedeemerTag.Cert).length).padStart(10, "0"), result.aggregate); }
-  public add_proposal(result: ProposalBuilderResult): void { for (const [index, entry] of result.entries.entries()) this.add(RedeemerTag.Proposing, String(index).padStart(10, "0"), entry.aggregate); }
+  public add_cert(result: CertificateBuilderResult): void { this.add(RedeemerTag.Cert, String(this.#certificateCount++).padStart(10, "0"), result.aggregate); }
+  public add_proposal(result: ProposalBuilderResult): void { for (const entry of result.entries) this.add(RedeemerTag.Proposing, String(this.#proposalCount++).padStart(10, "0"), entry.aggregate); }
   public add_vote(result: VoteBuilderResult): void { for (const entry of result.entries) this.add(RedeemerTag.Voting, `${canonicalHex(entry.voter)}:${canonicalHex(entry.action)}`, entry.aggregate); }
   public is_empty(): boolean { return this.#sources.length === 0; }
   public update_ex_units(key: RedeemerWitnessKey, exUnits: ExUnits): void { this.#overrides.set(key.key(), clone(exUnits, ExUnits)); }
@@ -635,14 +794,25 @@ export class RedeemerSetBuilder {
     const output = LegacyRedeemerList.new();
     for (const tag of [RedeemerTag.Spend, RedeemerTag.Mint, RedeemerTag.Cert, RedeemerTag.Reward, RedeemerTag.Voting, RedeemerTag.Proposing]) {
       const values = this.#sources.filter((source) => source.tag === tag).sort((left, right) => left.sortKey.localeCompare(right.sortKey));
-      for (const [index, source] of values.entries()) {
+      for (const [position, source] of values.entries()) {
         if (source.aggregate.state.kind !== "plutus") throw new TypeError("redeemer source must be Plutus");
-        const key = RedeemerWitnessKey.new(tag, BigInt(index));
+        // Certificates and proposals are indexed in the complete body collection,
+        // including entries that do not need a Plutus redeemer.
+        const index = tag === RedeemerTag.Cert || tag === RedeemerTag.Proposing ? BigInt(source.sortKey) : BigInt(position);
+        const key = RedeemerWitnessKey.new(tag, index);
         const exUnits = this.#overrides.get(key.key()) ?? (defaultToDummyExUnits ? ExUnits.new(0n, 0n) : undefined);
         if (exUnits === undefined) throw new TypeError(`missing execution units for redeemer ${key.key()}`);
-        output.add(LegacyRedeemer.from_cbor_bytes(encodeCbor(array([uint(BigInt(tag)), uint(BigInt(index)), node(source.aggregate.state.partial.data()), node(exUnits)]))));
+        output.add(LegacyRedeemer.from_cbor_bytes(encodeCbor(array([uint(BigInt(tag)), uint(index), node(source.aggregate.state.partial.data()), node(exUnits)]))));
       }
     }
+    return output;
+  }
+  public copy(): RedeemerSetBuilder {
+    const output = RedeemerSetBuilder.new();
+    output.#sources.push(...this.#sources);
+    output.#certificateCount = this.#certificateCount;
+    output.#proposalCount = this.#proposalCount;
+    for (const [key, value] of this.#overrides) output.#overrides.set(key, clone(value, ExUnits));
     return output;
   }
 }
@@ -906,8 +1076,8 @@ function transactionNode(body: TransactionBody, witness: TransactionWitnessSet, 
 
 export class TransactionBuilder {
   readonly #config: TransactionBuilderConfig;
-  readonly #inputs: InputBuilderResult[] = [];
-  readonly #utxos: InputBuilderResult[] = [];
+  #inputs: InputBuilderResult[] = [];
+  #utxos: InputBuilderResult[] = [];
   readonly #outputs: SingleOutputBuilderResult[] = [];
   readonly #certificates: CertificateBuilderResult[] = [];
   readonly #withdrawals: WithdrawalBuilderResult[] = [];
@@ -915,9 +1085,9 @@ export class TransactionBuilder {
   readonly #votes: VoteEntry[] = [];
   readonly #collateral: InputBuilderResult[] = [];
   readonly #referenceInputs: TransactionUnspentOutput[] = [];
-  readonly #requiredSigners = new Map<string, Ed25519KeyHash>();
-  readonly #witnesses = TransactionWitnessSetBuilder.new();
-  readonly #redeemers = RedeemerSetBuilder.new();
+  #requiredSigners = new Map<string, Ed25519KeyHash>();
+  #witnesses = TransactionWitnessSetBuilder.new();
+  #redeemers = RedeemerSetBuilder.new();
   #mint: Mint | undefined;
   #fee: bigint | undefined;
   #ttl: bigint | undefined;
@@ -929,31 +1099,30 @@ export class TransactionBuilder {
   #currentTreasuryValue: bigint | undefined;
   private constructor(config: TransactionBuilderConfig) { this.#config = config; }
   public static new(config: TransactionBuilderConfig): TransactionBuilder { return new TransactionBuilder(config); }
+  private inputRole(id: string): string | undefined {
+    if (this.#inputs.some((entry) => canonicalHex(entry.inputValue) === id)) return "spending input";
+    if (this.#collateral.some((entry) => canonicalHex(entry.inputValue) === id)) return "collateral input";
+    if (this.#referenceInputs.some((entry) => canonicalHex(entry.input()) === id)) return "reference input";
+    if (this.#utxos.some((entry) => canonicalHex(entry.inputValue) === id)) return "selection candidate";
+    return undefined;
+  }
+  private assertUnusedInput(id: string, requestedRole: string): void {
+    const role = this.inputRole(id);
+    if (role !== undefined) throw new TypeError(`transaction input is already used as ${role}; cannot add it as ${requestedRole}`);
+  }
   public add_input(result: InputBuilderResult): void {
-    const id = canonicalHex(result.inputValue); if (this.#inputs.some((entry) => canonicalHex(entry.inputValue) === id)) throw new TypeError("duplicate transaction input");
+    const id = canonicalHex(result.inputValue); this.assertUnusedInput(id, "spending input");
     this.#inputs.push(result); this.#witnesses.add_required_wits(result.required); this.#redeemers.add_spend(result); this.addAggregate(result.aggregate);
   }
   public add_utxo(result: InputBuilderResult): void {
-    const id = canonicalHex(result.inputValue); if (!this.#utxos.some((entry) => canonicalHex(entry.inputValue) === id) && !this.#inputs.some((entry) => canonicalHex(entry.inputValue) === id)) this.#utxos.push(result);
+    const id = canonicalHex(result.inputValue); this.assertUnusedInput(id, "selection candidate"); this.#utxos.push(result);
   }
   public add_reference_input(value: TransactionUnspentOutput): void {
-    const id = canonicalHex(value.input()); if (!this.#referenceInputs.some((entry) => canonicalHex(entry.input()) === id)) this.#referenceInputs.push(value);
+    const id = canonicalHex(value.input()); this.assertUnusedInput(id, "reference input"); this.#referenceInputs.push(value);
     const reference = outputParts(value.output()).scriptRef;
     if (reference !== undefined) {
-      const decoded = node(reference);
-      if (decoded.kind === "tag" && decoded.value.kind === "bytes") {
-        const script = Script.from_cbor_bytes(decoded.value.value); const { kind, payload } = scriptParts(script);
-        const hash = kind === 0
-          ? NativeScript.from_cbor_bytes(encodeCbor(payload)).hash()
-          : payload.kind === "bytes" && kind === 1
-            ? PlutusScript.from_v1(PlutusV1Script.from_raw_bytes(payload.value)).hash()
-            : payload.kind === "bytes" && kind === 2
-              ? PlutusScript.from_v2(PlutusV2Script.from_raw_bytes(payload.value)).hash()
-              : payload.kind === "bytes" && kind === 3
-                ? PlutusScript.from_v3(PlutusV3Script.from_raw_bytes(payload.value)).hash()
-                : undefined;
-        if (hash !== undefined) this.#witnesses.add_required_wits(scriptReferenceRequirement(hash));
-      }
+      const {hash}=discoveredScript(reference.script());
+      this.#witnesses.add_required_wits(scriptReferenceRequirement(hash));
     }
   }
   public add_output(value: SingleOutputBuilderResult): void {
@@ -973,14 +1142,27 @@ export class TransactionBuilder {
     }
     this.#witnesses.add_required_wits(result.required); this.#redeemers.add_mint(result); this.addAggregate(result.aggregate);
   }
-  public add_cert(result: CertificateBuilderResult): void { this.#certificates.push(result); this.#witnesses.add_required_wits(result.required); this.#redeemers.add_cert(result); this.addAggregate(result.aggregate); }
+  public add_cert(result: CertificateBuilderResult): void {
+    const id = canonicalHex(result.certificate);
+    if (this.#certificates.some((entry) => canonicalHex(entry.certificate) === id)) throw new TypeError("duplicate certificate");
+    this.#certificates.push(result); this.#witnesses.add_required_wits(result.required); this.#redeemers.add_cert(result); this.addAggregate(result.aggregate);
+  }
   public add_withdrawal(result: WithdrawalBuilderResult): void {
     const key = result.address.to_address().to_hex(); if (this.#withdrawals.some((value) => value.address.to_address().to_hex() === key)) throw new TypeError("duplicate withdrawal");
     this.#withdrawals.push(result); this.#witnesses.add_required_wits(result.required); this.#redeemers.add_reward(result); this.addAggregate(result.aggregate);
   }
-  public add_proposal(result: ProposalBuilderResult): void { this.#proposals.push(...result.entries); this.#redeemers.add_proposal(result); for (const entry of result.entries) this.addAggregate(entry.aggregate); }
+  public add_proposal(result: ProposalBuilderResult): void {
+    const seen = new Set(this.#proposals.map((entry) => canonicalHex(entry.proposal)));
+    for (const entry of result.entries) {
+      const id = canonicalHex(entry.proposal);
+      if (seen.has(id)) throw new TypeError("duplicate proposal");
+      seen.add(id);
+    }
+    this.#proposals.push(...result.entries); this.#redeemers.add_proposal(result); for (const entry of result.entries) this.addAggregate(entry.aggregate);
+  }
   public add_vote(result: VoteBuilderResult): void { this.#votes.push(...result.entries); this.#redeemers.add_vote(result); for (const entry of result.entries) this.addAggregate(entry.aggregate); }
   public add_collateral(result: InputBuilderResult): void {
+    const id = canonicalHex(result.inputValue); this.assertUnusedInput(id, "collateral input");
     if (result.aggregate !== undefined) throw new TypeError("collateral must use a payment-key input");
     if (this.#collateral.length >= this.#config.maxCollateralInputs) throw new RangeError("maximum collateral input count exceeded");
     this.#collateral.push(result); this.#witnesses.add_required_wits(result.required);
@@ -1030,10 +1212,25 @@ export class TransactionBuilder {
     if (strategy === CoinSelectionStrategyCIP2.RandomImprove && this.#outputs.some((value) => outputParts(value.output()).amount.has_multiassets())) {
       throw new TypeError("RandomImprove cannot cover native assets; use RandomImproveMultiAsset");
     }
-    const available = this.#utxos.filter((candidate) => !this.#inputs.some((value) => canonicalHex(value.inputValue) === canonicalHex(candidate.inputValue)));
+    const snapshot = {
+      inputs: [...this.#inputs], utxos: [...this.#utxos], witnesses: this.#witnesses.copy(), redeemers: this.#redeemers.copy(),
+      requiredSigners: new Map([...this.#requiredSigners].map(([key, value]) => [key, Ed25519KeyHash.from_raw_bytes(value.to_raw_bytes())])),
+    };
+    try {
+    const unavailable = new Set([
+      ...this.#inputs.map((value) => canonicalHex(value.inputValue)),
+      ...this.#collateral.map((value) => canonicalHex(value.inputValue)),
+      ...this.#referenceInputs.map((value) => canonicalHex(value.input())),
+    ]);
+    const available = this.#utxos.filter((candidate) => !unavailable.has(canonicalHex(candidate.inputValue)));
     const remaining = new Set(available.map((_, index) => index));
     const valueAt = (index: number): Value => outputParts(available[index]!.outputValue).amount;
-    const add = (index: number): void => { remaining.delete(index); this.add_input(available[index]!); };
+    const add = (index: number): void => {
+      remaining.delete(index);
+      const selected = available[index]!, id = canonicalHex(selected.inputValue);
+      this.#utxos = this.#utxos.filter((entry) => canonicalHex(entry.inputValue) !== id);
+      this.add_input(selected);
+    };
     const largestFirstBy = (quantity: (value: Value) => bigint, target: bigint): void => {
       const relevant = [...remaining].filter((index) => quantity(valueAt(index)) > 0n).sort((left, right) => {
         const a = quantity(valueAt(left)), b = quantity(valueAt(right));
@@ -1109,6 +1306,11 @@ export class TransactionBuilder {
       }
     }
     if (!this.coversOutputsAndFee()) throw new RangeError("available UTxOs do not cover transaction outputs and fees");
+    } catch (error) {
+      this.#inputs = snapshot.inputs; this.#utxos = snapshot.utxos; this.#witnesses = snapshot.witnesses;
+      this.#redeemers = snapshot.redeemers; this.#requiredSigners = snapshot.requiredSigners;
+      throw error;
+    }
   }
   private coversOutputsAndFee(): boolean {
     try { const fee = this.min_fee(true); return this.get_total_input().checked_sub(addValues(this.get_total_output(), Value.from_coin(fee), "selection target")) !== undefined; } catch { return false; }
@@ -1116,27 +1318,32 @@ export class TransactionBuilder {
   public fee_for_input(value: InputBuilderResult): bigint { return BigInt(value.inputValue.to_cbor_bytes().length) * this.#config.feeAlgo.coefficient(); }
   public fee_for_output(value: SingleOutputBuilderResult): bigint { return BigInt(value.output().to_cbor_bytes().length) * this.#config.feeAlgo.coefficient(); }
   public add_change_if_needed(address: Address, includeExunits: boolean): boolean {
-    const originalOutputs = this.#outputs.length;
-    let fee = this.#fee ?? 0n;
-    for (let iteration = 0; iteration < 8; iteration += 1) {
-      this.#outputs.splice(originalOutputs);
-      const available = this.get_total_input(), required = addValues(this.get_total_output(), Value.from_coin(fee), "transaction balance");
-      const change = subtractValues(available, required, "transaction balance");
-      this.addChangeOutputs(address, change);
-      this.#fee = fee;
-      const next = this.min_fee(includeExunits);
-      if (next === fee) break;
-      fee = next;
+    const originalOutputs = [...this.#outputs], originalFee = this.#fee;
+    try {
+      let fee = this.#fee ?? 0n;
+      let previousState: string | undefined;
+      const seen = new Set<string>();
+      for (let iteration = 0; iteration < 64; iteration += 1) {
+        this.#outputs.splice(originalOutputs.length);
+        const available = this.get_total_input(), required = addValues(this.get_total_output(), Value.from_coin(fee), "transaction balance");
+        const change = subtractValues(available, required, "transaction balance");
+        this.addChangeOutputs(address, change);
+        if (this.#outputs.length === originalOutputs.length && !change.is_zero()) {
+          if (change.has_multiassets()) throw new RangeError("native-asset change cannot be absorbed into the fee");
+          fee = checkedCoin(fee + change.coin(), "transaction fee");
+        }
+        this.#fee = fee;
+        const state = `${fee}:${this.#outputs.slice(originalOutputs.length).map((value) => canonicalHex(value.output())).join(":")}`;
+        const minimum = this.min_fee(includeExunits);
+        const nextFee = minimum > fee ? minimum : fee;
+        if (state === previousState && nextFee === fee) return this.#outputs.length > originalOutputs.length;
+        if (seen.has(state)) throw new TypeError("transaction fee/change convergence cycle detected");
+        seen.add(state); previousState = state; fee = nextFee;
+      }
+      throw new TypeError("transaction fee/change did not converge within 64 iterations");
+    } catch (error) {
+      this.#outputs.splice(0, this.#outputs.length, ...originalOutputs); this.#fee = originalFee; throw error;
     }
-    this.#outputs.splice(originalOutputs);
-    const finalChange = subtractValues(this.get_total_input(), addValues(this.get_total_output(), Value.from_coin(fee), "transaction balance"), "transaction balance");
-    this.addChangeOutputs(address, finalChange);
-    if (this.#outputs.length === originalOutputs && !finalChange.is_zero()) {
-      if (finalChange.has_multiassets()) throw new RangeError("native-asset change cannot be absorbed into the fee");
-      fee = checkedCoin(fee + finalChange.coin(), "transaction fee");
-    }
-    this.#fee = fee;
-    return this.#outputs.length > originalOutputs;
   }
   private addChangeOutputs(address: Address, change: Value): void {
     const assets = cleanMultiAsset(change.multi_asset() ?? MultiAsset.new());
@@ -1163,27 +1370,35 @@ export class TransactionBuilder {
     for (const [index, bundle] of bundles.entries()) this.#outputs.push(SingleOutputBuilderResult.new(makeOutput(address, Value.new((minimums[index] ?? 0n) + (index === 0 ? remainder : 0n), bundle))));
   }
   public min_fee(includeExunits: boolean): bigint {
-    const previous = this.#fee; this.#fee = UINT64_MAX;
-    const body = this.buildBody(false), witness = this.buildWitnesses(true), transaction = Transaction.from_cbor_bytes(encodeCbor(transactionNode(body, witness, this.#auxiliaryData)));
-    this.#fee = previous;
-    return includeExunits
-      ? transactionMinFee(transaction, this.#config.feeAlgo, this.#config.exUnitPrices, this.referenceScriptSize())
-      : BigInt(transaction.to_cbor_bytes().length) * this.#config.feeAlgo.coefficient() + this.#config.feeAlgo.constant();
+    const previous = this.#fee;
+    try {
+      this.#fee = UINT64_MAX;
+      const body = this.buildBody(false), witness = this.buildWitnesses(true), transaction = Transaction.from_cbor_bytes(encodeCbor(transactionNode(body, witness, this.#auxiliaryData)));
+      return includeExunits
+        ? transactionMinFee(transaction, this.#config.feeAlgo, this.#config.exUnitPrices, this.referenceScriptSize())
+        : BigInt(transaction.to_cbor_bytes().length) * this.#config.feeAlgo.coefficient() + this.#config.feeAlgo.constant();
+    } finally { this.#fee = previous; }
   }
   public full_size(): number { return this.transactionForSize().to_cbor_bytes().length; }
   public output_sizes(): Uint32Array { return Uint32Array.from(this.#outputs.map((value) => value.output().to_cbor_bytes().length)); }
   public build_for_evaluation(_algo: ChangeSelectionAlgo, changeAddress: Address): TxRedeemerBuilder {
-    this.add_change_if_needed(changeAddress, false); return new TxRedeemerBuilder(this.buildBody(true), this.#witnesses.copy(), this.#redeemers, this.#auxiliaryData);
+    const outputs = [...this.#outputs], fee = this.#fee;
+    try { this.add_change_if_needed(changeAddress, false); return new TxRedeemerBuilder(this.buildBody(true), this.#witnesses.copy(), this.#redeemers, this.#auxiliaryData); }
+    catch (error) { this.#outputs.splice(0, this.#outputs.length, ...outputs); this.#fee = fee; throw error; }
   }
   public build(_algo: ChangeSelectionAlgo, changeAddress: Address): SignedTxBuilder {
-    this.add_change_if_needed(changeAddress, true); const body = this.buildBody(true), witnesses = this.#witnesses.copy();
-    for (let index = 0; index < this.#redeemers.build(true).len(); index += 1) witnesses.add_redeemer(this.#redeemers.build(true).get(index));
-    return this.#auxiliaryData === undefined ? SignedTxBuilder.new_without_data(body, witnesses, true) : SignedTxBuilder.new_with_data(body, witnesses, true, this.#auxiliaryData);
+    const outputs = [...this.#outputs], fee = this.#fee;
+    try {
+      this.add_change_if_needed(changeAddress, true); const body = this.buildBody(true), witnesses = this.#witnesses.copy();
+      for (let index = 0; index < this.#redeemers.build(true).len(); index += 1) witnesses.add_redeemer(this.#redeemers.build(true).get(index));
+      return this.#auxiliaryData === undefined ? SignedTxBuilder.new_without_data(body, witnesses, true) : SignedTxBuilder.new_with_data(body, witnesses, true, this.#auxiliaryData);
+    } catch (error) { this.#outputs.splice(0, this.#outputs.length, ...outputs); this.#fee = fee; throw error; }
   }
   private addAggregateRequirements(value: InputAggregateWitnessData | undefined): void { if (value === undefined) return; const required = RequiredWitnessSet.new(); addAggregateRequirements(required, value); this.#witnesses.add_required_wits(required); }
   private bodyForAccounting(): TransactionBody { const fee = this.#fee; this.#fee ??= 0n; const body = this.buildBody(false, false); this.#fee = fee; return body; }
   private buildBody(enforceSize: boolean, includeScriptData = true): TransactionBody {
     if (this.#fee === undefined) throw new TypeError("transaction fee is not specified");
+    const collateralTotal = this.collateralAccounting(enforceSize);
     const entries: Array<readonly [CborValue, CborValue]> = [
       [uint(0n), collectionNode([...this.#inputs].sort((a, b) => canonicalHex(a.inputValue).localeCompare(canonicalHex(b.inputValue))).map((value) => value.inputValue))],
       [uint(1n), array(this.#outputs.map((value) => node(value.output())))],
@@ -1205,9 +1420,7 @@ export class TransactionBuilder {
     if (this.#networkId !== undefined) entries.push([uint(15n), node(this.#networkId)]);
     if (this.#collateralReturn !== undefined) {
       entries.push([uint(16n), node(this.#collateralReturn)]);
-      const collateralCoin = this.#collateral.reduce((sum, value) => checkedCoin(sum + outputParts(value.outputValue).amount.coin()), 0n);
-      const returnCoin = outputParts(this.#collateralReturn).amount.coin(); if (returnCoin > collateralCoin) throw new RangeError("collateral return exceeds collateral input");
-      entries.push([uint(17n), uint(collateralCoin - returnCoin)]);
+      entries.push([uint(17n), uint(collateralTotal)]);
     }
     if (this.#referenceInputs.length > 0) entries.push([uint(18n), collectionNode(this.#referenceInputs.map((value) => value.input()))]);
     if (this.#votes.length > 0) entries.push([uint(19n), votingNode(this.#votes)]);
@@ -1218,6 +1431,30 @@ export class TransactionBuilder {
     const body = TransactionBody.from_cbor_bytes(encodeCbor(map(entries)));
     if (enforceSize && this.transactionForSize(body).to_cbor_bytes().length > this.#config.maxTxSize) throw new RangeError("maximum transaction size exceeded");
     return body;
+  }
+  private collateralAccounting(checked: boolean): bigint {
+    const total = this.#collateral.reduce((sum, value) => addValues(sum, outputParts(value.outputValue).amount, "collateral input"), Value.zero());
+    const returned = this.#collateralReturn === undefined ? undefined : outputParts(this.#collateralReturn).amount;
+    if (!checked) return returned === undefined || returned.coin() > total.coin() ? 0n : total.coin() - returned.coin();
+    if (returned !== undefined && this.#collateral.length === 0) throw new TypeError("collateral return requires at least one collateral input");
+    const requiredForPlutus = !this.#redeemers.is_empty();
+    if (requiredForPlutus && this.#collateral.length === 0) throw new TypeError("Plutus transactions require collateral");
+    if (requiredForPlutus) {
+      const product = this.#fee! * BigInt(this.#config.collateralPercentage);
+      const required = checkedCoin((product + 99n) / 100n, "required collateral");
+      if (total.coin() < required) throw new RangeError(`collateral coin is below required amount ${required}`);
+    }
+    const totalAssets = cleanMultiAsset(total.multi_asset() ?? MultiAsset.new());
+    if (returned === undefined) {
+      if (totalAssets !== undefined) throw new TypeError("asset-bearing collateral requires a collateral return");
+      return total.coin();
+    }
+    if (returned.coin() > total.coin()) throw new RangeError("collateral return exceeds collateral input");
+    const returnedAssets = cleanMultiAsset(returned.multi_asset() ?? MultiAsset.new());
+    const totalHex = totalAssets === undefined ? "" : canonicalHex(Value.new(0n, totalAssets));
+    const returnedHex = returnedAssets === undefined ? "" : canonicalHex(Value.new(0n, returnedAssets));
+    if (totalHex !== returnedHex) throw new TypeError("collateral return must preserve every collateral native asset exactly");
+    return total.coin() - returned.coin();
   }
   private buildWitnesses(fake: boolean): TransactionWitnessSet { const value = this.#witnesses.copy(); if (fake) value.merge_fake_witness(value.remaining_wits()); const list = this.#redeemers.build(true); for (let index = 0; index < list.len(); index += 1) value.add_redeemer(list.get(index)); return value.build(); }
   private transactionForSize(body = this.buildBody(false)): Transaction { return Transaction.from_cbor_bytes(encodeCbor(transactionNode(body, this.buildWitnesses(true), this.#auxiliaryData))); }

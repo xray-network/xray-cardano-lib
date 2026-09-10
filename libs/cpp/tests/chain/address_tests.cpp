@@ -73,7 +73,8 @@ TEST_CASE("enterprise and reward address text and JSON contracts are strict", "[
 
   const auto custom = reward_address.to_bech32("unconstrained_hrp");
   REQUIRE(custom);
-  const auto custom_decoded = chain::Address::from_bech32(*custom);
+  CHECK_FALSE(chain::Address::from_bech32(*custom));
+  const auto custom_decoded = chain::Address::from_bech32_payload_compatible(*custom);
   REQUIRE(custom_decoded);
   CHECK(custom_decoded->to_bytes() == reward_address.to_bytes());
 }

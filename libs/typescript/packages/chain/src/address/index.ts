@@ -99,6 +99,21 @@ const trailingWhitelist=[
 
 function acceptedTrailing(data:Uint8Array,offset:number):Uint8Array|undefined { if(data.length===offset)return undefined;if(data.length<offset)throw new TypeError("address is truncated");const trailing=data.slice(offset);if(!trailingWhitelist.some((allowed)=>allowed.length===trailing.length&&allowed.every((byte,index)=>byte===trailing[index])))throw new TypeError("address has unrecognized trailing bytes");return trailing; }
 
+function strictAddressLength(data:Uint8Array):void {
+  const variant=(data[0]??0)>>>4;
+  if(variant<=3){if(data.length!==57)throw new TypeError("base address must contain exactly 57 bytes");return;}
+  if(variant===4||variant===5){let offset=29;for(let part=0;part<3;part+=1){const decoded=decodeVariableNat(data,offset);offset+=decoded.read;}if(offset!==data.length)throw new TypeError("pointer address has trailing bytes");return;}
+  if(variant===6||variant===7||variant===14||variant===15){if(data.length!==29)throw new TypeError("address must contain exactly 29 bytes");return;}
+  if(variant===8)throw new TypeError("Byron addresses use Base58, not Bech32");
+  throw new TypeError("reserved address header kind");
+}
+
+function canonicalAddressHrp(kind:AddressKind,network:number):string {
+  if(kind===AddressKind.Byron)throw new TypeError("Byron addresses use Base58, not Bech32");
+  const prefix=kind===AddressKind.Reward?"stake":"addr";
+  return network===1?prefix:`${prefix}_test`;
+}
+
 export class Address {
   public constructor(state: AddressState) { addressStates.set(this, state); }
   public static from_raw_bytes(data: Uint8Array): Address {
@@ -128,7 +143,7 @@ export class Address {
     throw new TypeError(`unsupported address header ${header}`);
   }
   public static from_hex(hex: string): Address { return Address.from_raw_bytes(hexToBytes(hex)); }
-  public static from_bech32(value: string): Address { return Address.from_raw_bytes(decodeBech32(value).bytes); }
+  public static from_bech32(value: string): Address { const decoded=decodeBech32(value);strictAddressLength(decoded.bytes);const address=Address.from_raw_bytes(decoded.bytes);if(decoded.prefix!==canonicalAddressHrp(address.kind(),address.network_id()))throw new TypeError("address Bech32 HRP does not match its kind and network");return address; }
   public static from_json(json: string): Address { const value:unknown=JSON.parse(json);if(typeof value!=="string")throw new TypeError("Address JSON must be a string");return Address.from_bech32(value); }
   public static is_valid_bech32(value: string): boolean { try { Address.from_bech32(value);return true; } catch { return false; } }
   public static is_valid_byron(value:string):boolean{return ByronAddress.is_valid(value);}
@@ -148,7 +163,8 @@ export class Address {
     return Uint8Array.from([header,...payment,...(state.trailing??[])]);
   }
   public to_hex(): string { return bytesToHex(this.to_raw_bytes()); }
-  public to_bech32(prefix?: string | null): string { const finalPrefix=prefix??`${this.kind()===AddressKind.Reward?"stake":"addr"}${this.network_id()===0?"_test":""}`;return encodeBech32(finalPrefix,this.to_raw_bytes()); }
+  public to_bech32(prefix?: string | null): string { if(prefix!=null)return this.to_bech32_unchecked(prefix);const raw=this.to_raw_bytes();strictAddressLength(raw);return encodeBech32(canonicalAddressHrp(this.kind(),this.network_id()),raw); }
+  public to_bech32_unchecked(hrp:string):string { return encodeBech32(hrp,this.to_raw_bytes()); }
   public to_js_value(): string { return this.to_bech32(); }
   public to_json(): string { return JSON.stringify(this.to_js_value()); }
 }

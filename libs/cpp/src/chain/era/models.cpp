@@ -7,4 +7,5 @@
 #include "byron/validation.ipp"
 #include "shared/dispatch.ipp"
 #include "shared/json.ipp"
+#include "conway/construction.ipp"
 // clang-format on

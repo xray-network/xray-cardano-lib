@@ -1,5 +1,8 @@
-import { HistoricalData, HistoricalList } from "../shared/codec.js";
+import { HistoricalData, HistoricalList, arrayValue } from "../shared/codec.js";
 import type { CborValue } from "@xray-network/xray-cardano-lib-core";
+import { encodeCbor } from "@xray-network/xray-cardano-lib-core";
+import { GenesisDelegateHash, GenesisHash, VRFKeyHash } from "@xray-network/xray-cardano-lib-crypto";
+import { Credential } from "../conway/model.js";
 import { validateShelley } from "./validation.js";
 
 abstract class ShelleyData extends HistoricalData {
@@ -16,10 +19,18 @@ export const MultisigScriptKind = Object.freeze({ MultisigPubkey: 0, MultisigAll
 export const ShelleyCertificateKind = Object.freeze({ StakeRegistration: 0, StakeDeregistration: 1, StakeDelegation: 2, ShelleyPoolRegistration: 3, PoolRetirement: 4, GenesisKeyDelegation: 5, ShelleyMoveInstantaneousRewardsCert: 6 });
 export const ShelleyRelayKind = Object.freeze({ SingleHostAddr: 0, ShelleySingleHostName: 1, ShelleyMultiHostName: 2 });
 
-export class GenesisKeyDelegation extends ShelleyData {}
+export class GenesisKeyDelegation extends ShelleyData {
+  public genesis_hash(): GenesisHash { const node=arrayValue(this.cbor_node(),1);if(node?.kind!=="bytes")throw new TypeError("genesis hash must be bytes");return GenesisHash.from_raw_bytes(node.value); }
+  public genesis_delegate_hash(): GenesisDelegateHash { const node=arrayValue(this.cbor_node(),2);if(node?.kind!=="bytes")throw new TypeError("genesis delegate hash must be bytes");return GenesisDelegateHash.from_raw_bytes(node.value); }
+  public vrf_keyhash(): VRFKeyHash { const node=arrayValue(this.cbor_node(),3);if(node?.kind!=="bytes")throw new TypeError("VRF key hash must be bytes");return VRFKeyHash.from_raw_bytes(node.value); }
+}
 export class MIRAction extends ShelleyData {}
 export class MoveInstantaneousReward extends ShelleyData {}
-export class MoveInstantaneousRewardsCert extends ShelleyData {}
+export class MoveInstantaneousRewardsCert extends ShelleyData {
+  public pot(): number { const mir=arrayValue(this.cbor_node(),1),pot=mir===undefined?undefined:arrayValue(mir,0);if(pot?.kind!=="unsigned"||pot.value>1n)throw new TypeError("MIR pot must be 0 or 1");return Number(pot.value); }
+  public rewards(): ReadonlyArray<readonly [Credential,bigint]> | undefined { const mir=arrayValue(this.cbor_node(),1),payload=mir===undefined?undefined:arrayValue(mir,1);if(payload?.kind!=="map")return undefined;return payload.entries.map(([key,value])=>{if(value.kind!=="unsigned"&&value.kind!=="negative")throw new TypeError("MIR reward must be an integer");return [Credential.from_cbor_bytes(encodeCbor(key)),value.value] as const;}); }
+  public other_pot_amount(): bigint | undefined { const mir=arrayValue(this.cbor_node(),1),payload=mir===undefined?undefined:arrayValue(mir,1);return payload?.kind==="unsigned"?payload.value:undefined; }
+}
 export class MultisigAll extends ShelleyData {}
 export class MultisigAny extends ShelleyData {}
 export class MultisigNOfK extends ShelleyData {}

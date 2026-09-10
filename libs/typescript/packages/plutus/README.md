@@ -28,8 +28,18 @@ const result = evaluateProgram(
 ```
 
 The root entry point exports the same UPLC API together with `Data`, `applyParamsToScript`, and
-`evaluatePhaseTwoRaw`. Generic CEK evaluation is explicitly budgeted and does not perform ledger
-phase-one validation.
+`evaluatePhaseTwoRaw`. It also exposes `data`, `uplc`, and `blueprint` namespaces for predictable
+domain access. Generic CEK evaluation is explicitly budgeted and does not perform ledger phase-one
+validation.
+
+`SerializedPlutusScript.from_raw_flat`, `from_single_cbor`, and `from_double_cbor` explicitly own
+the three serialized-script forms. Each constructor validates an exact Flat program and its exact
+CBOR nesting; `to_raw_flat`, `to_single_cbor`, and `to_double_cbor` convert without envelope
+guessing.
+
+`evaluatePhaseTwo(transaction, resolvedInputs, costModels, ...)` accepts the existing chain-owned
+ledger bindings and returns immutable evaluations paired with chain-owned `RedeemerWitnessKey`
+values. `evaluatePhaseTwoRaw` remains available for byte-oriented compatibility.
 
 ## Typed Data
 
@@ -51,12 +61,20 @@ lowercase `Data.void()` helper continues to return that raw CBOR directly.
 Ledger wire types such as `PlutusData`, scripts, redeemers, and `ExUnits` remain owned by
 `@xray-network/xray-cardano-lib-chain`.
 
+## Contract blueprints
+
+`@xray-network/xray-cardano-lib-plutus/blueprint` parses bounded CIP-57 blueprint documents,
+validates their declared Plutus Data schemas, and verifies compiled validator hashes without
+executing a validator. Parsed documents are immutable; recursive or oversized untrusted schemas
+fail through the package error boundary.
+
 ## Entry points
 
 | Entry point | Domain |
 | --- | --- |
-| `@xray-network/xray-cardano-lib-plutus` | Data, UPLC, parameter application, and phase-two valuation |
+| `@xray-network/xray-cardano-lib-plutus` | Flat owning APIs plus `data`, `uplc`, and `blueprint` namespaces |
 | `@xray-network/xray-cardano-lib-plutus/data` | Typed Plutus Data schemas and codecs |
+| `@xray-network/xray-cardano-lib-plutus/blueprint` | CIP-57 documents, validators, and schema validation |
 | `@xray-network/xray-cardano-lib-plutus/uplc` | UPLC AST, Flat/text codecs, costs, and CEK evaluation |
 
 The package is universal ESM, uses `Uint8Array` and Web Platform APIs, and is distributed under

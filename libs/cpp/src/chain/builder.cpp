@@ -8,6 +8,8 @@
 #include <set>
 #include <utility>
 
+#include "cardano/chain/era/shared/models.hpp"
+
 namespace cardano::chain {
 namespace {
 
@@ -695,8 +697,6 @@ CborValue TransactionOutput::to_cbor_value() const {
   }
 
 CARDANO_CONFIG_SETTER(linear_fee, linear_fee, 0, LinearFee)
-CARDANO_CONFIG_SETTER(reference_script_cost_per_byte, reference_script_cost_per_byte, 1,
-                      std::uint64_t)
 CARDANO_CONFIG_SETTER(pool_deposit, pool_deposit, 2, std::uint64_t)
 CARDANO_CONFIG_SETTER(key_deposit, key_deposit, 3, std::uint64_t)
 CARDANO_CONFIG_SETTER(max_value_size, max_value_size, 4, std::uint32_t)
@@ -707,6 +707,21 @@ CARDANO_CONFIG_SETTER(collateral_percentage, collateral_percentage, 8, std::uint
 CARDANO_CONFIG_SETTER(max_collateral_inputs, max_collateral_inputs, 9, std::uint32_t)
 
 #undef CARDANO_CONFIG_SETTER
+
+TransactionBuilderConfigBuilder& TransactionBuilderConfigBuilder::reference_script_cost_per_byte(
+    std::uint64_t value) {
+  config_.reference_script_cost_per_byte = value;
+  config_.reference_script_cost = NonnegativeRational{value, 1};
+  required_mask_ |= static_cast<std::uint16_t>(1U << 1U);
+  return *this;
+}
+TransactionBuilderConfigBuilder& TransactionBuilderConfigBuilder::reference_script_cost(
+    NonnegativeRational value) {
+  config_.reference_script_cost = value;
+  config_.reference_script_cost_per_byte = value.denominator == 1 ? value.numerator : 0;
+  required_mask_ |= static_cast<std::uint16_t>(1U << 1U);
+  return *this;
+}
 
 TransactionBuilderConfigBuilder& TransactionBuilderConfigBuilder::cost_models(CborValue value) {
   config_.cost_models = std::move(value);
@@ -722,12 +737,96 @@ Result<TransactionBuilderConfig> TransactionBuilderConfigBuilder::build() const 
     return std::unexpected(argument_error("transaction builder configuration is incomplete"));
   }
   if (config_.ex_unit_prices.memory_denominator == 0 ||
-      config_.ex_unit_prices.steps_denominator == 0 || config_.max_value_size == 0 ||
+      config_.ex_unit_prices.steps_denominator == 0 ||
+      config_.reference_script_cost.denominator == 0 || config_.max_value_size == 0 ||
       config_.max_transaction_size == 0 || config_.coins_per_utxo_byte == 0) {
     return std::unexpected(
         argument_error("transaction builder configuration has invalid zero bounds"));
   }
   return config_;
+}
+
+Result<TransactionBuilderConfig> transaction_builder_config_from_conway(
+    const ProtocolParamUpdate& parameters) {
+  const auto required_uint = [&](std::uint64_t key,
+                                 std::string_view name) -> Result<std::uint64_t> {
+    auto value = parameters.field(key);
+    if (!value || value->as_unsigned() == nullptr || !value->as_unsigned()->value.fits_uint64())
+      return std::unexpected(
+          argument_error("missing or invalid Conway protocol parameter " + std::string(name)));
+    return *value->as_unsigned()->value.to_uint64();
+  };
+  const auto rational = [&](std::uint64_t key,
+                            std::string_view name) -> Result<NonnegativeRational> {
+    auto value = parameters.field(key);
+    const auto* tag = value ? value->as_tag() : nullptr;
+    const auto* fields = tag && tag->value ? tag->value->as_array() : nullptr;
+    if (tag == nullptr || tag->tag != BigInteger(std::uint64_t{30}) || fields == nullptr ||
+        fields->values.size() != 2 || fields->values[0].as_unsigned() == nullptr ||
+        fields->values[1].as_unsigned() == nullptr ||
+        !fields->values[0].as_unsigned()->value.fits_uint64() ||
+        !fields->values[1].as_unsigned()->value.fits_uint64())
+      return std::unexpected(
+          argument_error("missing or invalid Conway rational parameter " + std::string(name)));
+    return NonnegativeRational::make(*fields->values[0].as_unsigned()->value.to_uint64(),
+                                     *fields->values[1].as_unsigned()->value.to_uint64());
+  };
+  auto min_a = required_uint(0, "minfeeA"), min_b = required_uint(1, "minfeeB"),
+       max_tx = required_uint(3, "max transaction size"), key = required_uint(5, "key deposit"),
+       pool = required_uint(6, "pool deposit"), coins = required_uint(17, "coins per UTxO byte"),
+       max_value = required_uint(22, "max value size"),
+       collateral = required_uint(23, "collateral percentage"),
+       max_collateral = required_uint(24, "max collateral inputs");
+  auto reference = rational(33, "reference script cost");
+  auto prices_value = parameters.field(19);
+  const auto* prices = prices_value ? prices_value->as_array() : nullptr;
+  if (!min_a || !min_b || !max_tx || !key || !pool || !coins || !max_value || !collateral ||
+      !max_collateral || !reference || prices == nullptr || prices->values.size() != 2)
+    return std::unexpected((!min_a            ? min_a.error()
+                            : !min_b          ? min_b.error()
+                            : !max_tx         ? max_tx.error()
+                            : !key            ? key.error()
+                            : !pool           ? pool.error()
+                            : !coins          ? coins.error()
+                            : !max_value      ? max_value.error()
+                            : !collateral     ? collateral.error()
+                            : !max_collateral ? max_collateral.error()
+                            : !reference      ? reference.error()
+                                              : argument_error("missing Conway execution prices")));
+  const auto parse_price = [&](const CborValue& value) -> Result<NonnegativeRational> {
+    const auto* tag = value.as_tag();
+    const auto* pair = tag && tag->value ? tag->value->as_array() : nullptr;
+    if (tag == nullptr || tag->tag != BigInteger(std::uint64_t{30}) || pair == nullptr ||
+        pair->values.size() != 2 || pair->values[0].as_unsigned() == nullptr ||
+        pair->values[1].as_unsigned() == nullptr ||
+        !pair->values[0].as_unsigned()->value.fits_uint64() ||
+        !pair->values[1].as_unsigned()->value.fits_uint64())
+      return std::unexpected(argument_error("invalid Conway execution price"));
+    return NonnegativeRational::make(*pair->values[0].as_unsigned()->value.to_uint64(),
+                                     *pair->values[1].as_unsigned()->value.to_uint64());
+  };
+  auto memory_price = parse_price(prices->values[0]), step_price = parse_price(prices->values[1]);
+  if (!memory_price || !step_price)
+    return std::unexpected(!memory_price ? memory_price.error() : step_price.error());
+  if (*max_tx > std::numeric_limits<std::uint32_t>::max() ||
+      *max_value > std::numeric_limits<std::uint32_t>::max() ||
+      *collateral > std::numeric_limits<std::uint32_t>::max() ||
+      *max_collateral > std::numeric_limits<std::uint32_t>::max())
+    return std::unexpected(argument_error("Conway builder parameter exceeds uint32"));
+  TransactionBuilderConfigBuilder builder;
+  builder.linear_fee({*min_a, *min_b})
+      .reference_script_cost(*reference)
+      .pool_deposit(*pool)
+      .key_deposit(*key)
+      .max_value_size(static_cast<std::uint32_t>(*max_value))
+      .max_transaction_size(static_cast<std::uint32_t>(*max_tx))
+      .coins_per_utxo_byte(*coins)
+      .ex_unit_prices({memory_price->numerator, memory_price->denominator, step_price->numerator,
+                       step_price->denominator})
+      .collateral_percentage(static_cast<std::uint32_t>(*collateral))
+      .max_collateral_inputs(static_cast<std::uint32_t>(*max_collateral));
+  if (auto models = parameters.field(18)) builder.cost_models(*models);
+  return builder.build();
 }
 
 TransactionOutputBuilder& TransactionOutputBuilder::with_address(Address address) {
@@ -1412,33 +1511,63 @@ bool TransactionBuilder::contains_input(const TransactionInput& input) const {
   return std::ranges::any_of(
       inputs_, [&](const auto& item) { return item.input.canonical_identity() == identity; });
 }
+std::optional<std::string> TransactionBuilder::input_role(const TransactionInput& input) const {
+  const auto identity = input.canonical_identity();
+  if (std::ranges::any_of(
+          inputs_, [&](const auto& item) { return item.input.canonical_identity() == identity; }))
+    return "spending input";
+  if (std::ranges::any_of(candidates_, [&](const auto& item) {
+        return item.input.canonical_identity() == identity;
+      }))
+    return "selection candidate";
+  if (std::ranges::any_of(reference_inputs_,
+                          [&](const auto& item) { return item.canonical_identity() == identity; }))
+    return "reference input";
+  if (std::ranges::any_of(collateral_, [&](const auto& item) {
+        return item.utxo.input.canonical_identity() == identity;
+      }))
+    return "collateral input";
+  return std::nullopt;
+}
+core::VoidResult TransactionBuilder::require_unused_input(const TransactionInput& input,
+                                                          std::string_view requested_role) const {
+  const auto role = input_role(input);
+  if (role)
+    return std::unexpected(CardanoError(ErrorCode::duplicate_key,
+                                        "transaction input is already used as " + *role +
+                                            "; cannot add it as " + std::string(requested_role)));
+  return std::monostate{};
+}
 core::VoidResult TransactionBuilder::add_input(TransactionUnspentOutput input) {
-  if (contains_input(input.input)) {
-    return std::unexpected(
-        CardanoError(ErrorCode::duplicate_key, "duplicate explicit transaction input"));
-  }
+  auto unused = require_unused_input(input.input, "spending input");
+  if (!unused) return unused;
   inputs_.push_back(std::move(input));
   return std::monostate{};
 }
 core::VoidResult TransactionBuilder::add_input(InputBuilderResult input) {
+  auto snapshot = *this;
+  auto unused = require_unused_input(input.utxo.input, "spending input");
+  if (!unused) return unused;
   if (input.required_vkey) witnesses_.require_vkey(*input.required_vkey);
   if (input.aggregate) {
     auto status = apply_aggregate(
         witnesses_, redeemers_,
         RedeemerWitnessKey{RedeemerPurpose::spend, input.utxo.input.canonical_identity()},
         *input.aggregate);
-    if (!status) return status;
+    if (!status) {
+      *this = std::move(snapshot);
+      return status;
+    }
   }
-  return add_input(std::move(input.utxo));
+  auto status = add_input(std::move(input.utxo));
+  if (!status) *this = std::move(snapshot);
+  return status;
 }
-void TransactionBuilder::add_utxo(TransactionUnspentOutput candidate) {
-  const auto identity = candidate.input.canonical_identity();
-  if (contains_input(candidate.input) || std::ranges::any_of(candidates_, [&](const auto& item) {
-        return item.input.canonical_identity() == identity;
-      })) {
-    return;
-  }
+core::VoidResult TransactionBuilder::add_utxo(TransactionUnspentOutput candidate) {
+  auto unused = require_unused_input(candidate.input, "selection candidate");
+  if (!unused) return unused;
   candidates_.push_back(std::move(candidate));
+  return std::monostate{};
 }
 core::VoidResult TransactionBuilder::add_output(TransactionOutput output) {
   auto value_bytes = output.amount().to_cbor();
@@ -1461,21 +1590,16 @@ core::VoidResult TransactionBuilder::add_output(TransactionOutput output) {
   outputs_.push_back(std::move(output));
   return std::monostate{};
 }
-void TransactionBuilder::add_reference_input(TransactionInput input) {
-  const auto identity = input.canonical_identity();
-  if (!std::ranges::any_of(reference_inputs_, [&](const auto& existing) {
-        return existing.canonical_identity() == identity;
-      })) {
-    reference_inputs_.push_back(std::move(input));
-  }
+core::VoidResult TransactionBuilder::add_reference_input(TransactionInput input) {
+  auto unused = require_unused_input(input, "reference input");
+  if (!unused) return unused;
+  reference_inputs_.push_back(std::move(input));
+  return std::monostate{};
 }
 core::VoidResult TransactionBuilder::add_reference_input(TransactionUnspentOutput input) {
-  const auto identity = input.input.canonical_identity();
-  if (std::ranges::any_of(reference_inputs_, [&](const auto& existing) {
-        return existing.canonical_identity() == identity;
-      })) {
-    return std::monostate{};
-  }
+  auto snapshot = *this;
+  auto unused = require_unused_input(input.input, "reference input");
+  if (!unused) return unused;
   if (input.output.script_reference()) {
     const auto* tag = input.output.script_reference()->as_tag();
     if (tag != nullptr && tag->value != nullptr && tag->value->as_byte_string() != nullptr) {
@@ -1506,7 +1630,10 @@ core::VoidResult TransactionBuilder::add_reference_input(TransactionUnspentOutpu
       }
       auto status = witnesses_.satisfy_script_reference(static_cast<std::uint8_t>(*language),
                                                         std::move(*hash));
-      if (!status) return status;
+      if (!status) {
+        *this = std::move(snapshot);
+        return status;
+      }
     }
   }
   reference_inputs_.push_back(input.input);
@@ -1526,6 +1653,7 @@ core::VoidResult TransactionBuilder::set_mint(std::vector<PolicyAssets> mint) {
   return std::monostate{};
 }
 core::VoidResult TransactionBuilder::add_mint(MintBuilderResult mint) {
+  auto snapshot = *this;
   auto combined = mint_;
   combined.push_back(mint.mint);
   auto normalized = normalize_assets(combined, true);
@@ -1533,7 +1661,10 @@ core::VoidResult TransactionBuilder::add_mint(MintBuilderResult mint) {
   auto status = apply_aggregate(
       witnesses_, redeemers_, RedeemerWitnessKey{RedeemerPurpose::mint, mint.mint.policy.to_hex()},
       mint.aggregate);
-  if (!status) return status;
+  if (!status) {
+    *this = std::move(snapshot);
+    return status;
+  }
   mint_ = std::move(*normalized);
   return std::monostate{};
 }
@@ -1551,19 +1682,25 @@ core::VoidResult TransactionBuilder::add_withdrawal(Address reward_address, std:
   return std::monostate{};
 }
 core::VoidResult TransactionBuilder::add_withdrawal(WithdrawalBuilderResult withdrawal) {
+  auto snapshot = *this;
   if (withdrawal.aggregate) {
     auto status =
         apply_aggregate(witnesses_, redeemers_,
                         RedeemerWitnessKey{RedeemerPurpose::reward, withdrawal.address.to_hex()},
                         *withdrawal.aggregate);
-    if (!status) return status;
+    if (!status) {
+      *this = std::move(snapshot);
+      return status;
+    }
   }
   for (const auto& key : withdrawal.required.vkeys) {
     auto hash = crypto::Ed25519KeyHash::from_hex(key);
     if (!hash) return std::unexpected(hash.error());
     witnesses_.require_vkey(*hash);
   }
-  return add_withdrawal(std::move(withdrawal.address), withdrawal.amount);
+  auto status = add_withdrawal(std::move(withdrawal.address), withdrawal.amount);
+  if (!status) *this = std::move(snapshot);
+  return status;
 }
 void TransactionBuilder::add_certificate(CborValue value) {
   certificates_.push_back(std::move(value));
@@ -1590,6 +1727,7 @@ core::VoidResult TransactionBuilder::add_certificate(CertificateBuilderResult ce
 }
 void TransactionBuilder::add_proposal(CborValue value) { proposals_.push_back(std::move(value)); }
 core::VoidResult TransactionBuilder::add_proposals(ProposalBuilderResult proposals) {
+  auto snapshot = *this;
   for (std::size_t index = 0; index < proposals.entries.size(); ++index) {
     auto& entry = proposals.entries[index];
     if (entry.aggregate) {
@@ -1600,13 +1738,17 @@ core::VoidResult TransactionBuilder::add_proposals(ProposalBuilderResult proposa
               RedeemerPurpose::proposing,
               std::string(10 - std::min<std::size_t>(10, decimal.size()), '0') + decimal},
           *entry.aggregate);
-      if (!status) return status;
+      if (!status) {
+        *this = std::move(snapshot);
+        return status;
+      }
     }
     proposals_.push_back(std::move(entry.proposal));
   }
   return std::monostate{};
 }
 core::VoidResult TransactionBuilder::add_votes(VoteBuilderResult votes) {
+  auto snapshot = *this;
   for (auto& entry : votes.entries) {
     if (entry.aggregate) {
       auto status = apply_aggregate(
@@ -1614,13 +1756,18 @@ core::VoidResult TransactionBuilder::add_votes(VoteBuilderResult votes) {
           RedeemerWitnessKey{RedeemerPurpose::voting,
                              canonical_hex(entry.voter) + ":" + canonical_hex(entry.action)},
           *entry.aggregate);
-      if (!status) return status;
+      if (!status) {
+        *this = std::move(snapshot);
+        return status;
+      }
     }
     votes_.push_back(std::move(entry));
   }
   return std::monostate{};
 }
 core::VoidResult TransactionBuilder::add_collateral(InputBuilderResult collateral) {
+  auto unused = require_unused_input(collateral.utxo.input, "collateral input");
+  if (!unused) return unused;
   if (collateral.aggregate) {
     return std::unexpected(
         argument_error("collateral cannot require native or Plutus script witnesses"));
@@ -1774,6 +1921,13 @@ core::VoidResult TransactionBuilder::select_candidate(std::size_t index) {
 }
 core::VoidResult TransactionBuilder::select_utxos(CoinSelectionStrategyCIP2 strategy,
                                                   core::SecureRandomSource* random) {
+  auto snapshot = *this;
+  auto result = select_utxos_impl(strategy, random);
+  if (!result) *this = std::move(snapshot);
+  return result;
+}
+core::VoidResult TransactionBuilder::select_utxos_impl(CoinSelectionStrategyCIP2 strategy,
+                                                       core::SecureRandomSource* random) {
   if ((strategy == CoinSelectionStrategyCIP2::random_improve ||
        strategy == CoinSelectionStrategyCIP2::random_improve_multi_asset) &&
       random == nullptr) {
@@ -2089,10 +2243,19 @@ Result<std::vector<TransactionOutput>> TransactionBuilder::make_change(const Add
 
 Result<bool> TransactionBuilder::add_change_if_needed(const Address& address,
                                                       ChangeSelectionAlgo algorithm) {
+  auto snapshot = *this;
+  auto result = add_change_if_needed_impl(address, algorithm);
+  if (!result) *this = std::move(snapshot);
+  return result;
+}
+Result<bool> TransactionBuilder::add_change_if_needed_impl(const Address& address,
+                                                           ChangeSelectionAlgo algorithm) {
   static_cast<void>(algorithm);
   const auto original_size = outputs_.size();
   std::uint64_t current_fee = fee_.value_or(0);
-  for (std::size_t iteration = 0; iteration < 8; ++iteration) {
+  std::optional<std::string> previous_state;
+  std::set<std::string> seen;
+  for (std::size_t iteration = 0; iteration < 32; ++iteration) {
     outputs_.erase(outputs_.begin() + static_cast<std::ptrdiff_t>(original_size), outputs_.end());
     auto input = total_input();
     auto output = total_output();
@@ -2105,42 +2268,33 @@ Result<bool> TransactionBuilder::add_change_if_needed(const Address& address,
     if (!change) return std::unexpected(change.error());
     auto change_outputs = make_change(address, *change);
     if (!change_outputs) return std::unexpected(change_outputs.error());
+    const bool emitted = !change_outputs->empty();
+    if (!emitted && (change->coin() != 0 || change->has_assets())) {
+      if (change->has_assets())
+        return std::unexpected(
+            balance_error("native-asset change cannot be absorbed into the fee"));
+      if (change->coin() > std::numeric_limits<std::uint64_t>::max() - current_fee)
+        return std::unexpected(CardanoError(ErrorCode::out_of_range, "change fee overflow"));
+      current_fee += change->coin();
+    }
     outputs_.insert(outputs_.end(), std::make_move_iterator(change_outputs->begin()),
                     std::make_move_iterator(change_outputs->end()));
     fee_ = current_fee;
+    std::string state = std::to_string(current_fee);
+    for (auto output_index = original_size; output_index < outputs_.size(); ++output_index)
+      state += ":" + canonical_hex(outputs_[output_index].to_cbor_value());
     auto next_fee = min_fee(true);
     if (!next_fee) return std::unexpected(next_fee.error());
-    if (*next_fee == current_fee) break;
-    current_fee = *next_fee;
+    const auto next = std::max(current_fee, *next_fee);
+    if (previous_state && *previous_state == state && next == current_fee) return emitted;
+    if (!seen.insert(state).second)
+      return std::unexpected(
+          CardanoError(ErrorCode::internal, "transaction fee/change convergence cycle detected"));
+    previous_state = std::move(state);
+    current_fee = next;
   }
-
-  outputs_.erase(outputs_.begin() + static_cast<std::ptrdiff_t>(original_size), outputs_.end());
-  auto input = total_input();
-  auto output = total_output();
-  if (!input || !output) {
-    return std::unexpected(!input ? input.error() : output.error());
-  }
-  auto required = output->checked_add(Value(current_fee));
-  if (!required) return std::unexpected(required.error());
-  auto change = input->checked_sub(*required);
-  if (!change) return std::unexpected(change.error());
-  auto final_outputs = make_change(address, *change);
-  if (!final_outputs) return std::unexpected(final_outputs.error());
-  const bool emitted = !final_outputs->empty();
-  if (!emitted && (change->coin() != 0 || change->has_assets())) {
-    if (change->has_assets()) {
-      return std::unexpected(balance_error("native-asset change cannot be absorbed into the fee"));
-    }
-    if (change->coin() > std::numeric_limits<std::uint64_t>::max() - current_fee) {
-      return std::unexpected(CardanoError(ErrorCode::out_of_range, "change fee overflow"));
-    }
-    current_fee += change->coin();
-  } else {
-    outputs_.insert(outputs_.end(), std::make_move_iterator(final_outputs->begin()),
-                    std::make_move_iterator(final_outputs->end()));
-  }
-  fee_ = current_fee;
-  return emitted;
+  return std::unexpected(CardanoError(
+      ErrorCode::internal, "transaction fee/change did not converge within 32 iterations"));
 }
 
 Result<std::uint64_t> TransactionBuilder::min_fee(bool include_exunits) const {
@@ -2207,14 +2361,15 @@ Result<std::uint64_t> TransactionBuilder::min_fee(bool include_exunits) const {
     }
     reference_size += static_cast<std::uint64_t>(size);
   }
-  auto reference_fee =
-      min_reference_script_fee(reference_size, config_.reference_script_cost_per_byte);
+  auto reference_fee = min_reference_script_fee(reference_size, config_.reference_script_cost);
   if (!reference_fee) return std::unexpected(reference_fee.error());
   return cardano::chain::min_fee(transaction, config_.linear_fee, *script_fee, *reference_fee);
 }
 
 Result<CborValue> TransactionBuilder::build_body_with_fee(std::uint64_t fee,
                                                           bool enforce_size) const {
+  auto checked_collateral_total = collateral_total(fee, enforce_size);
+  if (!checked_collateral_total) return std::unexpected(checked_collateral_total.error());
   if (donation_ && *donation_ == 0) {
     return std::unexpected(argument_error("donation cannot be zero"));
   }
@@ -2283,20 +2438,8 @@ Result<CborValue> TransactionBuilder::build_body_with_fee(std::uint64_t fee,
   }
   if (network_id_) fields.emplace_back(uint(15), uint(*network_id_));
   if (collateral_return_) {
-    std::uint64_t collateral_coin = 0;
-    for (const auto& collateral : collateral_) {
-      const auto coin = collateral.utxo.output.amount().coin();
-      if (coin > std::numeric_limits<std::uint64_t>::max() - collateral_coin) {
-        return std::unexpected(
-            CardanoError(ErrorCode::out_of_range, "collateral coin total overflow"));
-      }
-      collateral_coin += coin;
-    }
-    if (collateral_return_->amount().coin() > collateral_coin) {
-      return std::unexpected(balance_error("collateral return exceeds collateral input coin"));
-    }
     fields.emplace_back(uint(16), collateral_return_->to_cbor_value());
-    fields.emplace_back(uint(17), uint(collateral_coin - collateral_return_->amount().coin()));
+    fields.emplace_back(uint(17), uint(*checked_collateral_total));
   }
   if (!reference_inputs_.empty()) {
     std::vector<CborValue> values;
@@ -2366,6 +2509,46 @@ Result<CborValue> TransactionBuilder::build_body_with_fee(std::uint64_t fee,
   return body;
 }
 
+Result<std::uint64_t> TransactionBuilder::collateral_total(std::uint64_t fee, bool checked) const {
+  Value total;
+  for (const auto& collateral : collateral_) {
+    auto next = total.checked_add(collateral.utxo.output.amount());
+    if (!next) return std::unexpected(next.error());
+    total = std::move(*next);
+  }
+  if (!checked) {
+    if (!collateral_return_ || collateral_return_->amount().coin() > total.coin())
+      return std::uint64_t{0};
+    return total.coin() - collateral_return_->amount().coin();
+  }
+  if (collateral_return_ && collateral_.empty())
+    return std::unexpected(argument_error("collateral return requires collateral inputs"));
+  if (!redeemers_.empty()) {
+    if (collateral_.empty())
+      return std::unexpected(argument_error("Plutus transaction requires collateral"));
+    const auto product =
+        BigInteger(fee) * BigInteger(static_cast<std::uint64_t>(config_.collateral_percentage));
+    const auto required =
+        (product + BigInteger(std::uint64_t{99})) / BigInteger(std::uint64_t{100});
+    if (!required.fits_uint64())
+      return std::unexpected(
+          CardanoError(ErrorCode::out_of_range, "required collateral exceeds uint64"));
+    if (total.coin() < *required.to_uint64())
+      return std::unexpected(balance_error("collateral coin is below the configured percentage"));
+  }
+  if (!collateral_return_) {
+    if (total.has_assets())
+      return std::unexpected(
+          balance_error("asset-bearing collateral requires a collateral return"));
+    return total.coin();
+  }
+  if (collateral_return_->amount().coin() > total.coin())
+    return std::unexpected(balance_error("collateral return exceeds collateral input coin"));
+  if (collateral_return_->amount().multiasset() != total.multiasset())
+    return std::unexpected(balance_error("collateral return must preserve every native asset"));
+  return total.coin() - collateral_return_->amount().coin();
+}
+
 Result<CborValue> TransactionBuilder::build_body() const {
   if (!fee_) {
     return std::unexpected(argument_error("transaction fee has not been set"));
@@ -2376,6 +2559,8 @@ Result<CborValue> TransactionBuilder::build_for_evaluation() const {
   if (!fee_) {
     return std::unexpected(argument_error("transaction fee has not been set"));
   }
+  auto collateral = collateral_total(*fee_, true);
+  if (!collateral) return std::unexpected(collateral.error());
   auto body = build_body_with_fee(*fee_, false);
   if (!body) return std::unexpected(body.error());
   auto witness = witnesses_.build_unchecked(true, true);

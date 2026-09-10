@@ -69,6 +69,7 @@ export {
   CertificateBuilderResult,
   ChangeSelectionAlgo,
   CoinSelectionStrategyCIP2,
+  discover_required_witnesses,
   InputAggregateWitnessData,
   InputBuilderResult,
   MintBuilderResult,

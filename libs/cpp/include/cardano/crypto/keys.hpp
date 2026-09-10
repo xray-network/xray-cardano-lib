@@ -12,6 +12,8 @@
 
 namespace cardano::crypto {
 
+enum class PrivateKeyForm : std::uint8_t { normal, extended };
+
 class PublicKey {
  public:
   [[nodiscard]] static core::Result<PublicKey> from_bytes(core::ByteSpan bytes);
@@ -40,6 +42,8 @@ class PrivateKey {
   ~PrivateKey();
 
   [[nodiscard]] static core::Result<PrivateKey> from_bytes(core::ByteSpan bytes);
+  [[nodiscard]] static core::Result<PrivateKey> from_normal_bytes(core::ByteSpan bytes);
+  [[nodiscard]] static core::Result<PrivateKey> from_extended_bytes(core::ByteSpan bytes);
   [[nodiscard]] static core::Result<PrivateKey> from_hex(std::string_view hex);
   [[nodiscard]] static core::Result<PrivateKey> from_bech32(std::string_view encoded);
   [[nodiscard]] static core::Result<PrivateKey> generate(core::SecureRandomSource& random);
@@ -50,11 +54,13 @@ class PrivateKey {
   [[nodiscard]] core::Result<std::string> to_bech32() const;
   [[nodiscard]] core::Result<PublicKey> public_key() const;
   [[nodiscard]] core::Result<Ed25519Signature> sign(core::ByteSpan message) const;
+  [[nodiscard]] PrivateKeyForm form() const noexcept;
   void clear() noexcept;
 
  private:
-  explicit PrivateKey(std::array<core::Byte, 32> bytes);
-  std::array<core::Byte, 32> bytes_{};
+  PrivateKey(std::array<core::Byte, 64> bytes, PrivateKeyForm form);
+  std::array<core::Byte, 64> bytes_{};
+  PrivateKeyForm form_{PrivateKeyForm::normal};
   bool cleared_{false};
 };
 
@@ -102,6 +108,7 @@ class Bip32PrivateKey {
   [[nodiscard]] core::Result<Bip32PublicKey> public_key() const;
   [[nodiscard]] core::Result<Bip32PrivateKey> derive(std::uint32_t index) const;
   [[nodiscard]] core::Result<Ed25519Signature> sign(core::ByteSpan message) const;
+  [[nodiscard]] core::Result<PrivateKey> to_raw_key() const;
   void clear() noexcept;
 
  private:

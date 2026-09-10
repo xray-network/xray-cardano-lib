@@ -99,23 +99,32 @@ class EraCborModel {
   class name final : public EraCborModel<name> {                                     \
    public:                                                                           \
     static constexpr std::string_view model_name = #name;                            \
+                                                                                     \
+   private:                                                                          \
     explicit name(core::cbor::Value value) : EraCborModel<name>(std::move(value)) {} \
+    friend class EraCborModel<name>;                                                 \
   }
 
 #define CARDANO_ERA_ARRAY_MODEL(name)                                  \
   class name final : public EraCborModel<name, EraWireShape::array> {  \
    public:                                                             \
     static constexpr std::string_view model_name = #name;              \
+                                                                       \
+   private:                                                            \
     explicit name(core::cbor::Value value)                             \
         : EraCborModel<name, EraWireShape::array>(std::move(value)) {} \
+    friend class EraCborModel<name, EraWireShape::array>;              \
   }
 
 #define CARDANO_ERA_MAP_MODEL(name)                                  \
   class name final : public EraCborModel<name, EraWireShape::map> {  \
    public:                                                           \
     static constexpr std::string_view model_name = #name;            \
+                                                                     \
+   private:                                                          \
     explicit name(core::cbor::Value value)                           \
         : EraCborModel<name, EraWireShape::map>(std::move(value)) {} \
+    friend class EraCborModel<name, EraWireShape::map>;              \
   }
 
 enum class MIRActionKind : std::uint8_t { to_stake_credentials = 0, to_other_pot = 1 };

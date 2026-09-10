@@ -42,6 +42,10 @@ export function blake2b224(data: Uint8Array): Uint8Array {
   return Uint8Array.from(blake2b(data, { dkLen: 28 }));
 }
 
+export function blake2b160(data: Uint8Array): Uint8Array {
+  return Uint8Array.from(blake2b(Uint8Array.from(data), { dkLen: 20 }));
+}
+
 export function blake2b256(data: Uint8Array): Uint8Array {
   return Uint8Array.from(blake2b(data, { dkLen: 32 }));
 }

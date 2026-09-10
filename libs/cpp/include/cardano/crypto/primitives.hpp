@@ -14,6 +14,7 @@ namespace cardano::crypto {
 [[nodiscard]] core::Result<core::Bytes> secure_random_bytes(std::size_t length);
 
 [[nodiscard]] core::Bytes blake2b224(core::ByteSpan input);
+[[nodiscard]] core::Bytes blake2b160(core::ByteSpan input);
 [[nodiscard]] core::Bytes blake2b256(core::ByteSpan input);
 [[nodiscard]] core::Bytes sha2_256(core::ByteSpan input);
 [[nodiscard]] core::Bytes sha3_256(core::ByteSpan input);

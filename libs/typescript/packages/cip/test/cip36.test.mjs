@@ -59,7 +59,7 @@ test("CIP36 delegation variants, non-empty bounds, and preserved/canonical CBOR"
 test("CIP36 registration metadata views sign, verify, and preserve unrelated labels", () => {
   const privateKey = PrivateKey.from_normal_bytes(Uint8Array.from({ length: 32 }, (_, index) => index + 1));
   const signer = privateKey.to_public();
-  const delegations = NonEmptyCIP36DelegationList.new(CIP36Delegation.new(vote, 0));
+  const delegations = NonEmptyCIP36DelegationList.new(CIP36Delegation.new(vote, 1));
   const registration = CIP36KeyRegistration.new(CIP36DelegationDistribution.new_weighted(delegations), signer, legacyAddress, 42n);
   const signature = privateKey.sign(registration.hash_to_sign(false));
   const view = CIP36RegistrationCbor.new(registration, CIP36RegistrationWitness.new(signature));
@@ -71,9 +71,40 @@ test("CIP36 registration metadata views sign, verify, and preserve unrelated lab
   assert.equal(restored.key_registration().nonce(), 42n);
   assert.equal(CIP36RegistrationCbor.from_metadata_bytes(metadata.to_cbor_bytes()).registration_witness().stake_witness().to_hex(), signature.to_hex());
 
-  const invalid = NonEmptyCIP36DelegationList.new(CIP36Delegation.new(vote, 1));
+  const invalid = NonEmptyCIP36DelegationList.new(CIP36Delegation.new(vote, 0));
   const invalidView = CIP36RegistrationCbor.new(CIP36KeyRegistration.new(CIP36DelegationDistribution.new_weighted(invalid), signer, legacyAddress, 43n), CIP36RegistrationWitness.new(signature));
   assert.throws(() => invalidView.verify(), /Invalid delegation weights/);
+});
+
+test("CIP36 weighted metadata requires at least one positive weight before mutation", () => {
+  const privateKey = PrivateKey.from_normal_bytes(Uint8Array.from({ length: 32 }, (_, index) => index + 1));
+  for (const weights of [[0], [0, 0], [1], [0, 1], [1, 0], [0xffff_ffff]]) {
+    const list = NonEmptyCIP36DelegationList.new(CIP36Delegation.new(vote, weights[0]));
+    for (const weight of weights.slice(1)) list.add(CIP36Delegation.new(vote, weight));
+    const registration = CIP36KeyRegistration.new(CIP36DelegationDistribution.new_weighted(list), privateKey.to_public(), legacyAddress, 42n);
+    const witness = CIP36RegistrationWitness.new(privateKey.sign(registration.hash_to_sign(false)));
+    const view = CIP36RegistrationCbor.new(registration, witness);
+    const metadata = Metadata.new();
+    metadata.set(7n, TransactionMetadatum.new_text("unrelated"));
+    metadata.set(61284n, TransactionMetadatum.new_text("existing registration"));
+    metadata.set(61285n, TransactionMetadatum.new_text("existing witness"));
+    const before = metadata.to_cbor_bytes();
+    const operations = [() => view.verify(), () => view.to_metadata_bytes(), () => view.try_into_metadata(), () => view.add_to_metadata(metadata)];
+    for (const operation of operations) {
+      if (weights.some((weight) => weight > 0)) assert.doesNotThrow(operation, `weights ${weights}`);
+      else {
+        assert.throws(operation, { name: "TypeError", message: "Invalid delegation weights" }, `weights ${weights}`);
+        assert.deepEqual(metadata.to_cbor_bytes(), before);
+      }
+    }
+    assert.equal(privateKey.to_public().verify(registration.hash_to_sign(false), witness.stake_witness()), true);
+  }
+  const legacy = CIP36KeyRegistration.new(CIP36DelegationDistribution.new_legacy(vote), privateKey.to_public(), legacyAddress, 42n);
+  const legacyView = CIP36RegistrationCbor.new(legacy, CIP36RegistrationWitness.new(privateKey.sign(legacy.hash_to_sign(false))));
+  assert.doesNotThrow(() => legacyView.verify());
+  assert.doesNotThrow(() => legacyView.to_metadata_bytes());
+  for (const weight of [-1, 0x1_0000_0000, 0.5, NaN]) assert.throws(() => CIP36Delegation.new(vote, weight), /uint32/);
+  assert.throws(() => CIP36DelegationDistribution.from_cbor_hex("80"), /must not be empty/);
 });
 
 test("CIP36 deregistration metadata views retain explicit default-purpose presence", () => {
@@ -92,3 +123,90 @@ test("CIP36 deregistration metadata views retain explicit default-purpose presen
 
 function u(value) { return { kind: "unsigned", value, encoding: { width: 0 } }; }
 function b(value) { return { kind: "bytes", value, encoding: { kind: "definite", width: 0 } }; }
+
+function metadataViewFixture(deregister) {
+  const key = PrivateKey.from_normal_bytes(Uint8Array.from({ length: 32 }, (_, index) => index + 1));
+  const Payload = deregister ? CIP36KeyDeregistration : CIP36KeyRegistration;
+  const View = deregister ? CIP36DeregistrationCbor : CIP36RegistrationCbor;
+  const Witness = deregister ? CIP36DeregistrationWitness : CIP36RegistrationWitness;
+  const payload = deregister
+    ? Payload.new(key.to_public(), 42n)
+    : Payload.new(CIP36DelegationDistribution.new_legacy(vote), key.to_public(), legacyAddress, 42n);
+  const node = decodeCbor(payload.to_cbor_bytes());
+  node.encoding = { kind: "indefinite" };
+  node.entries.find(([label]) => label.value === (deregister ? 2n : 4n))[1].encoding = { width: 8 };
+  const preserved = Payload.from_cbor_bytes(encodeCbor(node));
+  const view = View.new(preserved, Witness.new(key.sign(preserved.hash_to_sign(false))));
+  return { View, view, payload: preserved, primaryLabel: deregister ? 61286n : 61284n };
+}
+
+for (const deregister of [false, true]) {
+  const kind = deregister ? "deregistration" : "registration";
+  test(`CIP36 ${kind} views round-trip complete metadata and own their buffers`, () => {
+    const { View, view, payload } = metadataViewFixture(deregister);
+    const signingHash = payload.hash_to_sign(false);
+    for (const encoding of [{ kind: "indefinite" }, { kind: "definite", width: 2 }]) {
+      const fields = decodeCbor(view.to_metadata_bytes()).entries;
+      const text = { kind: "text", value: "unrelated", encoding: { kind: "indefinite", chunks: [
+        { value: "un", width: 1 }, { value: "related", width: 2 },
+      ] } };
+      const original = encodeCbor({ kind: "map", encoding, entries: [
+        [{ ...u(7n), encoding: { width: 8 } }, text],
+        [fields[1][0], { ...fields[1][1], encoding: { kind: "indefinite" } }],
+        [u(8n), { kind: "array", values: [b(Uint8Array.of(1, 2)), u(3n)], encoding: { kind: "indefinite" } }],
+        fields[0],
+      ] });
+      const input = original.slice();
+      const restored = View.from_metadata_bytes(input);
+      input.fill(0);
+      assert.deepEqual(restored.to_metadata_bytes(), original);
+      const returned = restored.to_metadata_bytes(); returned.fill(0);
+      assert.deepEqual(restored.to_metadata_bytes(), original);
+      const metadata = restored.try_into_metadata();
+      assert.ok(metadata instanceof Metadata);
+      assert.deepEqual(metadata.to_cbor_bytes(), original);
+      assert.deepEqual(metadata.to_canonical_cbor_bytes(), Metadata.from_cbor_bytes(original).to_canonical_cbor_bytes());
+      assert.notDeepEqual(metadata.to_canonical_cbor_bytes(), original);
+      const objectView = View.try_from_metadata(metadata);
+      metadata.set(7n, TransactionMetadatum.new_text("changed"));
+      assert.deepEqual(objectView.to_metadata_bytes(), original);
+      assert.deepEqual(restored.to_metadata_bytes(), original);
+      const roundTripPayload = deregister ? restored.key_deregistration() : restored.key_registration();
+      assert.deepEqual(roundTripPayload.hash_to_sign(false), signingHash);
+      assert.equal(restored.to_json(), view.to_json());
+    }
+  });
+
+  test(`CIP36 ${kind} merge preserves caller labels without importing unrelated view labels`, () => {
+    const { View, view, primaryLabel } = metadataViewFixture(deregister);
+    const original = view.try_into_metadata();
+    original.set(7n, TransactionMetadatum.new_text("view"));
+    original.set(8n, TransactionMetadatum.new_text("view only"));
+    const restored = View.try_from_metadata(original);
+    const caller = Metadata.new();
+    caller.set(7n, TransactionMetadatum.new_text("caller"));
+    caller.set(9n, TransactionMetadatum.new_text("caller only"));
+    restored.add_to_metadata(caller);
+    assert.equal(caller.get(7n).as_text(), "caller");
+    assert.equal(caller.get(8n), undefined);
+    assert.equal(caller.get(9n).as_text(), "caller only");
+    assert.deepEqual(caller.get(primaryLabel).to_cbor_bytes(), original.get(primaryLabel).to_cbor_bytes());
+    assert.deepEqual(caller.get(61285n).to_cbor_bytes(), original.get(61285n).to_cbor_bytes());
+    assert.equal(restored.try_into_metadata().get(7n).as_text(), "view");
+    assert.equal(restored.try_into_metadata().get(8n).as_text(), "view only");
+  });
+
+  test(`CIP36 ${kind} views reject malformed reserved fields and duplicate labels`, () => {
+    const { View, view, primaryLabel } = metadataViewFixture(deregister);
+    const node = decodeCbor(view.to_metadata_bytes());
+    for (const label of [primaryLabel, 61285n, 7n]) {
+      const entries = [...node.entries, [u(7n), u(1n)], [u(label), u(2n)]];
+      assert.throws(() => View.from_metadata_bytes(encodeCbor({ ...node, entries })), /duplicate metadata label/);
+    }
+    const primary = node.entries.find(([key]) => key.value === primaryLabel)[1];
+    const invalid = { ...primary, entries: [...primary.entries, [u(99n), u(1n)]] };
+    assert.throws(() => View.from_metadata_bytes(encodeCbor({ ...node, entries: node.entries.map(([key, item]) => [key, key.value === primaryLabel ? invalid : item]) })), /unknown CIP36 map key/);
+    assert.throws(() => View.from_metadata_bytes(encodeCbor({ ...node, entries: node.entries.filter(([key]) => key.value !== 61285n) })), /missing CIP36 map key/);
+    assert.throws(() => View.from_metadata_bytes(view.to_metadata_bytes().slice(0, -1)));
+  });
+}

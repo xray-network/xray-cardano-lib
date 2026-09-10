@@ -229,10 +229,26 @@ core::Result<std::uint64_t> min_script_fee(ExUnits total, ExUnitPrices prices) {
 
 core::Result<std::uint64_t> min_reference_script_fee(std::uint64_t script_size,
                                                      std::uint64_t cost_per_byte) {
+  return min_reference_script_fee(script_size, NonnegativeRational{cost_per_byte, 1});
+}
+
+core::Result<NonnegativeRational> NonnegativeRational::make(std::uint64_t numerator,
+                                                            std::uint64_t denominator) {
+  if (denominator == 0)
+    return std::unexpected(core::CardanoError(core::ErrorCode::invalid_argument,
+                                              "rational denominator must be positive"));
+  return NonnegativeRational{numerator, denominator};
+}
+
+core::Result<std::uint64_t> min_reference_script_fee(std::uint64_t script_size,
+                                                     NonnegativeRational cost_per_byte) {
+  if (cost_per_byte.denominator == 0)
+    return std::unexpected(core::CardanoError(
+        core::ErrorCode::invalid_argument, "reference-script price denominator must be positive"));
   constexpr std::uint64_t tier_size = 25'600U;
   auto remaining = script_size;
-  auto price_numerator = core::BigInteger(cost_per_byte);
-  auto price_denominator = core::BigInteger(std::uint64_t{1});
+  auto price_numerator = core::BigInteger(cost_per_byte.numerator);
+  auto price_denominator = core::BigInteger(cost_per_byte.denominator);
   core::BigInteger total_numerator(std::uint64_t{0});
   core::BigInteger total_denominator(std::uint64_t{1});
   while (remaining != 0U) {

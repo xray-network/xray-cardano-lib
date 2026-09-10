@@ -4,6 +4,7 @@ import { decodeCbor, encodeCbor } from "../../core/dist/esm/index.js";
 import { __setCoinSelectionRandomSourceForTests } from "../dist/esm/builder/transaction.js";
 import { evaluatePhaseTwoRaw } from "../../plutus/dist/esm/api.js";
 import {
+  AnchorDocHash,
   Bip32PrivateKey,
   PrivateKey,
   ScriptHash,
@@ -11,6 +12,7 @@ import {
 } from "../../crypto/dist/esm/index.js";
 import {
   Address,
+  Anchor,
   AssetName,
   AuxiliaryData,
   ByronAddress,
@@ -23,6 +25,7 @@ import {
   ExUnitPrices,
   ExUnits,
   GovActionId,
+  GovAction,
   LinearFee,
   MapAssetNameToNonZeroInt64,
   MultiAsset,
@@ -48,16 +51,21 @@ import {
   SingleInputBuilder,
   SingleMintBuilder,
   SingleWithdrawalBuilder,
+  StakeDeregistration,
+  StakeRegistration,
   TransactionBuilder,
   TransactionBuilderConfigBuilder,
   TransactionInput,
+  TransactionOutput,
   TransactionOutputBuilder,
   TransactionUnspentOutput,
   TransactionWitnessSetBuilder,
   Value,
   VoteBuilder,
   Voter,
+  Vote,
   VotingProcedure,
+  Url,
   hash_transaction,
   make_icarus_bootstrap_witness,
   make_vkey_witness,
@@ -109,6 +117,31 @@ test("add_output_amount, add_output_coin, and too-big output gates", () => {
   assert.ok(built.output().to_js_value());
   assert.ok(min_ada_required(built.output(), 2n) <= Value.from_cbor_bytes(bodyFieldFromOutput(built.output(), 1)).coin());
   assert.throws(() => TransactionBuilder.new(config({ maxValueSize: 1 })).add_output(output(2_000_000n)), /maximum size/);
+});
+
+test("output construction and transaction bodies omit empty multi-assets", () => {
+  const emptyTuple = Value.from_cbor_hex("821a003d0900a0");
+  const result = TransactionOutputBuilder.new()
+    .with_address(address)
+    .next()
+    .with_value(emptyTuple)
+    .build();
+  const built = result.output();
+  assert.equal(Buffer.from(bodyFieldFromOutput(built, 1)).toString("hex"), "1a003d0900");
+  const direct = TransactionOutput.new(address, emptyTuple);
+  assert.equal(Buffer.from(bodyFieldFromOutput(direct, 1)).toString("hex"), "1a003d0900");
+  direct.set_amount(emptyTuple);
+  assert.equal(Buffer.from(bodyFieldFromOutput(direct, 1)).toString("hex"), "1a003d0900");
+
+  const builder = TransactionBuilder.new(config({ fee: LinearFee.new(0n, 200n, 0n) }));
+  builder.add_input(input(99, 4_000_200n).result);
+  builder.add_output(result);
+  const outputs = bodyField(builder.build(ChangeSelectionAlgo.Default, address).body(), 1);
+  assert.equal(outputs?.kind, "array");
+  assert.equal(outputs.values[0]?.kind, "map");
+  const amount = outputs.values[0].entries.find(([keyNode]) => keyNode.kind === "unsigned" && keyNode.value === 1n)?.[1];
+  assert.equal(amount?.kind, "unsigned");
+  assert.equal(amount?.value, 4_000_000n);
 });
 
 test("vkey_test, bootstrap_test, native_script_test, and witness requirements", () => {
@@ -224,33 +257,161 @@ test("mint, burn, native-asset change, and purification retain exact balances", 
 
 test("build_tx_with_certs, withdrawals, proposals, and votes", () => {
   const builder = TransactionBuilder.new(config()); builder.add_input(input(30, 8_000_000n).result); builder.add_output(output(2_000_000n));
-  builder.add_cert(SingleCertificateBuilder.new(Certificate.new(1n, Credential.new_pub_key(paymentHash))).payment_key());
+  builder.add_cert(SingleCertificateBuilder.new(Certificate.new_stake_deregistration(StakeDeregistration.new(Credential.new_pub_key(paymentHash)))).payment_key());
   builder.add_withdrawal(SingleWithdrawalBuilder.new(reward, 1_000n).payment_key());
-  const proposal = ProposalProcedure.from_cbor_bytes(encodeCbor({
-    kind: "array",
-    values: [
-      uintNode(200n),
-      { kind: "bytes", value: reward.to_address().to_raw_bytes(), encoding: { kind: "definite", width: 0 } },
-      { kind: "array", values: [uintNode(6n)], encoding: { kind: "definite", width: 0 } },
-      {
-        kind: "array",
-        values: [
-          { kind: "text", value: "", encoding: { kind: "definite", width: 0 } },
-          { kind: "bytes", value: new Uint8Array(32), encoding: { kind: "definite", width: 0 } },
-        ],
-        encoding: { kind: "definite", width: 0 },
-      },
-    ],
-    encoding: { kind: "definite", width: 0 },
-  })); builder.add_proposal(ProposalBuilder.new().with_proposal(proposal).build());
-  const voter = Voter.new(0n, paymentHash.to_raw_bytes());
-  const action = GovActionId.from_cbor_bytes(encodeCbor({ kind: "array", values: [{ kind: "bytes", value: new Uint8Array(32), encoding: { kind: "definite", width: 0 } }, uintNode(0n)], encoding: { kind: "definite", width: 0 } }));
-  const procedure = VotingProcedure.new(1n, null);
+  const proposal = ProposalProcedure.new(200n, reward, GovAction.new_info_action(), Anchor.new(Url.new(""), AnchorDocHash.from_raw_bytes(new Uint8Array(32))));
+  builder.add_proposal(ProposalBuilder.new().with_proposal(proposal).build());
+  const voter = Voter.new_constitutional_committee_hot_key(paymentHash);
+  const action = GovActionId.new(TransactionHash.from_raw_bytes(new Uint8Array(32)), 0);
+  const procedure = VotingProcedure.new(Vote.Yes, null);
   builder.add_vote(VoteBuilder.new().with_vote(voter, action, procedure).build());
   const signed = builder.build(ChangeSelectionAlgo.Default, address);
   for (const field of [4, 5, 19, 20]) assert.ok(bodyField(signed.body(), field));
   assert.equal(builder.get_deposit(), 200n);
   assert.equal(builder.get_implicit_input().coin(), 1_100n);
+});
+
+function fundedBuilder() {
+  const builder = TransactionBuilder.new(config());
+  builder.add_input(input(70, 8_000_000n).result);
+  builder.add_collateral(input(71, 2_000_000n).result);
+  builder.add_output(output(2_000_000n));
+  return builder;
+}
+
+function builderState(builder) {
+  const draft = builder.build_for_evaluation(ChangeSelectionAlgo.Default, address);
+  return {
+    deposit: builder.get_deposit(),
+    implicit: builder.get_implicit_input().to_cbor_bytes(),
+    body: draft.draft_body().to_cbor_bytes(),
+    transaction: draft.draft_tx().to_cbor_bytes(),
+  };
+}
+
+function proposal(deposit) {
+  return ProposalProcedure.new(deposit, reward, GovAction.new_info_action(), Anchor.new(Url.new(""), AnchorDocHash.from_raw_bytes(new Uint8Array(32))));
+}
+
+test("certificate duplicates fail before changing refunds, body, or witnesses", () => {
+  const builder = fundedBuilder();
+  const certificate = Certificate.new_stake_deregistration(StakeDeregistration.new(Credential.new_pub_key(paymentHash)));
+  const result = SingleCertificateBuilder.new(certificate).payment_key();
+  builder.add_cert(result);
+  const before = builderState(builder);
+  const node = decodeCbor(certificate.to_cbor_bytes());
+  node.encoding = { kind: "indefinite" };
+  node.values[0].encoding = { width: 2 };
+  const equivalent = SingleCertificateBuilder.new(Certificate.from_cbor_bytes(encodeCbor(node))).payment_key();
+  for (const duplicate of [result, equivalent]) {
+    assert.throws(() => builder.add_cert(duplicate), { name: "TypeError", message: "duplicate certificate" });
+    assert.deepEqual(builderState(builder), before);
+  }
+  // Sharing a credential does not make distinct complete certificates equal.
+  builder.add_cert(SingleCertificateBuilder.new(Certificate.new_stake_registration(StakeRegistration.new(Credential.new_pub_key(paymentHash)))).payment_key());
+  // Earlier drafts already allocated change; fund the newly added deposit and fee.
+  builder.add_input(input(72, 2_000_000n).result);
+  const field = bodyField(builder.build_for_evaluation(ChangeSelectionAlgo.Default, address).draft_body(), 4);
+  assert.equal(field.value.values.length, 2);
+  assert.equal(builder.get_implicit_input().coin(), 100n);
+  assert.equal(builder.get_deposit(), 100n);
+});
+
+test("proposal duplicates reject entire batches before deposits or witnesses change", () => {
+  const builder = fundedBuilder();
+  const first = proposal(200n), second = proposal(201n), third = proposal(202n);
+  builder.add_proposal(ProposalBuilder.new().with_proposal(first).build());
+  const before = builderState(builder);
+  const node = decodeCbor(first.to_cbor_bytes());
+  node.encoding = { kind: "indefinite" }; node.values[0].encoding = { width: 8 };
+  const equivalent = ProposalProcedure.from_cbor_bytes(encodeCbor(node));
+  for (const batch of [[first], [equivalent], [second, first], [second, third, second]]) {
+    const proposals = ProposalBuilder.new();
+    for (const value of batch) proposals.with_proposal(value);
+    assert.throws(() => builder.add_proposal(proposals.build()), { name: "TypeError", message: "duplicate proposal" });
+    assert.deepEqual(builderState(builder), before);
+  }
+  builder.add_proposal(ProposalBuilder.new().with_proposal(second).with_proposal(third).build());
+  builder.add_input(input(72, 2_000_000n).result);
+  assert.equal(builder.get_deposit(), 603n);
+  const field = bodyField(builder.build_for_evaluation(ChangeSelectionAlgo.Default, address).draft_body(), 20);
+  assert.deepEqual(field.value.values.map((value) => value.values[0].value), [200n, 201n, 202n]);
+});
+
+function scriptBuilderFixtures() {
+  const script = PlutusScript.from_v1(PlutusV1Script.new(Uint8Array.of(1, 2, 3)));
+  const partial = PartialPlutusWitness.new(PlutusScriptWitness.new_script(script), PlutusData.from_cbor_hex("00"));
+  const signers = requiredSigners(paymentHash);
+  const plainCert = SingleCertificateBuilder.new(Certificate.new_stake_registration(StakeRegistration.new(Credential.new_pub_key(paymentHash)))).payment_key();
+  const scriptCert = SingleCertificateBuilder.new(Certificate.new_stake_deregistration(StakeDeregistration.new(Credential.new_script(script.hash())))).plutus_script(partial, signers);
+  const plainProposal = (deposit) => ProposalBuilder.new().with_proposal(proposal(deposit)).build();
+  const scriptProposal = (deposit) => ProposalBuilder.new().with_plutus_proposal_inline_datum(proposal(deposit), partial, signers).build();
+  return { partial, signers, plainCert, scriptCert, plainProposal, scriptProposal };
+}
+
+function redeemerPointers(list) {
+  return Array.from({ length: list.len() }, (_, index) => {
+    const value = decodeCbor(list.get(index).to_cbor_bytes());
+    return value.values.slice(0, 2).map((field) => field.value);
+  });
+}
+
+test("certificate and proposal redeemers retain positions across non-script entries and copies", () => {
+  const { plainCert, scriptCert, plainProposal, scriptProposal, partial, signers } = scriptBuilderFixtures();
+  const redeemers = RedeemerSetBuilder.new();
+  redeemers.add_cert(plainCert); redeemers.add_cert(scriptCert);
+  redeemers.add_cert(plainCert); redeemers.add_cert(scriptCert);
+  redeemers.add_proposal(plainProposal(200n));
+  redeemers.add_proposal(scriptProposal(201n));
+  redeemers.add_proposal(ProposalBuilder.new().with_proposal(proposal(202n)).with_plutus_proposal_inline_datum(proposal(203n), partial, signers).build());
+  const expected = [[2n, 1n], [2n, 3n], [5n, 1n], [5n, 3n]];
+  assert.deepEqual(redeemerPointers(redeemers.build(true)), expected);
+  for (const [tag, index] of expected) redeemers.update_ex_units(RedeemerWitnessKey.new(Number(tag), index), ExUnits.new(index, index + 10n));
+  const copy = redeemers.copy();
+  for (let index = 0; index < expected.length; index += 1) {
+    assert.deepEqual(copy.build(false).get(index).to_cbor_bytes(), redeemers.build(false).get(index).to_cbor_bytes());
+  }
+  copy.add_cert(plainCert); copy.add_cert(scriptCert);
+  copy.add_proposal(plainProposal(204n)); copy.add_proposal(scriptProposal(205n));
+  assert.deepEqual(redeemerPointers(copy.build(true)), [[2n, 1n], [2n, 3n], [2n, 5n], [5n, 1n], [5n, 3n], [5n, 5n]]);
+  assert.deepEqual(redeemerPointers(redeemers.build(false)), expected);
+  for (let index = 0; index < expected.length; index += 1) {
+    const node = decodeCbor(copy.build(true).get(index < 2 ? index : index + 1).to_cbor_bytes());
+    assert.deepEqual(node.values[3].values.map((value) => value.value), [expected[index][1], expected[index][1] + 10n]);
+  }
+});
+
+test("rejected script-bearing additions leave transaction redeemers and witnesses unchanged", () => {
+  const { plainCert, scriptCert, plainProposal, scriptProposal, partial, signers } = scriptBuilderFixtures();
+  const builder = fundedBuilder();
+  builder.add_cert(plainCert); builder.add_cert(scriptCert);
+  builder.add_proposal(plainProposal(200n)); builder.add_proposal(scriptProposal(201n));
+  const before = builderState(builder);
+  assert.throws(() => builder.add_cert(scriptCert), /duplicate certificate/);
+  assert.deepEqual(builderState(builder), before);
+  const failedBatch = ProposalBuilder.new()
+    .with_plutus_proposal_inline_datum(proposal(202n), partial, signers)
+    .with_proposal(proposal(200n)).build();
+  assert.throws(() => builder.add_proposal(failedBatch), /duplicate proposal/);
+  assert.deepEqual(builderState(builder), before);
+  builder.add_proposal(plainProposal(202n)); builder.add_proposal(scriptProposal(203n));
+  builder.add_input(input(72, 2_000_000n).result);
+  const draft = builder.build_for_evaluation(ChangeSelectionAlgo.Default, address);
+  for (const [tag, index] of [[2, 1n], [5, 1n], [5, 3n]]) draft.set_exunits(RedeemerWitnessKey.new(tag, index), ExUnits.new(1n, 2n));
+  assert.deepEqual(redeemerPointers(draft.build()), [[2n, 1n], [5n, 1n], [5n, 3n]]);
+});
+
+test("witness unions keep scripts and datums unique through repeat merges", () => {
+  const builder = TransactionWitnessSetBuilder.new();
+  const script = PlutusScript.from_v1(PlutusV1Script.new(Uint8Array.of(1, 2, 3)));
+  const datum = PlutusData.from_cbor_hex("1801");
+  builder.add_script(script.to_script()); builder.add_script(script.to_script());
+  builder.add_plutus_datum(datum); builder.add_plutus_datum(datum);
+  const before = builder.build();
+  builder.add_existing(before); builder.add_existing(before);
+  assert.equal(witnessFieldLength(decodeCbor(builder.build().to_cbor_bytes()), 3), 1);
+  assert.equal(witnessFieldLength(decodeCbor(builder.build().to_cbor_bytes()), 4), 1);
+  assert.deepEqual(builder.copy().build().to_cbor_bytes(), before.to_cbor_bytes());
 });
 
 test("test_collateral and build_tx_with_ref_input avoid double counting", () => {
@@ -259,6 +420,23 @@ test("test_collateral and build_tx_with_ref_input avoid double counting", () => 
   const reference = input(42, 1_000_000n); builder.add_reference_input(TransactionUnspentOutput.new(reference.txInput, reference.output));
   const body = builder.build(ChangeSelectionAlgo.Default, address).body();
   assert.ok(bodyField(body, 13)); assert.ok(bodyField(body, 16)); assert.equal(bodyField(body, 17)?.value, 500_000n); assert.ok(bodyField(body, 18));
+});
+
+test("input roles are disjoint in every insertion direction and selection failures roll back", () => {
+  const roles = [
+    (builder, value) => builder.add_input(value.result),
+    (builder, value) => builder.add_utxo(value.result),
+    (builder, value) => builder.add_collateral(value.result),
+    (builder, value) => builder.add_reference_input(TransactionUnspentOutput.new(value.txInput, value.output)),
+  ];
+  for (let first = 0; first < roles.length; first += 1) for (let second = 0; second < roles.length; second += 1) {
+    const builder = TransactionBuilder.new(config()), value = input(70 + first * 4 + second, 2_000_000n);
+    roles[first](builder, value); assert.throws(() => roles[second](builder, value));
+  }
+  const builder = TransactionBuilder.new(config()); builder.add_input(input(90, 1_900_000n).result); builder.add_utxo(input(91, 10n).result); builder.add_output(output(1_900_000n));
+  const before = builder.get_total_input().to_canonical_cbor_hex();
+  assert.throws(() => builder.select_utxos(CoinSelectionStrategyCIP2.LargestFirst));
+  assert.equal(builder.get_total_input().to_canonical_cbor_hex(), before);
 });
 
 test("test_contract and UPLC-valued execution-unit flow", () => {
@@ -279,6 +457,7 @@ test("test_contract and UPLC-valued execution-unit flow", () => {
     .output();
   const builder = TransactionBuilder.new(config());
   builder.add_input(SingleInputBuilder.new(sourceInput, sourceOutput).plutus_script(partial, requiredSigners(paymentHash), datum));
+  builder.add_collateral(input(51, 2_000_000n).result);
   builder.add_output(output(2_000_000n));
   const evaluation = builder.build_for_evaluation(ChangeSelectionAlgo.Default, address);
   assert.ok(bodyField(evaluation.draft_body(), 11)); assert.ok(evaluation.draft_tx().to_cbor_bytes().length > 0);
