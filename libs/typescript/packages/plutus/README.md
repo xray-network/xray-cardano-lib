@@ -1,12 +1,34 @@
 # Cardano Plutus
 
-Typed Plutus Data, UPLC parsing and serialization, budgeted CEK evaluation, script parameter
-application, and raw phase-two transaction valuation for Node.js and modern browsers.
+`@xray-network/xray-cardano-lib-plutus` provides typed Plutus Data, UPLC parsing and serialization,
+budgeted CEK evaluation, script parameter application, and phase-two transaction evaluation.
 
 ## Installation
 
 ```sh
 npm install @xray-network/xray-cardano-lib-plutus
+```
+
+## Requirements
+
+ESM-only, with TypeScript declarations included. Use Node.js 20.19 or newer, or a modern browser
+with `Uint8Array`, `bigint`, and Web Platform APIs. No CommonJS, native addon, or WebAssembly build is shipped.
+
+## Quickstart
+
+Encode and decode a typed datum:
+
+```ts
+import { Data } from "@xray-network/xray-cardano-lib-plutus/data";
+
+const paymentSchema = Data.Object({
+  owner: Data.Bytes({ minLength: 28, maxLength: 28 }),
+  amount: Data.Integer({ minimum: 0 }),
+});
+const payment = { owner: "11".repeat(28), amount: 42n };
+const cbor = Data.to(payment, paymentSchema);
+const decoded = Data.from(cbor, paymentSchema);
+console.log(decoded.amount); // 42n
 ```
 
 ## UPLC
@@ -20,11 +42,10 @@ import {
 
 const program = parseUplcText("(program 1.0.0 (con unit ()))");
 const script = encodeProgramEnvelope(program);
-const result = evaluateProgram(
-  program,
-  [],
-  { cpu: 10_000_000n, memory: 10_000_000n },
-);
+const result = evaluateProgram(program, [], {
+  cpu: 10_000_000n,
+  memory: 10_000_000n,
+});
 ```
 
 The root entry point exports the same UPLC API together with `Data`, `applyParamsToScript`, and
@@ -70,12 +91,33 @@ fail through the package error boundary.
 
 ## Entry points
 
-| Entry point | Domain |
-| --- | --- |
-| `@xray-network/xray-cardano-lib-plutus` | Flat owning APIs plus `data`, `uplc`, and `blueprint` namespaces |
-| `@xray-network/xray-cardano-lib-plutus/data` | Typed Plutus Data schemas and codecs |
-| `@xray-network/xray-cardano-lib-plutus/blueprint` | CIP-57 documents, validators, and schema validation |
-| `@xray-network/xray-cardano-lib-plutus/uplc` | UPLC AST, Flat/text codecs, costs, and CEK evaluation |
+| Entry point                                       | Domain                                                           |
+| ------------------------------------------------- | ---------------------------------------------------------------- |
+| `@xray-network/xray-cardano-lib-plutus`           | Flat owning APIs plus `data`, `uplc`, and `blueprint` namespaces |
+| `@xray-network/xray-cardano-lib-plutus/data`      | Typed Plutus Data schemas and codecs                             |
+| `@xray-network/xray-cardano-lib-plutus/blueprint` | CIP-57 documents, validators, and schema validation              |
+| `@xray-network/xray-cardano-lib-plutus/uplc`      | UPLC AST, Flat/text codecs, costs, and CEK evaluation            |
 
-The package is universal ESM, uses `Uint8Array` and Web Platform APIs, and is distributed under
-the [MIT License](./LICENSE).
+## Evaluation boundaries
+
+Choose budgets and cost models appropriate to the ledger version you target. Generic UPLC
+execution is not transaction validation; resolve inputs and apply the required ledger checks in
+the surrounding application.
+
+## Development
+
+From a repository checkout, run these commands at the repository root:
+
+```sh
+npm --prefix libs/typescript ci
+npm --prefix libs/typescript run check
+```
+
+## Documentation
+
+See the [TypeScript package overview](https://github.com/xray-network/xray-cardano-lib/blob/main/libs/typescript/README.md) and
+[architecture decisions](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/README.md).
+
+## License
+
+MIT. See [LICENSE](./LICENSE).

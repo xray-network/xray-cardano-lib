@@ -12,9 +12,12 @@ decoding for Cardano.
 npm install @xray-network/xray-cardano-lib-chain
 ```
 
-Node.js 20.19 or newer is required.
+## Requirements
 
-## Basic usage
+ESM-only, with TypeScript declarations included. Use Node.js 20.19 or newer, or a modern browser
+with `Uint8Array`, `bigint`, and Web Platform APIs. No CommonJS, native addon, or WebAssembly build is shipped.
+
+## Quickstart
 
 ```ts
 import { Address, NetworkInfo } from "@xray-network/xray-cardano-lib-chain";
@@ -30,32 +33,39 @@ console.log(address.to_hex());
 The root entry point exposes current ledger models, addresses, native scripts, Plutus data,
 transaction builders, hashing, fee calculation, witnesses, and multi-era compatibility types.
 
-## Era entry points
+## Entry points
 
 Import from an era entry point when an application only needs that era's runtime and JSON types.
 
-| Entry point | Contents |
-| --- | --- |
-| `@xray-network/xray-cardano-lib-chain/byron` | Byron encoding, addresses, transactions, witnesses, blocks, and genesis parsing |
-| `@xray-network/xray-cardano-lib-chain/shelley` | Shelley blocks, transactions, certificates, and genesis parsing |
-| `@xray-network/xray-cardano-lib-chain/allegra` | Allegra blocks, validity intervals, and auxiliary data |
-| `@xray-network/xray-cardano-lib-chain/mary` | Mary blocks, transactions, and multi-asset outputs |
-| `@xray-network/xray-cardano-lib-chain/alonzo` | Alonzo blocks, scripts, redeemers, and protocol parameters |
-| `@xray-network/xray-cardano-lib-chain/babbage` | Babbage blocks, reference inputs, inline data, and reference scripts |
-| `@xray-network/xray-cardano-lib-chain/conway` | Conway ledger and governance models |
-| `@xray-network/xray-cardano-lib-chain/multi-era` | Era detection and a common view across all supported eras |
+| Entry point                                      | Contents                                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `@xray-network/xray-cardano-lib-chain`           | Current ledger models, addresses, builders, hashing, and multi-era APIs         |
+| `@xray-network/xray-cardano-lib-chain/byron`     | Byron encoding, addresses, transactions, witnesses, blocks, and genesis parsing |
+| `@xray-network/xray-cardano-lib-chain/shelley`   | Shelley blocks, transactions, certificates, and genesis parsing                 |
+| `@xray-network/xray-cardano-lib-chain/allegra`   | Allegra blocks, validity intervals, and auxiliary data                          |
+| `@xray-network/xray-cardano-lib-chain/mary`      | Mary blocks, transactions, and multi-asset outputs                              |
+| `@xray-network/xray-cardano-lib-chain/alonzo`    | Alonzo blocks, scripts, redeemers, and protocol parameters                      |
+| `@xray-network/xray-cardano-lib-chain/babbage`   | Babbage blocks, reference inputs, inline data, and reference scripts            |
+| `@xray-network/xray-cardano-lib-chain/conway`    | Conway ledger and governance models                                             |
+| `@xray-network/xray-cardano-lib-chain/multi-era` | Era detection and a common view across all supported eras                       |
 
 Conway certificates and governance values should normally be created with their typed factories:
 
 ```ts
+import { Address, RewardAddress } from "@xray-network/xray-cardano-lib-chain";
 import {
   Certificate,
-  Credential,
   StakeDeregistration,
 } from "@xray-network/xray-cardano-lib-chain/conway";
 
+const stakeAddress = Address.from_bech32(
+  "stake1u8pcjgmx7962w6hey5hhsd502araxp26kdtgagakhaqtq8squng76",
+);
+const rewardAddress = RewardAddress.from_address(stakeAddress);
+if (!rewardAddress) throw new Error("Expected a reward address");
+
 const certificate = Certificate.new_stake_deregistration(
-  StakeDeregistration.new(Credential.new_pub_key(stakeKeyHash)),
+  StakeDeregistration.new(rewardAddress.payment()),
 );
 ```
 
@@ -137,7 +147,7 @@ models, schemas, and JSON contracts live under `src/era/shared/`. The runtime va
 fields, discriminators, nested choices, bounds, tagged sets, governance structures, and block
 collection invariants while preserving accepted noncanonical CBOR bytes. Captured CDDL is
 comparison and conformance evidence rather than an automatic emitter. Chain tests live in
-[`test/`](./test/).
+[the package tests](https://github.com/xray-network/xray-cardano-lib/tree/main/libs/typescript/packages/chain/test).
 
 ## Development
 
@@ -152,5 +162,14 @@ npm --prefix libs/typescript run check
 `npm --prefix libs/typescript run check` validates captured input provenance, package boundaries, focused codec and
 historical-vector tests, security checks, and packed ESM consumers.
 
-See [ADR 0002](../../../../docs/adr/typescript/0002-cryptography-dependency-policy.md) for the security policy and
-vulnerability reporting. This package is distributed under the [MIT License](./LICENSE).
+See [ADR 0002](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/src/adr/typescript/0002-cryptography-dependency-policy.md) for the security policy and
+vulnerability reporting.
+
+## Documentation
+
+See the [TypeScript package overview](https://github.com/xray-network/xray-cardano-lib/blob/main/libs/typescript/README.md) and
+[architecture decisions](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/README.md).
+
+## License
+
+MIT. See [LICENSE](./LICENSE).

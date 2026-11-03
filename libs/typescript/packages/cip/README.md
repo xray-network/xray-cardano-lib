@@ -1,7 +1,7 @@
 # Cardano CIP
 
-Application-level implementations of Cardano Improvement Proposals. The package is universal ESM
-for Node.js 20.19 or newer and modern browsers.
+`@xray-network/xray-cardano-lib-cip` provides application-level implementations of Cardano
+Improvement Proposals, with focused entry points for individual proposals.
 
 ## Installation
 
@@ -9,11 +9,34 @@ for Node.js 20.19 or newer and modern browsers.
 npm install @xray-network/xray-cardano-lib-cip
 ```
 
+## Requirements
+
+ESM-only, with TypeScript declarations included. Use Node.js 20.19 or newer, or a modern browser
+with `Uint8Array`, `bigint`, and Web Platform APIs. No CommonJS, native addon, or WebAssembly build is shipped.
+
+## Quickstart
+
+Calculate a wallet checksum from a lowercase hexadecimal 28-byte public-key hash:
+
+```ts
+import { CIP4 } from "@xray-network/xray-cardano-lib-cip/cip4";
+
+const checksum = CIP4.calculateChecksum(
+  "13559f50b21a7229275ea7586e5b5a504c8ed1d9ddf17464c413f0ba",
+);
+console.log(checksum.checksumId); // "XPPX-4012"
+```
+
+## Proposal APIs
+
 Import the proposal-specific entry point:
 
 ```ts
 import { CIP4 } from "@xray-network/xray-cardano-lib-cip/cip4";
-import { CIP8Message, COSESign1Builder } from "@xray-network/xray-cardano-lib-cip/cip8";
+import {
+  CIP8Message,
+  COSESign1Builder,
+} from "@xray-network/xray-cardano-lib-cip/cip8";
 import { AssetFingerprint } from "@xray-network/xray-cardano-lib-cip/cip14";
 import { diagnose_cip21_transaction } from "@xray-network/xray-cardano-lib-cip/cip21";
 import { CIP25Metadata } from "@xray-network/xray-cardano-lib-cip/cip25";
@@ -41,24 +64,51 @@ header and detached-payload workflows.
 The root package exposes every stable implemented proposal as a numerically ordered namespace:
 
 ```ts
-import { cip4, cip8, cip14, cip21, cip25, cip36, cip67, cip68 } from "@xray-network/xray-cardano-lib-cip";
+import {
+  cip4,
+  cip8,
+  cip14,
+  cip21,
+  cip25,
+  cip36,
+  cip67,
+  cip68,
+} from "@xray-network/xray-cardano-lib-cip";
 ```
 
 ## Entry points
 
-| Entry point | Domain |
-| --- | --- |
-| `@xray-network/xray-cardano-lib-cip` | Stable CIP-4, CIP-8, CIP-14, CIP-21, CIP-25, CIP-36, CIP-67, and CIP-68 namespaces |
-| `@xray-network/xray-cardano-lib-cip/cip14` | User-facing asset fingerprints |
-| `@xray-network/xray-cardano-lib-cip/cip21` | Bounded, pure compatibility diagnostics over preserved CBOR |
-| `@xray-network/xray-cardano-lib-cip/cip67` | CRC-8 labelled asset-name codec |
-| `@xray-network/xray-cardano-lib-cip/cip68` | Token-pair relationships and versioned datum metadata |
-| `@xray-network/xray-cardano-lib-cip/cip4` | Wallet checksum image and text identifier |
-| `@xray-network/xray-cardano-lib-cip/cip8` | COSE signing structures, keys, and builders |
-| `@xray-network/xray-cardano-lib-cip/cip25` | NFT metadata and label 721 conversion |
-| `@xray-network/xray-cardano-lib-cip/cip36` | Voting registration and deregistration metadata |
-| `@xray-network/xray-cardano-lib-cip/cip129` | Provisional governance credential/action identifiers |
+| Entry point                                 | Domain                                                                             |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `@xray-network/xray-cardano-lib-cip`        | Stable CIP-4, CIP-8, CIP-14, CIP-21, CIP-25, CIP-36, CIP-67, and CIP-68 namespaces |
+| `@xray-network/xray-cardano-lib-cip/cip14`  | User-facing asset fingerprints                                                     |
+| `@xray-network/xray-cardano-lib-cip/cip21`  | Bounded, pure compatibility diagnostics over preserved CBOR                        |
+| `@xray-network/xray-cardano-lib-cip/cip67`  | CRC-8 labelled asset-name codec                                                    |
+| `@xray-network/xray-cardano-lib-cip/cip68`  | Token-pair relationships and versioned datum metadata                              |
+| `@xray-network/xray-cardano-lib-cip/cip4`   | Wallet checksum image and text identifier                                          |
+| `@xray-network/xray-cardano-lib-cip/cip8`   | COSE signing structures, keys, and builders                                        |
+| `@xray-network/xray-cardano-lib-cip/cip25`  | NFT metadata and label 721 conversion                                              |
+| `@xray-network/xray-cardano-lib-cip/cip36`  | Voting registration and deregistration metadata                                    |
+| `@xray-network/xray-cardano-lib-cip/cip129` | Provisional governance credential/action identifiers                               |
 
 CIP metadata uses the chain package's existing metadata owners; CIP-8 re-exports the existing core
 `Int` and crypto public-key/signature owners by identity. The package uses `Uint8Array` and Web
-Platform APIs and is distributed under the [MIT License](./LICENSE).
+Platform APIs.
+
+## Development
+
+From a repository checkout, run these commands at the repository root:
+
+```sh
+npm --prefix libs/typescript ci
+npm --prefix libs/typescript run check
+```
+
+## Documentation
+
+See the [TypeScript package overview](https://github.com/xray-network/xray-cardano-lib/blob/main/libs/typescript/README.md) and
+[architecture decisions](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/README.md).
+
+## License
+
+MIT. See [LICENSE](./LICENSE).

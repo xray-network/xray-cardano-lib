@@ -5,15 +5,19 @@ Browser-safe foundational types and codecs shared by the XRAY Cardano Lib packag
 collections, numeric primitives, network identifiers, and consistent errors without depending on
 another workspace package.
 
-The package is universal ESM for Node.js 20.19 or newer and modern browsers.
-
 ## Installation
 
 ```sh
 npm install @xray-network/xray-cardano-lib-core
 ```
 
-## Basic usage
+## Requirements
+
+ESM-only, with TypeScript declarations included. Use Node.js 20.19 or newer, or a modern browser
+with `Uint8Array`, `bigint`, and Web Platform APIs. Secure random-byte consumers also require
+`globalThis.crypto.getRandomValues`. No CommonJS, native addon, or WebAssembly build is shipped.
+
+## Quickstart
 
 The root entry point exposes the complete foundational API:
 
@@ -46,16 +50,16 @@ const { prefix, bytes } = decodeBech32(encoded);
 
 ## API domains
 
-| Domain | Main exports | Responsibility |
-| --- | --- | --- |
-| Bytes | `ByteArray`, `SecureRandomSource`, `bytesToHex`, `hexToBytes`, `bytesEqual` | Portable byte types, copying, comparison, conversion, and length checks |
-| CBOR | `CborValue`, `decodeCbor`, `encodeCbor`, `decodeEmbeddedCbor` | Lossless decoding, preserved or canonical encoding, and decoder limits |
-| Collections | `NonEmptyVec`, `NonEmptyMap`, `OrderedMap`, `PairMap` | Explicit non-empty, ordered, structural-key, and duplicate-key semantics |
-| Encoding | `encodeBech32`, `decodeBech32` | Bech32 encoding through the `/bech32` entry point |
-| Errors | `CardanoError`, `CardanoBoundsError`, `DeserializeError`, `CardanoResult` | Stable error codes, paths, offsets, and result helpers |
-| Numbers | `Int`, `BigInteger`, integer bounds, `asInt64`, `asUint64` | Cardano integer ranges and CBOR-aware numeric values |
-| Network | `ProtocolMagic` and network magic constants | Validated protocol magic values and CBOR conversion |
-| Shared conventions | `Cloneable`, `Equatable`, `Comparator`, `cloneValue` | Common contracts used across domain packages |
+| Domain             | Main exports                                                                | Responsibility                                                           |
+| ------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Bytes              | `ByteArray`, `SecureRandomSource`, `bytesToHex`, `hexToBytes`, `bytesEqual` | Portable byte types, copying, comparison, conversion, and length checks  |
+| CBOR               | `CborValue`, `decodeCbor`, `encodeCbor`, `decodeEmbeddedCbor`               | Lossless decoding, preserved or canonical encoding, and decoder limits   |
+| Collections        | `NonEmptyVec`, `NonEmptyMap`, `OrderedMap`, `PairMap`                       | Explicit non-empty, ordered, structural-key, and duplicate-key semantics |
+| Encoding           | `encodeBech32`, `decodeBech32`                                              | Bech32 encoding through the `/bech32` entry point                        |
+| Errors             | `CardanoError`, `CardanoBoundsError`, `DeserializeError`, `CardanoResult`   | Stable error codes, paths, offsets, and result helpers                   |
+| Numbers            | `Int`, `BigInteger`, integer bounds, `asInt64`, `asUint64`                  | Cardano integer ranges and CBOR-aware numeric values                     |
+| Network            | `ProtocolMagic` and network magic constants                                 | Validated protocol magic values and CBOR conversion                      |
+| Shared conventions | `Cloneable`, `Equatable`, `Comparator`, `cloneValue`                        | Common contracts used across domain packages                             |
 
 `decodeCbor` rejects trailing data and supports configurable depth, collection, string, and token
 limits. Decoded values retain wire-level details such as integer head width, definite versus
@@ -68,10 +72,20 @@ Cardano data.
 
 ## Entry points
 
-| Entry point | Contents |
-| --- | --- |
-| `@xray-network/xray-cardano-lib-core` | Bytes, CBOR, collections, errors, numbers, network values, and shared conventions |
-| `@xray-network/xray-cardano-lib-core/bech32` | Bech32 encoder and decoder |
+| Entry point                                  | Contents                                                                          |
+| -------------------------------------------- | --------------------------------------------------------------------------------- |
+| `@xray-network/xray-cardano-lib-core`        | Bytes, CBOR, collections, errors, numbers, network values, and shared conventions |
+| `@xray-network/xray-cardano-lib-core/bech32` | Bech32 encoder and decoder                                                        |
+
+## Security
+
+Decoding untrusted CBOR should use limits appropriate to the surrounding application. Keep the
+default limits or lower them when inputs are expected to be small. Treat malformed encodings and
+range failures as untrusted input errors rather than retryable transport failures.
+
+Please report suspected vulnerabilities according to
+[ADR 0002](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/src/adr/typescript/0002-cryptography-dependency-policy.md). Do not include private keys,
+seed phrases, or production signing material in a report.
 
 ## Source layout
 
@@ -133,15 +147,10 @@ npm --prefix libs/typescript run check
 `npm --prefix libs/typescript run check` validates TypeScript, package boundaries, browser-safe ESM output, tests, security
 rules, and packed-package imports.
 
-## Security
+## Documentation
 
-Decoding untrusted CBOR should use limits appropriate to the surrounding application. Keep the
-default limits or lower them when inputs are expected to be small. Treat malformed encodings and
-range failures as untrusted input errors rather than retryable transport failures.
-
-Please report suspected vulnerabilities according to
-[ADR 0002](../../../../docs/adr/typescript/0002-cryptography-dependency-policy.md). Do not include private keys,
-seed phrases, or production signing material in a report.
+See the [TypeScript package overview](https://github.com/xray-network/xray-cardano-lib/blob/main/libs/typescript/README.md) and
+[architecture decisions](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/README.md).
 
 ## License
 

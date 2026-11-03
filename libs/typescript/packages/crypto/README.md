@@ -1,7 +1,7 @@
-# `@xray-network/xray-cardano-lib-crypto`
+# Cardano Cryptography
 
-Native ESM cryptography and Cardano key types for XRAY Cardano Lib. The package runs locally in Node.js
-and modern browsers.
+`@xray-network/xray-cardano-lib-crypto` provides cryptography and Cardano key types for
+XRAY Cardano Lib. The package runs locally in Node.js and modern browsers.
 
 It provides:
 
@@ -13,16 +13,19 @@ It provides:
 - EMIP-3 password encryption and decryption; and
 - the legacy Daedalus key operations required by Byron compatibility code.
 
-## Install
+## Installation
 
 ```sh
 npm install @xray-network/xray-cardano-lib-crypto
 ```
 
-The package is ESM-only and requires Node.js 20.19 or newer, or a browser/runtime with the Web
-Crypto `getRandomValues` API.
+## Requirements
 
-## Sign and verify
+ESM-only, with TypeScript declarations included. Use Node.js 20.19 or newer, or a modern browser
+with `Uint8Array`, `bigint`, and Web Platform APIs. Key generation also requires
+`globalThis.crypto.getRandomValues`. No CommonJS, native addon, or WebAssembly build is shipped.
+
+## Quickstart
 
 ```ts
 import { PrivateKey } from "@xray-network/xray-cardano-lib-crypto";
@@ -56,8 +59,8 @@ words.
 import { Bip32PrivateKey } from "@xray-network/xray-cardano-lib-crypto";
 
 const entropy = Uint8Array.from([
-  0xdf, 0x9e, 0xd2, 0x5e, 0xd1, 0x46, 0xbf, 0x43,
-  0x33, 0x6a, 0x5d, 0x7c, 0xf7, 0x39, 0x59, 0x94,
+  0xdf, 0x9e, 0xd2, 0x5e, 0xd1, 0x46, 0xbf, 0x43, 0x33, 0x6a, 0x5d, 0x7c, 0xf7,
+  0x39, 0x59, 0x94,
 ]);
 const root = Bip32PrivateKey.from_bip39_entropy(entropy, new Uint8Array());
 const purpose = root.derive(0x8000_0000 + 1852);
@@ -113,7 +116,9 @@ import {
 const toHex = (bytes: Uint8Array): string =>
   [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 
-const password = toHex(new TextEncoder().encode("correct horse battery staple"));
+const password = toHex(
+  new TextEncoder().encode("correct horse battery staple"),
+);
 const salt = toHex(secureRandomBytes(32));
 const nonce = toHex(secureRandomBytes(12));
 const plaintext = toHex(new TextEncoder().encode("wallet secret"));
@@ -127,20 +132,41 @@ if (decrypted !== plaintext) throw new Error("EMIP-3 round trip failed");
 Use a fresh random salt and nonce for every encryption. EMIP-3's fixed KDF parameters are retained
 for format compatibility; they are not a recommendation for a new password-storage design.
 
+## Entry points
+
+| Entry point                             | Contents                                                                |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| `@xray-network/xray-cardano-lib-crypto` | Keys, signatures, hashes, derivation, encryption, and secure randomness |
+
 ## Public API
 
-The supported package entry point is `@xray-network/xray-cardano-lib-crypto`.
-
-| Area | Public values |
-|---|---|
-| Keys | `PrivateKey`, `PublicKey`, `Ed25519Signature`, `Bip32PrivateKey`, `Bip32PublicKey`, `CardanoKeyRole`, `Cip1852Path`, `Cip1852Role`, role-aware text codecs, CIP-1852 derivation helpers |
-| Hashes | `Ed25519KeyHash`, `ScriptHash`, `TransactionHash`, `GenesisDelegateHash`, `GenesisHash`, `AuxiliaryDataHash`, `PoolMetadataHash`, `VRFKeyHash`, `BlockBodyHash`, `BlockHeaderHash`, `DatumHash`, `ScriptDataHash`, `VRFVkey`, `KESVkey`, `NonceHash`, `AnchorDocHash` |
-| Digests | `blake2b160`, `blake2b224`, `blake2b256`, `blake2b512`, `sha3_256` |
-| Randomness | `secureRandomBytes`, `systemSecureRandomSource` |
-| Encryption | `emip3_encrypt_with_password`, `emip3_decrypt_with_password` |
-| Byron compatibility | `LegacyDaedalusPrivateKey`, `legacyPublicKey`, `legacySign` |
+| Area                | Public values                                                                                                                                                                                                                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Keys                | `PrivateKey`, `PublicKey`, `Ed25519Signature`, `Bip32PrivateKey`, `Bip32PublicKey`, `CardanoKeyRole`, `Cip1852Path`, `Cip1852Role`, role-aware text codecs, CIP-1852 derivation helpers                                                                               |
+| Hashes              | `Ed25519KeyHash`, `ScriptHash`, `TransactionHash`, `GenesisDelegateHash`, `GenesisHash`, `AuxiliaryDataHash`, `PoolMetadataHash`, `VRFKeyHash`, `BlockBodyHash`, `BlockHeaderHash`, `DatumHash`, `ScriptDataHash`, `VRFVkey`, `KESVkey`, `NonceHash`, `AnchorDocHash` |
+| Digests             | `blake2b160`, `blake2b224`, `blake2b256`, `blake2b512`, `sha3_256`                                                                                                                                                                                                    |
+| Randomness          | `secureRandomBytes`, `systemSecureRandomSource`                                                                                                                                                                                                                       |
+| Encryption          | `emip3_encrypt_with_password`, `emip3_decrypt_with_password`                                                                                                                                                                                                          |
+| Byron compatibility | `LegacyDaedalusPrivateKey`, `legacyPublicKey`, `legacySign`                                                                                                                                                                                                           |
 
 Internal source folders are not package subpaths. Importing emitted files directly is unsupported.
+
+## Security notes
+
+- JavaScript cannot guarantee secret zeroization. Garbage collection, engine internals,
+  dependency calls, and returned copies may retain bytes after a key is disposed.
+- `dispose()` overwrites buffers owned by key and signature objects as a best effort. It cannot
+  erase copies held elsewhere.
+- Random key generation exclusively uses `globalThis.crypto.getRandomValues` unless an explicit
+  randomness source is supplied. It never falls back to `Math.random`.
+- Authentication failures during EMIP-3 decryption are rejected; callers should not reveal
+  password or ciphertext details in error messages.
+- Cryptographic dependencies are exactly pinned in the workspace lockfile. Dependency pinning and
+  tests are not substitutes for an independent audit.
+
+See the [security and dependency policy](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/src/adr/typescript/0002-cryptography-dependency-policy.md)
+and [cryptography decision](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/src/adr/typescript/0004-cryptography-primitives.md) for the
+current threat model and review status.
 
 ## Source map
 
@@ -169,35 +195,18 @@ src/
     proxy.ts
 ```
 
-| Domain | Responsibility |
-|---|---|
-| `hashes` | Fixed-size byte wrappers and Cardano hash owners |
-| `keys` | Ed25519, extended Ed25519, and Cardano BIP32 key lifecycles |
+| Domain       | Responsibility                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------- |
+| `hashes`     | Fixed-size byte wrappers and Cardano hash owners                                                  |
+| `keys`       | Ed25519, extended Ed25519, and Cardano BIP32 key lifecycles                                       |
 | `primitives` | Noble-library boundaries, byte arithmetic, digests, signatures, KDFs, AEAD, and secure randomness |
-| `encryption` | EMIP-3 wire layout and password-based encryption |
-| `byron` | Internal ABOR, legacy Daedalus, and Byron proxy-certificate compatibility |
-| `index.ts` | Stable public package barrel |
+| `encryption` | EMIP-3 wire layout and password-based encryption                                                  |
+| `byron`      | Internal ABOR, legacy Daedalus, and Byron proxy-certificate compatibility                         |
+| `index.ts`   | Stable public package barrel                                                                      |
 
 `src/hashes/types.ts` is ordinary reviewed source. Hash-size or ownership changes require focused
 vectors, API compatibility review, and direct comparison with captured ledger grammar when
 applicable.
-
-## Security notes
-
-- JavaScript cannot guarantee secret zeroization. Garbage collection, engine internals,
-  dependency calls, and returned copies may retain bytes after a key is disposed.
-- `dispose()` overwrites buffers owned by key and signature objects as a best effort. It cannot
-  erase copies held elsewhere.
-- Random key generation exclusively uses `globalThis.crypto.getRandomValues` unless an explicit
-  randomness source is supplied. It never falls back to `Math.random`.
-- Authentication failures during EMIP-3 decryption are rejected; callers should not reveal
-  password or ciphertext details in error messages.
-- Cryptographic dependencies are exactly pinned in the workspace lockfile. Dependency pinning and
-  tests are not substitutes for an independent audit.
-
-See the [security and dependency policy](../../../../docs/adr/typescript/0002-cryptography-dependency-policy.md)
-and [cryptography decision](../../../../docs/adr/typescript/0004-cryptography-primitives.md) for the
-current threat model and review status.
 
 ## Development
 
@@ -212,6 +221,11 @@ npm --prefix libs/typescript run check
 The complete TypeScript gate checks captured CDDL, TypeScript declarations, browser boundaries,
 published package contents, cryptographic vectors, malformed inputs, mutation probes, and
 installed-consumer behavior.
+
+## Documentation
+
+See the [TypeScript package overview](https://github.com/xray-network/xray-cardano-lib/blob/main/libs/typescript/README.md) and
+[architecture decisions](https://github.com/xray-network/xray-cardano-lib/blob/main/docs/README.md).
 
 ## License
 
