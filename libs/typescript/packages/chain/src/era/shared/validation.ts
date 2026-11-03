@@ -1,9 +1,14 @@
-import type { CborValue } from "@xray-network/xray-cardano-lib-core";
+import { bytesToHex, encodeCbor, type CborValue } from "@xray-network/xray-cardano-lib-core";
 
 export type CborValidator = (node: CborValue, path?: string) => void;
 
 export function invalid(path: string, expected: string): never {
   throw new TypeError(`${path} requires ${expected}`);
+}
+
+/** Semantic key identity: differently encoded heads for the same value collide. */
+function canonicalKey(node: CborValue): string {
+  return bytesToHex(encodeCbor(node, { mode: "canonical" }));
 }
 
 export function unsigned(maximum?: bigint): CborValidator {
@@ -149,13 +154,20 @@ export function mapOf(
   keyValidator: CborValidator,
   valueValidator: CborValidator,
   minimum = 0,
+  uniqueKeys = false,
 ): CborValidator {
   return (node, path = "value") => {
     if (node.kind !== "map" || node.entries.length < minimum) {
       invalid(path, `a map with at least ${minimum} entries`);
     }
+    const seen = new Set<string>();
     node.entries.forEach(([key, value], index) => {
       keyValidator(key, `${path}.key[${index}]`);
+      if (uniqueKeys) {
+        const identity = canonicalKey(key);
+        if (seen.has(identity)) invalid(`${path}.key[${index}]`, "a unique map key");
+        seen.add(identity);
+      }
       valueValidator(value, `${path}.value[${index}]`);
     });
   };
@@ -169,13 +181,20 @@ export interface MapField {
 export function fixedMap(
   fields: Readonly<Record<number, MapField>>,
   allowUnknown = false,
+  uniqueKeys = false,
 ): CborValidator {
   return (node, path = "value") => {
     if (node.kind !== "map") invalid(path, "a CBOR map");
     const present = new Set<number>();
+    const seen = new Set<bigint>();
     node.entries.forEach(([key, value], index) => {
       if (key.kind !== "unsigned" || key.value > BigInt(Number.MAX_SAFE_INTEGER)) {
         invalid(`${path}.key[${index}]`, "an unsigned integer field key");
+      }
+      // Unknown keys count too: a repeated unknown field is as ambiguous as a known one.
+      if (uniqueKeys) {
+        if (seen.has(key.value)) invalid(`${path}.key[${index}]`, "a unique field key");
+        seen.add(key.value);
       }
       const numericKey = Number(key.value);
       const field = fields[numericKey];

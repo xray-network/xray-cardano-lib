@@ -28,4 +28,5 @@ historical mirrors, not active SPECTRE lifecycle records.
 | [0001](src/adr/typescript/0001-lossless-cbor-and-encoding-metadata.md) | Lossless CBOR and encoding metadata | Accepted |
 | [0002](src/adr/typescript/0002-cryptography-dependency-policy.md) | Security, cryptography dependency, and randomness policy | Accepted |
 | [0003](src/adr/typescript/0003-upstream-evidence-and-package-ownership.md) | Upstream evidence and package ownership | Accepted |
+| [0005](src/adr/typescript/0005-conway-duplicate-map-keys.md) | Reject duplicate keys in Conway transaction maps | Proposed |
 | [0004](src/adr/typescript/0004-cryptography-primitives.md) | Cryptography primitive selection | Accepted |

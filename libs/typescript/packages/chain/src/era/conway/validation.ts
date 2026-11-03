@@ -72,8 +72,10 @@ const datumOption = discriminated({
   1: [embeddedCbor(plutusData)],
 });
 
+// Conway transaction maps reject duplicate keys: a repeated key would let two decoders disagree
+// about what was signed. Plutus data and metadata keep lossless duplicate preservation.
 function multiasset(amount: CborValidator, nonempty = false): CborValidator {
-  return mapOf(hash28, mapOf(bytes([0, 32]), amount, 1), nonempty ? 1 : 0);
+  return mapOf(hash28, mapOf(bytes([0, 32]), amount, 1, true), nonempty ? 1 : 0, true);
 }
 
 const value = oneOf(coin, tuple(coin, multiasset(strictlyPositiveCoin)));
@@ -90,7 +92,7 @@ const conwayOutput = fixedMap({
   1: { required: true, validate: value },
   2: { validate: datumOption },
   3: { validate: scriptRef },
-});
+}, false, true);
 const transactionOutput = oneOf(alonzoOutput, conwayOutput);
 
 const relay = discriminated({
@@ -150,8 +152,8 @@ const voter = discriminated({
   4: [hash28],
 });
 const votingProcedure = tuple(unsigned(2n), optional(anchor));
-const govActionVotes = mapOf(govActionId, votingProcedure, 1);
-const votingProcedures = mapOf(voter, govActionVotes, 1);
+const govActionVotes = mapOf(govActionId, votingProcedure, 1, true);
+const votingProcedures = mapOf(voter, govActionVotes, 1, true);
 
 const costModels: CborValidator = (node, path = "cost_models") => {
   if (node.kind !== "map") invalid(path, "a cost-model map");
@@ -262,10 +264,10 @@ const redeemerKey = tuple(unsigned(5n), uint32);
 const redeemerVal = tuple(plutusData, exUnits);
 const redeemers = oneOf(
   arrayOf(redeemer, 1),
-  mapOf(redeemerKey, redeemerVal, 1),
+  mapOf(redeemerKey, redeemerVal, 1, true),
 );
 
-const transactionWitnessSet = fixedMap({
+const transactionWitnessSetFields: Record<number, MapField> = {
   0: { validate: taggedSet(tuple(bytes(32), signature64), true) },
   1: { validate: taggedSet(nativeScript, true) },
   2: { validate: taggedSet(tuple(bytes(32), signature64, bytes(), bytes()), true) },
@@ -274,7 +276,9 @@ const transactionWitnessSet = fixedMap({
   5: { validate: redeemers },
   6: { validate: taggedSet(bytes(), true) },
   7: { validate: taggedSet(bytes(), true) },
-}, true);
+};
+const transactionWitnessSet = fixedMap(transactionWitnessSetFields, true, true);
+const historicalBlockWitnessSet = fixedMap(transactionWitnessSetFields, true);
 
 let metadatum: CborValidator;
 metadatum = (node, path) => oneOf(
@@ -292,16 +296,17 @@ const conwayAux = tagged(259n, fixedMap({
   2: { validate: arrayOf(bytes()) },
   3: { validate: arrayOf(bytes()) },
   4: { validate: arrayOf(bytes()) },
-}, true));
+}, true, true));
 const auxiliaryData = oneOf(metadata, shelleyMaAux, conwayAux);
 
+const withdrawals = mapOf(bytes(), coin, 1, true);
 const transactionBodyFields: Record<number, MapField> = {
   0: { required: true, validate: taggedSet(transactionInput) },
   1: { required: true, validate: arrayOf(transactionOutput) },
   2: { required: true, validate: coin },
   3: { validate: uint64 },
   4: { validate: taggedSet(certificate, true) },
-  5: { validate: mapOf(bytes(), coin, 1) },
+  5: { validate: withdrawals },
   7: { validate: hash32 },
   8: { validate: uint64 },
   9: { validate: mint },
@@ -317,7 +322,7 @@ const transactionBodyFields: Record<number, MapField> = {
   21: { validate: coin },
   22: { validate: strictlyPositiveCoin },
 };
-const transactionBody = fixedMap(transactionBodyFields, true);
+const transactionBody = fixedMap(transactionBodyFields, true, true);
 const historicalBlockTransactionBody = fixedMap({
   ...transactionBodyFields,
   20: { validate: historicalProposalProcedures },
@@ -341,7 +346,7 @@ const header = tuple(headerBody, bytes(448));
 const blockShape = tuple(
   header,
   arrayOf(historicalBlockTransactionBody),
-  arrayOf(transactionWitnessSet),
+  arrayOf(historicalBlockWitnessSet),
   mapOf(uint16, auxiliaryData),
   arrayOf(uint16),
 );
@@ -447,7 +452,7 @@ const classValidators: Readonly<Record<string, CborValidator>> = {
   Voter: voter,
   VotingProcedure: votingProcedure,
   VotingProcedures: votingProcedures,
-  Withdrawals: mapOf(bytes(), coin, 1),
+  Withdrawals: withdrawals,
 };
 
 export function validateConwayModel(name: string, node: CborValue): boolean {

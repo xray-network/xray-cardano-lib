@@ -33,7 +33,8 @@ export const documentationSections = [
           { text: "Lossless CBOR and encoding metadata", link: "/adr/typescript/0001-lossless-cbor-and-encoding-metadata" },
           { text: "Cryptography dependency policy", link: "/adr/typescript/0002-cryptography-dependency-policy" },
           { text: "Upstream evidence and package ownership", link: "/adr/typescript/0003-upstream-evidence-and-package-ownership" },
-          { text: "Cryptography primitives", link: "/adr/typescript/0004-cryptography-primitives" }
+          { text: "Cryptography primitives", link: "/adr/typescript/0004-cryptography-primitives" },
+          { text: "Conway duplicate map keys", link: "/adr/typescript/0005-conway-duplicate-map-keys" }
         ]
       },
       { sectionHeaderText: "Legacy documentation snapshot" },

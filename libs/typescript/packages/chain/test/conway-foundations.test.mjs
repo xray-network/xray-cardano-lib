@@ -359,3 +359,45 @@ test("transactions expose typed defensive parts and preserve noncanonical child 
   assert.equal(focused.Transaction, root.Transaction);
   assert.equal(root.Transaction, aggregate.chain.Transaction);
 });
+
+test("Conway transaction maps reject duplicate keys that decoders could resolve differently", () => {
+  const inputs = "00d9010280", outputs = "0180", fee = "0200";
+  const zero28 = "00".repeat(28), one28 = "01".repeat(28);
+  const body = (count, ...fields) => TransactionBody.from_cbor_hex(`a${count}${fields.join("")}`);
+  assert.equal(body(3, inputs, outputs, fee).to_cbor_hex(), "a300d9010280018002" + "00");
+
+  // Known field repeated, including a second head width for the same key.
+  assert.throws(() => body(4, inputs, outputs, fee, "0201"), /unique field key/);
+  assert.throws(() => body(4, inputs, outputs, fee, "180201"), /unique field key/);
+  assert.throws(() => body(4, inputs, outputs, fee, "0180"), /unique field key/);
+  // Unknown fields stay forward-compatible once, but never repeat.
+  assert.equal(body(4, inputs, outputs, fee, "186300").to_cbor_hex(), `a4${inputs}${outputs}${fee}186300`);
+  assert.throws(() => body(5, inputs, outputs, fee, "186300", "186301"), /unique field key/);
+
+  // Withdrawals: same reward account twice.
+  const withdrawal = (account, amount) => `581de1${account}${amount}`;
+  assert.doesNotThrow(() => body(4, inputs, outputs, fee, `05a2${withdrawal(zero28, "01")}${withdrawal(one28, "02")}`));
+  assert.throws(() => body(4, inputs, outputs, fee, `05a2${withdrawal(zero28, "01")}${withdrawal(zero28, "02")}`), /unique map key/);
+
+  // Output values: the same policy and the same asset name repeated. Outputs are a CDDL choice, so
+  // each rejection is paired with an accepted control that differs only in the repeated key.
+  const output = (assets) => `82581d61${zero28}8201${assets}`;
+  assert.doesNotThrow(() => body(3, inputs, `0181${output(`a2581c${zero28}a14001581c${one28}a14001`)}`, fee));
+  assert.throws(() => body(3, inputs, `0181${output(`a2581c${zero28}a14001581c${zero28}a14001`)}`, fee));
+  assert.doesNotThrow(() => body(3, inputs, `0181${output(`a1581c${zero28}a24001410102`)}`, fee));
+  assert.throws(() => body(3, inputs, `0181${output(`a1581c${zero28}a240014002`)}`, fee));
+  // Post-Alonzo map outputs.
+  assert.doesNotThrow(() => body(3, inputs, `0181a200581d61${zero28}0101`, fee));
+  assert.throws(() => body(3, inputs, `0181a300581d61${zero28}01010102`, fee));
+
+  // Witness sets, alone and inside a transaction.
+  assert.throws(() => TransactionWitnessSet.from_cbor_hex("a2038141000381410" + "1"), /unique field key/);
+  assert.throws(
+    () => Transaction.from_cbor_hex(`84a4${inputs}${outputs}${fee}0201a0f5f6`),
+    /unique field key/,
+  );
+  assert.throws(
+    () => Transaction.from_cbor_hex(`84a3${inputs}${outputs}${fee}a2038141000381410` + "1f5f6"),
+    /unique field key/,
+  );
+});
