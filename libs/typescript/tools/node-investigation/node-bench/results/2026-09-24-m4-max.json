@@ -1,0 +1,3242 @@
+{
+  "metadata": {
+    "date": "2026-09-24T20:55:10.391Z",
+    "sourceCommit": "e099bc937defd92542c436aece929691c3e19f8e",
+    "libraryChanges": "",
+    "platform": "darwin",
+    "release": "25.5.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Max",
+    "logicalCpus": 14,
+    "versions": {
+      "node": "24.18.0",
+      "acorn": "8.16.0",
+      "ada": "3.4.4",
+      "amaro": "1.1.9",
+      "ares": "1.34.6",
+      "brotli": "1.2.0",
+      "cldr": "48.0",
+      "icu": "78.3",
+      "llhttp": "9.4.2",
+      "merve": "1.2.2",
+      "modules": "137",
+      "napi": "10",
+      "nbytes": "0.1.4",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.69.0",
+      "nghttp3": "",
+      "ngtcp2": "",
+      "openssl": "3.5.7",
+      "simdjson": "4.6.4",
+      "simdutf": "6.4.0",
+      "sqlite": "3.53.1",
+      "tz": "2026b",
+      "undici": "7.28.0",
+      "unicode": "17.0",
+      "uv": "1.52.1",
+      "uvwasi": "0.0.23",
+      "v8": "13.6.233.17-node.50",
+      "zlib": "1.3.1-e00f703",
+      "zstd": "1.5.7"
+    },
+    "lockSha256": "0ff76dd141de4e6f97397278560f1ccc2c00ac085a24a67b82dccf3d585154b9",
+    "harnessSha256": "1dcc07afc4dd9046766b9a8ae155811ddbef1a72e43e1093f46c2681592e99e7",
+    "fixtureSha256": "99573f4f4a2ea381b49074842b46502bf507fd7619d8c4c33c17a305eb891cee",
+    "rustSourceSha256": "a7f1156014869499fc62ce8db5721b0392316fa184fa175aa79dc868a66a2813",
+    "rustLockSha256": "edc0850a6b7fb1ffc56fbb25a756e9c1abfe82e262c2d8a140eaaa6f924a9223",
+    "rustBinarySha256": "3ac426973cb46d3940839fa5b1178db75497edc11f2e1bc275c7fa2f3aa3de03",
+    "rustCompiler": "rustc 1.98.1 (48a229cea 2026-09-01), LLVM 22.1.8, aarch64-apple-darwin",
+    "rustFlags": "-C target-cpu=native; release; thin LTO; codegen-units=1",
+    "rounds": 7,
+    "windowMs": 300,
+    "warmupMs": 400,
+    "smoke": false,
+    "blockFixtures": [
+      {
+        "path": "blocks/mainnet/11c08542cf8da1ab1d1686c259dfc922e492c8ae893bccb588059f62717e573a.cbor",
+        "fixturePath": "records/typescript/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/blocks/mainnet/11c08542cf8da1ab1d1686c259dfc922e492c8ae893bccb588059f62717e573a.cbor",
+        "source": "dolos@ea7960a1c2e56c523fec7c4bab75f390ee443514",
+        "eraTag": 5,
+        "era": "alonzo",
+        "storageFormat": "raw-cbor",
+        "storedBytes": 80134,
+        "decodedCborBytes": 80134,
+        "sha256": "685d59f5b3461c4bada700a35244e0e013135dea847bea03eef50b81da250239",
+        "expected": "byte-exact-round-trip",
+        "decodedSha256": "685d59f5b3461c4bada700a35244e0e013135dea847bea03eef50b81da250239"
+      },
+      {
+        "path": "blocks/mainnet/8d4eb9c1e090f3ed4f23ff3690a4ace2fb474cbfec15c420c88d9c3fe8fe3823.cbor",
+        "fixturePath": "records/typescript/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/blocks/mainnet/8d4eb9c1e090f3ed4f23ff3690a4ace2fb474cbfec15c420c88d9c3fe8fe3823.cbor",
+        "source": "dolos@ea7960a1c2e56c523fec7c4bab75f390ee443514",
+        "eraTag": 6,
+        "era": "babbage",
+        "storageFormat": "raw-cbor",
+        "storedBytes": 89342,
+        "decodedCborBytes": 89342,
+        "sha256": "b2e87edcb2748841e2a6d8056ab2434a46cf41f3b3578cf21087196006464d54",
+        "expected": "byte-exact-round-trip",
+        "decodedSha256": "b2e87edcb2748841e2a6d8056ab2434a46cf41f3b3578cf21087196006464d54"
+      },
+      {
+        "path": "blocks/pallas/conway4.block",
+        "fixturePath": "records/typescript/providers/cardano-multiplatform-lib/0001-cardano-multiplatform-lib/artifacts/test-vectors/blocks/pallas/conway4.block",
+        "source": "pallas@a7b5a86",
+        "eraTag": 7,
+        "era": "conway",
+        "storageFormat": "ascii-hex",
+        "storedBytes": 3750,
+        "decodedCborBytes": 1875,
+        "sha256": "b0106388ff177993e865e33cb8bacb8b22e8109150da25feb25f024d36f24df3",
+        "expected": "byte-exact-round-trip",
+        "decodedSha256": "0d2f4ba1c0e91b2f1ab9da0b27428d5792a28acf09056093480d9f2c354d559c"
+      }
+    ],
+    "method": "One process doing timed work at a time. Warm each path, seven alternating JS/Rust windows. Report median throughput. No forced GC. Not per-operation latency percentiles. Rust release build; inputs prepared outside timing."
+  },
+  "results": [
+    {
+      "id": "ed25519_verify",
+      "unit": "checks",
+      "typescript": {
+        "opsPerSecond": 1137.9179739767433,
+        "microsecondsPerOp": 878.7979651162782,
+        "minOpsPerSecond": 1121.3244207860605,
+        "maxOpsPerSecond": 1142.1573684609232,
+        "samples": [
+          {
+            "count": 344,
+            "elapsedMs": 301.18441600000006,
+            "opsPerSecond": 1142.1573684609232
+          },
+          {
+            "count": 344,
+            "elapsedMs": 301.7809579999998,
+            "opsPerSecond": 1139.899622162377
+          },
+          {
+            "count": 344,
+            "elapsedMs": 303.4371249999999,
+            "opsPerSecond": 1133.6780230830361
+          },
+          {
+            "count": 344,
+            "elapsedMs": 302.6062079999997,
+            "opsPerSecond": 1136.7909544010424
+          },
+          {
+            "count": 344,
+            "elapsedMs": 301.7168750000001,
+            "opsPerSecond": 1140.1417305545137
+          },
+          {
+            "count": 344,
+            "elapsedMs": 306.7800840000009,
+            "opsPerSecond": 1121.3244207860605
+          },
+          {
+            "count": 344,
+            "elapsedMs": 302.3064999999997,
+            "opsPerSecond": 1137.9179739767433
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 51759.514488024826,
+        "microsecondsPerOp": 19.320119400102985,
+        "minOpsPerSecond": 51405.79381690686,
+        "maxOpsPerSecond": 52051.1428477385,
+        "samples": [
+          {
+            "count": 15616,
+            "elapsedMs": 300.09225,
+            "opsPerSecond": 52037.331853788295,
+            "output": "01"
+          },
+          {
+            "count": 15424,
+            "elapsedMs": 300.044,
+            "opsPerSecond": 51405.79381690686,
+            "output": "01"
+          },
+          {
+            "count": 15576,
+            "elapsedMs": 300.143,
+            "opsPerSecond": 51895.263257847095,
+            "output": "01"
+          },
+          {
+            "count": 15504,
+            "elapsedMs": 300.10637499999996,
+            "opsPerSecond": 51661.68162872249,
+            "output": "01"
+          },
+          {
+            "count": 15536,
+            "elapsedMs": 300.157375,
+            "opsPerSecond": 51759.514488024826,
+            "output": "01"
+          },
+          {
+            "count": 15456,
+            "elapsedMs": 300.03533300000004,
+            "opsPerSecond": 51513.93286070077,
+            "output": "01"
+          },
+          {
+            "count": 15616,
+            "elapsedMs": 300.01262499999996,
+            "opsPerSecond": 52051.1428477385,
+            "output": "01"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 2.198471112475396
+    },
+    {
+      "id": "ed25519_verify_fresh",
+      "unit": "checks",
+      "typescript": {
+        "opsPerSecond": 1126.2808260360978,
+        "microsecondsPerOp": 887.8780290697673,
+        "minOpsPerSecond": 1104.9187794264774,
+        "maxOpsPerSecond": 1138.8396721447434,
+        "samples": [
+          {
+            "count": 344,
+            "elapsedMs": 302.0618340000001,
+            "opsPerSecond": 1138.8396721447434
+          },
+          {
+            "count": 344,
+            "elapsedMs": 304.9779159999998,
+            "opsPerSecond": 1127.9505234733133
+          },
+          {
+            "count": 344,
+            "elapsedMs": 304.8399159999999,
+            "opsPerSecond": 1128.4611428642438
+          },
+          {
+            "count": 336,
+            "elapsedMs": 301.3111659999995,
+            "opsPerSecond": 1115.1262811149873
+          },
+          {
+            "count": 336,
+            "elapsedMs": 304.0947500000002,
+            "opsPerSecond": 1104.9187794264774
+          },
+          {
+            "count": 336,
+            "elapsedMs": 300.5024169999997,
+            "opsPerSecond": 1118.127445876751
+          },
+          {
+            "count": 344,
+            "elapsedMs": 305.43004199999996,
+            "opsPerSecond": 1126.2808260360978
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 46879.40103751941,
+        "microsecondsPerOp": 21.33133056029579,
+        "minOpsPerSecond": 46650.57221925102,
+        "maxOpsPerSecond": 47221.039492793774,
+        "samples": [
+          {
+            "count": 14072,
+            "elapsedMs": 300.01066599999996,
+            "opsPerSecond": 46904.99903760089,
+            "output": "01"
+          },
+          {
+            "count": 14040,
+            "elapsedMs": 300.13154199999997,
+            "opsPerSecond": 46779.48844177131,
+            "output": "01"
+          },
+          {
+            "count": 14136,
+            "elapsedMs": 300.146208,
+            "opsPerSecond": 47097.0467832797,
+            "output": "01"
+          },
+          {
+            "count": 14064,
+            "elapsedMs": 300.003833,
+            "opsPerSecond": 46879.40103751941,
+            "output": "01"
+          },
+          {
+            "count": 14016,
+            "elapsedMs": 300.179541,
+            "opsPerSecond": 46692.05620512293,
+            "output": "01"
+          },
+          {
+            "count": 14000,
+            "elapsedMs": 300.1035,
+            "opsPerSecond": 46650.57221925102,
+            "output": "01"
+          },
+          {
+            "count": 14168,
+            "elapsedMs": 300.03575,
+            "opsPerSecond": 47221.039492793774,
+            "output": "01"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 2.4025068603898996
+    },
+    {
+      "id": "ed25519_sign",
+      "unit": "signatures",
+      "typescript": {
+        "opsPerSecond": 5635.876993369159,
+        "microsecondsPerOp": 177.43467452830166,
+        "minOpsPerSecond": 5470.886740942455,
+        "maxOpsPerSecond": 5739.337581200425,
+        "samples": [
+          {
+            "count": 1712,
+            "elapsedMs": 300.0751249999994,
+            "opsPerSecond": 5705.23797998919
+          },
+          {
+            "count": 1680,
+            "elapsedMs": 300.05933299999924,
+            "opsPerSecond": 5598.892669670782
+          },
+          {
+            "count": 1648,
+            "elapsedMs": 301.2308750000011,
+            "opsPerSecond": 5470.886740942455
+          },
+          {
+            "count": 1688,
+            "elapsedMs": 300.0119169999998,
+            "opsPerSecond": 5626.443165589322
+          },
+          {
+            "count": 1696,
+            "elapsedMs": 300.92920799999956,
+            "opsPerSecond": 5635.876993369159
+          },
+          {
+            "count": 1704,
+            "elapsedMs": 300.8762079999997,
+            "opsPerSecond": 5663.458773716005
+          },
+          {
+            "count": 1728,
+            "elapsedMs": 301.0800419999996,
+            "opsPerSecond": 5739.337581200425
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 129852.81569965869,
+        "microsecondsPerOp": 7.701026694045175,
+        "minOpsPerSecond": 128773.08299170586,
+        "maxOpsPerSecond": 130802.99481268544,
+        "samples": [
+          {
+            "count": 38824,
+            "elapsedMs": 300.051875,
+            "opsPerSecond": 129390.95947992326,
+            "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+          },
+          {
+            "count": 39240,
+            "elapsedMs": 300.02887499999997,
+            "opsPerSecond": 130787.41171162277,
+            "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+          },
+          {
+            "count": 38640,
+            "elapsedMs": 300.062708,
+            "opsPerSecond": 128773.08299170586,
+            "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+          },
+          {
+            "count": 39248,
+            "elapsedMs": 300.054292,
+            "opsPerSecond": 130802.99481268544,
+            "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+          },
+          {
+            "count": 38960,
+            "elapsedMs": 300.03200000000004,
+            "opsPerSecond": 129852.81569965869,
+            "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+          },
+          {
+            "count": 38960,
+            "elapsedMs": 300.013959,
+            "opsPerSecond": 129860.62425182023,
+            "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+          },
+          {
+            "count": 38936,
+            "elapsedMs": 300.023084,
+            "opsPerSecond": 129776.6807836693,
+            "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 4.340203917029096
+    },
+    {
+      "id": "secp256k1_ecdsa_verify",
+      "unit": "checks",
+      "typescript": {
+        "opsPerSecond": 1063.4369201205218,
+        "microsecondsPerOp": 940.347265624996,
+        "minOpsPerSecond": 1060.0566235208298,
+        "maxOpsPerSecond": 1074.5726382846751,
+        "samples": [
+          {
+            "count": 320,
+            "elapsedMs": 301.59587499999907,
+            "opsPerSecond": 1061.0224692230986
+          },
+          {
+            "count": 320,
+            "elapsedMs": 300.2660840000026,
+            "opsPerSecond": 1065.7214285979674
+          },
+          {
+            "count": 320,
+            "elapsedMs": 300.9111249999987,
+            "opsPerSecond": 1063.4369201205218
+          },
+          {
+            "count": 328,
+            "elapsedMs": 305.2376250000016,
+            "opsPerSecond": 1074.5726382846751
+          },
+          {
+            "count": 328,
+            "elapsedMs": 306.5441659999997,
+            "opsPerSecond": 1069.9926352537414
+          },
+          {
+            "count": 320,
+            "elapsedMs": 301.0631659999999,
+            "opsPerSecond": 1062.8998699894098
+          },
+          {
+            "count": 320,
+            "elapsedMs": 301.87066699999923,
+            "opsPerSecond": 1060.0566235208298
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 28517.993029582834,
+        "microsecondsPerOp": 35.06558119158879,
+        "minOpsPerSecond": 28251.618724469266,
+        "maxOpsPerSecond": 28779.538515569788,
+        "samples": [
+          {
+            "count": 8640,
+            "elapsedMs": 300.213292,
+            "opsPerSecond": 28779.538515569788,
+            "output": "01"
+          },
+          {
+            "count": 8608,
+            "elapsedMs": 300.12825,
+            "opsPerSecond": 28681.072174978533,
+            "output": "01"
+          },
+          {
+            "count": 8560,
+            "elapsedMs": 300.161375,
+            "opsPerSecond": 28517.993029582834,
+            "output": "01"
+          },
+          {
+            "count": 8520,
+            "elapsedMs": 300.238959,
+            "opsPerSecond": 28377.396552324175,
+            "output": "01"
+          },
+          {
+            "count": 8480,
+            "elapsedMs": 300.159792,
+            "opsPerSecond": 28251.618724469266,
+            "output": "01"
+          },
+          {
+            "count": 8568,
+            "elapsedMs": 300.198541,
+            "opsPerSecond": 28541.111397340206,
+            "output": "01"
+          },
+          {
+            "count": 8528,
+            "elapsedMs": 300.18537499999996,
+            "opsPerSecond": 28409.112202751385,
+            "output": "01"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 3.729003366461928
+    },
+    {
+      "id": "secp256k1_schnorr_verify",
+      "unit": "checks",
+      "typescript": {
+        "opsPerSecond": 1067.777561607081,
+        "microsecondsPerOp": 936.5246432926808,
+        "minOpsPerSecond": 1056.9518103663806,
+        "maxOpsPerSecond": 1076.2857138506902,
+        "samples": [
+          {
+            "count": 320,
+            "elapsedMs": 302.7574170000007,
+            "opsPerSecond": 1056.9518103663806
+          },
+          {
+            "count": 328,
+            "elapsedMs": 307.1800829999993,
+            "opsPerSecond": 1067.777561607081
+          },
+          {
+            "count": 320,
+            "elapsedMs": 300.99524999999994,
+            "opsPerSecond": 1063.139700709563
+          },
+          {
+            "count": 328,
+            "elapsedMs": 306.05954100000235,
+            "opsPerSecond": 1071.6868976811197
+          },
+          {
+            "count": 328,
+            "elapsedMs": 306.90929099999994,
+            "opsPerSecond": 1068.7196823898043
+          },
+          {
+            "count": 320,
+            "elapsedMs": 302.03020800000013,
+            "opsPerSecond": 1059.4966712733578
+          },
+          {
+            "count": 328,
+            "elapsedMs": 304.75179200000275,
+            "opsPerSecond": 1076.2857138506902
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 30829.86409928775,
+        "microsecondsPerOp": 32.4360820008643,
+        "minOpsPerSecond": 30555.098452956503,
+        "maxOpsPerSecond": 31099.875788708392,
+        "samples": [
+          {
+            "count": 9280,
+            "elapsedMs": 300.235042,
+            "opsPerSecond": 30909.1168645131,
+            "output": "01"
+          },
+          {
+            "count": 9224,
+            "elapsedMs": 300.082709,
+            "opsPerSecond": 30738.192249524112,
+            "output": "01"
+          },
+          {
+            "count": 9232,
+            "elapsedMs": 300.09425,
+            "opsPerSecond": 30763.668414173215,
+            "output": "01"
+          },
+          {
+            "count": 9256,
+            "elapsedMs": 300.22837499999997,
+            "opsPerSecond": 30829.86409928775,
+            "output": "01"
+          },
+          {
+            "count": 9168,
+            "elapsedMs": 300.048125,
+            "opsPerSecond": 30555.098452956503,
+            "output": "01"
+          },
+          {
+            "count": 9304,
+            "elapsedMs": 300.170041,
+            "opsPerSecond": 30995.764830508182,
+            "output": "01"
+          },
+          {
+            "count": 9336,
+            "elapsedMs": 300.194125,
+            "opsPerSecond": 31099.875788708392,
+            "output": "01"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 3.4634520546970213
+    },
+    {
+      "id": "blake2b256_32",
+      "bytesPerOp": 32,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 451239.29527885997,
+        "microsecondsPerOp": 2.216119053598852,
+        "minOpsPerSecond": 447343.09937770717,
+        "maxOpsPerSecond": 453645.64555179287,
+        "samples": [
+          {
+            "count": 135408,
+            "elapsedMs": 300.0123749999984,
+            "opsPerSecond": 451341.38216798793
+          },
+          {
+            "count": 136096,
+            "elapsedMs": 300.00508400000035,
+            "opsPerSecond": 453645.64555179287
+          },
+          {
+            "count": 135176,
+            "elapsedMs": 300.0038749999985,
+            "opsPerSecond": 450580.84666406614
+          },
+          {
+            "count": 135632,
+            "elapsedMs": 300.00125000000116,
+            "opsPerSecond": 452104.7828967362
+          },
+          {
+            "count": 134208,
+            "elapsedMs": 300.0113339999989,
+            "opsPerSecond": 447343.09937770717
+          },
+          {
+            "count": 135376,
+            "elapsedMs": 300.00933299999815,
+            "opsPerSecond": 451239.29527885997
+          },
+          {
+            "count": 135064,
+            "elapsedMs": 300.0166250000002,
+            "opsPerSecond": 450188.3853936425
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 10016613.556140212,
+        "microsecondsPerOp": 0.09983413999105488,
+        "minOpsPerSecond": 9957393.982797693,
+        "maxOpsPerSecond": 10102816.833258282,
+        "samples": [
+          {
+            "count": 2987224,
+            "elapsedMs": 300.000583,
+            "opsPerSecond": 9957393.982797693,
+            "output": "4634c2a667c173441332fb16ddcd2db6d2172f04edc45b1eebe9a829cb78fb88"
+          },
+          {
+            "count": 3016712,
+            "elapsedMs": 300.000584,
+            "opsPerSecond": 10055687.091595795,
+            "output": "4634c2a667c173441332fb16ddcd2db6d2172f04edc45b1eebe9a829cb78fb88"
+          },
+          {
+            "count": 3013656,
+            "elapsedMs": 300.000084,
+            "opsPerSecond": 10045517.187255187,
+            "output": "4634c2a667c173441332fb16ddcd2db6d2172f04edc45b1eebe9a829cb78fb88"
+          },
+          {
+            "count": 2998640,
+            "elapsedMs": 300.00008299999996,
+            "opsPerSecond": 9995463.90125499,
+            "output": "4634c2a667c173441332fb16ddcd2db6d2172f04edc45b1eebe9a829cb78fb88"
+          },
+          {
+            "count": 3030848,
+            "elapsedMs": 300.000292,
+            "opsPerSecond": 10102816.833258282,
+            "output": "4634c2a667c173441332fb16ddcd2db6d2172f04edc45b1eebe9a829cb78fb88"
+          },
+          {
+            "count": 2998264,
+            "elapsedMs": 300.000625,
+            "opsPerSecond": 9994192.512098933,
+            "output": "4634c2a667c173441332fb16ddcd2db6d2172f04edc45b1eebe9a829cb78fb88"
+          },
+          {
+            "count": 3004992,
+            "elapsedMs": 300.000792,
+            "opsPerSecond": 10016613.556140212,
+            "output": "4634c2a667c173441332fb16ddcd2db6d2172f04edc45b1eebe9a829cb78fb88"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 4.504908697433465
+    },
+    {
+      "id": "blake2b224_32",
+      "bytesPerOp": 32,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 440223.24803799955,
+        "microsecondsPerOp": 2.271574716821137,
+        "minOpsPerSecond": 431109.1029989084,
+        "maxOpsPerSecond": 442827.2567122768,
+        "samples": [
+          {
+            "count": 132600,
+            "elapsedMs": 300.0147919999981,
+            "opsPerSecond": 441978.20752785023
+          },
+          {
+            "count": 132856,
+            "elapsedMs": 300.01766599999974,
+            "opsPerSecond": 442827.2567122768
+          },
+          {
+            "count": 132072,
+            "elapsedMs": 300.0114160000012,
+            "opsPerSecond": 440223.24803799955
+          },
+          {
+            "count": 131176,
+            "elapsedMs": 300.00204099999974,
+            "opsPerSecond": 437250.35857339425
+          },
+          {
+            "count": 131928,
+            "elapsedMs": 300.00562499999796,
+            "opsPerSecond": 439751.7546546032
+          },
+          {
+            "count": 129336,
+            "elapsedMs": 300.0075829999987,
+            "opsPerSecond": 431109.1029989084
+          },
+          {
+            "count": 132232,
+            "elapsedMs": 300.01104200000555,
+            "opsPerSecond": 440757.1105332768
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 9950637.246990362,
+        "microsecondsPerOp": 0.10049607629927991,
+        "minOpsPerSecond": 9855551.42115734,
+        "maxOpsPerSecond": 10027135.536546221,
+        "samples": [
+          {
+            "count": 2968536,
+            "elapsedMs": 300.000417,
+            "opsPerSecond": 9895106.245802317,
+            "output": "168371db017575e7d2099e40258fc2652fed2a0c7f8c013ee8a93050"
+          },
+          {
+            "count": 3008144,
+            "elapsedMs": 300.000333,
+            "opsPerSecond": 10027135.536546221,
+            "output": "168371db017575e7d2099e40258fc2652fed2a0c7f8c013ee8a93050"
+          },
+          {
+            "count": 2985192,
+            "elapsedMs": 300.00008299999996,
+            "opsPerSecond": 9950637.246990362,
+            "output": "168371db017575e7d2099e40258fc2652fed2a0c7f8c013ee8a93050"
+          },
+          {
+            "count": 2995472,
+            "elapsedMs": 300.00029099999995,
+            "opsPerSecond": 9984896.981316596,
+            "output": "168371db017575e7d2099e40258fc2652fed2a0c7f8c013ee8a93050"
+          },
+          {
+            "count": 2984328,
+            "elapsedMs": 300.0005,
+            "opsPerSecond": 9947743.420427633,
+            "output": "168371db017575e7d2099e40258fc2652fed2a0c7f8c013ee8a93050"
+          },
+          {
+            "count": 2956672,
+            "elapsedMs": 300.000667,
+            "opsPerSecond": 9855551.42115734,
+            "output": "168371db017575e7d2099e40258fc2652fed2a0c7f8c013ee8a93050"
+          },
+          {
+            "count": 2987408,
+            "elapsedMs": 300.00045800000004,
+            "opsPerSecond": 9958011.464102497,
+            "output": "168371db017575e7d2099e40258fc2652fed2a0c7f8c013ee8a93050"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 4.424070912354363
+    },
+    {
+      "id": "sha2_256_32",
+      "bytesPerOp": 32,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 1619475.464424734,
+        "microsecondsPerOp": 0.6174838841138093,
+        "minOpsPerSecond": 1597262.0308021524,
+        "maxOpsPerSecond": 1640276.9305640443,
+        "samples": [
+          {
+            "count": 489376,
+            "elapsedMs": 300.00362499999756,
+            "opsPerSecond": 1631233.6225937402
+          },
+          {
+            "count": 492088,
+            "elapsedMs": 300.002999999997,
+            "opsPerSecond": 1640276.9305640443
+          },
+          {
+            "count": 485856,
+            "elapsedMs": 300.00824999999895,
+            "opsPerSecond": 1619475.464424734
+          },
+          {
+            "count": 482632,
+            "elapsedMs": 300.0011250000025,
+            "opsPerSecond": 1608767.3004559432
+          },
+          {
+            "count": 479184,
+            "elapsedMs": 300.00337500000023,
+            "opsPerSecond": 1597262.0308021524
+          },
+          {
+            "count": 483920,
+            "elapsedMs": 300.0027090000003,
+            "opsPerSecond": 1613052.1008061946
+          },
+          {
+            "count": 489128,
+            "elapsedMs": 300.000082999999,
+            "opsPerSecond": 1630426.2155820858
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 7828671.595721869,
+        "microsecondsPerOp": 0.1277355918910265,
+        "minOpsPerSecond": 7779706.33775234,
+        "maxOpsPerSecond": 7964244.526066884,
+        "samples": [
+          {
+            "count": 2387176,
+            "elapsedMs": 300.000125,
+            "opsPerSecond": 7957250.017812492,
+            "output": "349e1858d73bb4749354819417f8c8169e37c15966e836cc2e3554532ae8a72e"
+          },
+          {
+            "count": 2333920,
+            "elapsedMs": 300.00104100000004,
+            "opsPerSecond": 7779706.33775234,
+            "output": "349e1858d73bb4749354819417f8c8169e37c15966e836cc2e3554532ae8a72e"
+          },
+          {
+            "count": 2334040,
+            "elapsedMs": 300.000709,
+            "opsPerSecond": 7780114.946328344,
+            "output": "349e1858d73bb4749354819417f8c8169e37c15966e836cc2e3554532ae8a72e"
+          },
+          {
+            "count": 2348608,
+            "elapsedMs": 300.000833,
+            "opsPerSecond": 7828671.595721869,
+            "output": "349e1858d73bb4749354819417f8c8169e37c15966e836cc2e3554532ae8a72e"
+          },
+          {
+            "count": 2362416,
+            "elapsedMs": 300.00075,
+            "opsPerSecond": 7874700.313249217,
+            "output": "349e1858d73bb4749354819417f8c8169e37c15966e836cc2e3554532ae8a72e"
+          },
+          {
+            "count": 2344240,
+            "elapsedMs": 300.000125,
+            "opsPerSecond": 7814130.0774458,
+            "output": "349e1858d73bb4749354819417f8c8169e37c15966e836cc2e3554532ae8a72e"
+          },
+          {
+            "count": 2389280,
+            "elapsedMs": 300.000834,
+            "opsPerSecond": 7964244.526066884,
+            "output": "349e1858d73bb4749354819417f8c8169e37c15966e836cc2e3554532ae8a72e"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 20.68646570012885
+    },
+    {
+      "id": "sha3_256_32",
+      "bytesPerOp": 32,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 383535.1069185469,
+        "microsecondsPerOp": 2.607323246193404,
+        "minOpsPerSecond": 380446.41174494947,
+        "maxOpsPerSecond": 385069.90824724705,
+        "samples": [
+          {
+            "count": 114552,
+            "elapsedMs": 300.00212499999907,
+            "opsPerSecond": 381837.29531915934
+          },
+          {
+            "count": 114136,
+            "elapsedMs": 300.00545799999963,
+            "opsPerSecond": 380446.41174494947
+          },
+          {
+            "count": 115144,
+            "elapsedMs": 300.0062919999982,
+            "opsPerSecond": 383805.2836571864
+          },
+          {
+            "count": 115216,
+            "elapsedMs": 300.0100839999941,
+            "opsPerSecond": 384040.42445454025
+          },
+          {
+            "count": 114664,
+            "elapsedMs": 300.0083749999976,
+            "opsPerSecond": 382202.66350898007
+          },
+          {
+            "count": 115064,
+            "elapsedMs": 300.00904199999786,
+            "opsPerSecond": 383535.1069185469
+          },
+          {
+            "count": 115528,
+            "elapsedMs": 300.018250000001,
+            "opsPerSecond": 385069.90824724705
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 6239756.526535534,
+        "microsecondsPerOp": 0.16026266341440482,
+        "minOpsPerSecond": 6203825.358972152,
+        "maxOpsPerSecond": 6263612.761446335,
+        "samples": [
+          {
+            "count": 1861824,
+            "elapsedMs": 300.0005,
+            "opsPerSecond": 6206069.656550572,
+            "output": "d4b19cdedcad503c2b78fe90c1005c05d3c51fb818ecc94b15bc113ee2d4b308"
+          },
+          {
+            "count": 1879088,
+            "elapsedMs": 300.000666,
+            "opsPerSecond": 6263612.761446335,
+            "output": "d4b19cdedcad503c2b78fe90c1005c05d3c51fb818ecc94b15bc113ee2d4b308"
+          },
+          {
+            "count": 1872432,
+            "elapsedMs": 300.0005,
+            "opsPerSecond": 6241429.5976173375,
+            "output": "d4b19cdedcad503c2b78fe90c1005c05d3c51fb818ecc94b15bc113ee2d4b308"
+          },
+          {
+            "count": 1871928,
+            "elapsedMs": 300.000167,
+            "opsPerSecond": 6239756.526535534,
+            "output": "d4b19cdedcad503c2b78fe90c1005c05d3c51fb818ecc94b15bc113ee2d4b308"
+          },
+          {
+            "count": 1861152,
+            "elapsedMs": 300.00070800000003,
+            "opsPerSecond": 6203825.358972152,
+            "output": "d4b19cdedcad503c2b78fe90c1005c05d3c51fb818ecc94b15bc113ee2d4b308"
+          },
+          {
+            "count": 1875192,
+            "elapsedMs": 300.000625,
+            "opsPerSecond": 6250626.977860463,
+            "output": "d4b19cdedcad503c2b78fe90c1005c05d3c51fb818ecc94b15bc113ee2d4b308"
+          },
+          {
+            "count": 1864352,
+            "elapsedMs": 300.00075,
+            "opsPerSecond": 6214491.130438841,
+            "output": "d4b19cdedcad503c2b78fe90c1005c05d3c51fb818ecc94b15bc113ee2d4b308"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 6.146635774769485
+    },
+    {
+      "id": "blake2b256_1024",
+      "bytesPerOp": 1024,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 64770.36469161868,
+        "microsecondsPerOp": 15.439159633593983,
+        "minOpsPerSecond": 64371.82231208991,
+        "maxOpsPerSecond": 64929.97861777113,
+        "samples": [
+          {
+            "count": 19480,
+            "elapsedMs": 300.01550000000134,
+            "opsPerSecond": 64929.97861777113
+          },
+          {
+            "count": 19408,
+            "elapsedMs": 300.08520800000406,
+            "opsPerSecond": 64674.96391891378
+          },
+          {
+            "count": 19448,
+            "elapsedMs": 300.1059170000008,
+            "opsPerSecond": 64803.78725754997
+          },
+          {
+            "count": 19432,
+            "elapsedMs": 300.01374999999825,
+            "opsPerSecond": 64770.36469161868
+          },
+          {
+            "count": 19464,
+            "elapsedMs": 300.05495900000096,
+            "opsPerSecond": 64868.11637730653
+          },
+          {
+            "count": 19312,
+            "elapsedMs": 300.00704200000473,
+            "opsPerSecond": 64371.82231208991
+          },
+          {
+            "count": 19336,
+            "elapsedMs": 300.0554170000032,
+            "opsPerSecond": 64441.429497671066
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 1536290.13272889,
+        "microsecondsPerOp": 0.6509187156098662,
+        "minOpsPerSecond": 1501108.326380915,
+        "maxOpsPerSecond": 1549143.6561641614,
+        "samples": [
+          {
+            "count": 464232,
+            "elapsedMs": 300.003167,
+            "opsPerSecond": 1547423.664364183,
+            "output": "a80b6f9b761798ced74aec337c504eaf2c441a219d57c85633cff9d3cccd6000"
+          },
+          {
+            "count": 460888,
+            "elapsedMs": 300.000625,
+            "opsPerSecond": 1536290.13272889,
+            "output": "a80b6f9b761798ced74aec337c504eaf2c441a219d57c85633cff9d3cccd6000"
+          },
+          {
+            "count": 462088,
+            "elapsedMs": 300.001125,
+            "opsPerSecond": 1540287.5572549936,
+            "output": "a80b6f9b761798ced74aec337c504eaf2c441a219d57c85633cff9d3cccd6000"
+          },
+          {
+            "count": 459296,
+            "elapsedMs": 300.00149999999996,
+            "opsPerSecond": 1530979.011771608,
+            "output": "a80b6f9b761798ced74aec337c504eaf2c441a219d57c85633cff9d3cccd6000"
+          },
+          {
+            "count": 460696,
+            "elapsedMs": 300.00495900000004,
+            "opsPerSecond": 1535627.9494033295,
+            "output": "a80b6f9b761798ced74aec337c504eaf2c441a219d57c85633cff9d3cccd6000"
+          },
+          {
+            "count": 464744,
+            "elapsedMs": 300.000583,
+            "opsPerSecond": 1549143.6561641614,
+            "output": "a80b6f9b761798ced74aec337c504eaf2c441a219d57c85633cff9d3cccd6000"
+          },
+          {
+            "count": 450336,
+            "elapsedMs": 300.002333,
+            "opsPerSecond": 1501108.326380915,
+            "output": "a80b6f9b761798ced74aec337c504eaf2c441a219d57c85633cff9d3cccd6000"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 4.216024259465106
+    },
+    {
+      "id": "blake2b224_1024",
+      "bytesPerOp": 1024,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 64459.05080848649,
+        "microsecondsPerOp": 15.513725186104399,
+        "minOpsPerSecond": 64373.67824670256,
+        "maxOpsPerSecond": 64938.06543671728,
+        "samples": [
+          {
+            "count": 19336,
+            "elapsedMs": 300.0474580000009,
+            "opsPerSecond": 64443.138858386665
+          },
+          {
+            "count": 19448,
+            "elapsedMs": 300.09879199999705,
+            "opsPerSecond": 64805.32584083241
+          },
+          {
+            "count": 19488,
+            "elapsedMs": 300.1013329999987,
+            "opsPerSecond": 64938.06543671728
+          },
+          {
+            "count": 19344,
+            "elapsedMs": 300.0975000000035,
+            "opsPerSecond": 64459.05080848649
+          },
+          {
+            "count": 19336,
+            "elapsedMs": 300.10945899999933,
+            "opsPerSecond": 64429.825252525756
+          },
+          {
+            "count": 19344,
+            "elapsedMs": 300.08487500000047,
+            "opsPerSecond": 64461.762692971344
+          },
+          {
+            "count": 19320,
+            "elapsedMs": 300.122666999996,
+            "opsPerSecond": 64373.67824670256
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 1534655.7961881103,
+        "microsecondsPerOp": 0.6516119135534318,
+        "minOpsPerSecond": 1517786.347092082,
+        "maxOpsPerSecond": 1543831.63757863,
+        "samples": [
+          {
+            "count": 460400,
+            "elapsedMs": 300.00212500000004,
+            "opsPerSecond": 1534655.7961881103,
+            "output": "38d9f093aad9c6e34a876294a90b74bdc4e208c8368ac0f78c156a7f"
+          },
+          {
+            "count": 463152,
+            "elapsedMs": 300.001625,
+            "opsPerSecond": 1543831.63757863,
+            "output": "38d9f093aad9c6e34a876294a90b74bdc4e208c8368ac0f78c156a7f"
+          },
+          {
+            "count": 460720,
+            "elapsedMs": 300.003333,
+            "opsPerSecond": 1535716.2715255567,
+            "output": "38d9f093aad9c6e34a876294a90b74bdc4e208c8368ac0f78c156a7f"
+          },
+          {
+            "count": 461568,
+            "elapsedMs": 300.00225,
+            "opsPerSecond": 1538548.4608865434,
+            "output": "38d9f093aad9c6e34a876294a90b74bdc4e208c8368ac0f78c156a7f"
+          },
+          {
+            "count": 457616,
+            "elapsedMs": 300.002,
+            "opsPerSecond": 1525376.4974900167,
+            "output": "38d9f093aad9c6e34a876294a90b74bdc4e208c8368ac0f78c156a7f"
+          },
+          {
+            "count": 458496,
+            "elapsedMs": 300.00512499999996,
+            "opsPerSecond": 1528293.8916460178,
+            "output": "38d9f093aad9c6e34a876294a90b74bdc4e208c8368ac0f78c156a7f"
+          },
+          {
+            "count": 455344,
+            "elapsedMs": 300.005334,
+            "opsPerSecond": 1517786.347092082,
+            "output": "38d9f093aad9c6e34a876294a90b74bdc4e208c8368ac0f78c156a7f"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 4.200228544315577
+    },
+    {
+      "id": "sha2_256_1024",
+      "bytesPerOp": 1024,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 270275.689736306,
+        "microsecondsPerOp": 3.69992580899765,
+        "minOpsPerSecond": 266767.03407443146,
+        "maxOpsPerSecond": 274320.79638676625,
+        "samples": [
+          {
+            "count": 80448,
+            "elapsedMs": 300.02366600000096,
+            "opsPerSecond": 268138.8474201223
+          },
+          {
+            "count": 82304,
+            "elapsedMs": 300.0282919999954,
+            "opsPerSecond": 274320.79638676625
+          },
+          {
+            "count": 80032,
+            "elapsedMs": 300.0070840000044,
+            "opsPerSecond": 266767.03407443146
+          },
+          {
+            "count": 81736,
+            "elapsedMs": 300.02150000000256,
+            "opsPerSecond": 272433.8089103591
+          },
+          {
+            "count": 81248,
+            "elapsedMs": 300.00599999999395,
+            "opsPerSecond": 270821.2502416673
+          },
+          {
+            "count": 81088,
+            "elapsedMs": 300.0195840000015,
+            "opsPerSecond": 270275.689736306
+          },
+          {
+            "count": 80976,
+            "elapsedMs": 300.01591700000426,
+            "opsPerSecond": 269905.67970431666
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 555701.8802211384,
+        "microsecondsPerOp": 1.7995260329190461,
+        "minOpsPerSecond": 547638.9578106909,
+        "maxOpsPerSecond": 562542.8105668516,
+        "samples": [
+          {
+            "count": 166696,
+            "elapsedMs": 300.013708,
+            "opsPerSecond": 555627.9448404404,
+            "output": "db548a477d35e6b7ac3b4421c81517e505b966b6389cd42baf4154124befed3a"
+          },
+          {
+            "count": 166712,
+            "elapsedMs": 300.002584,
+            "opsPerSecond": 555701.8802211384,
+            "output": "db548a477d35e6b7ac3b4421c81517e505b966b6389cd42baf4154124befed3a"
+          },
+          {
+            "count": 168368,
+            "elapsedMs": 300.010375,
+            "opsPerSecond": 561207.2582489855,
+            "output": "db548a477d35e6b7ac3b4421c81517e505b966b6389cd42baf4154124befed3a"
+          },
+          {
+            "count": 167352,
+            "elapsedMs": 300.010166,
+            "opsPerSecond": 557821.097302416,
+            "output": "db548a477d35e6b7ac3b4421c81517e505b966b6389cd42baf4154124befed3a"
+          },
+          {
+            "count": 164296,
+            "elapsedMs": 300.00787499999996,
+            "opsPerSecond": 547638.9578106909,
+            "output": "db548a477d35e6b7ac3b4421c81517e505b966b6389cd42baf4154124befed3a"
+          },
+          {
+            "count": 166496,
+            "elapsedMs": 300.017959,
+            "opsPerSecond": 554953.445303586,
+            "output": "db548a477d35e6b7ac3b4421c81517e505b966b6389cd42baf4154124befed3a"
+          },
+          {
+            "count": 168768,
+            "elapsedMs": 300.00916700000005,
+            "opsPerSecond": 562542.8105668516,
+            "output": "db548a477d35e6b7ac3b4421c81517e505b966b6389cd42baf4154124befed3a"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 48.636813974563374
+    },
+    {
+      "id": "sha3_256_1024",
+      "bytesPerOp": 1024,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 53090.86301547789,
+        "microsecondsPerOp": 18.835632785032413,
+        "minOpsPerSecond": 52813.61008598147,
+        "maxOpsPerSecond": 53272.43087544741,
+        "samples": [
+          {
+            "count": 15904,
+            "elapsedMs": 300.1392500000002,
+            "opsPerSecond": 52988.737727571424
+          },
+          {
+            "count": 15848,
+            "elapsedMs": 300.0741659999985,
+            "opsPerSecond": 52813.61008598147
+          },
+          {
+            "count": 15936,
+            "elapsedMs": 300.08787499999744,
+            "opsPerSecond": 53104.4448230377
+          },
+          {
+            "count": 15984,
+            "elapsedMs": 300.0426249999946,
+            "opsPerSecond": 53272.43087544741
+          },
+          {
+            "count": 15888,
+            "elapsedMs": 300.0264580000003,
+            "opsPerSecond": 52955.32969295656
+          },
+          {
+            "count": 15928,
+            "elapsedMs": 300.01395899999625,
+            "opsPerSecond": 53090.86301547789
+          },
+          {
+            "count": 15968,
+            "elapsedMs": 300.00854199999594,
+            "opsPerSecond": 53225.151169196426
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 891162.0690447807,
+        "microsecondsPerOp": 1.1221303450133158,
+        "minOpsPerSecond": 886045.3323439823,
+        "maxOpsPerSecond": 895434.8990058587,
+        "samples": [
+          {
+            "count": 265816,
+            "elapsedMs": 300.002709,
+            "opsPerSecond": 886045.3323439823,
+            "output": "4451724db99ed211d7c4a1a44b0bdfdedfc0254472da864c01978d654c344902"
+          },
+          {
+            "count": 268632,
+            "elapsedMs": 300.001709,
+            "opsPerSecond": 895434.8990058587,
+            "output": "4451724db99ed211d7c4a1a44b0bdfdedfc0254472da864c01978d654c344902"
+          },
+          {
+            "count": 268016,
+            "elapsedMs": 300.002792,
+            "opsPerSecond": 893378.3522921347,
+            "output": "4451724db99ed211d7c4a1a44b0bdfdedfc0254472da864c01978d654c344902"
+          },
+          {
+            "count": 266896,
+            "elapsedMs": 300.004833,
+            "opsPerSecond": 889639.0012490231,
+            "output": "4451724db99ed211d7c4a1a44b0bdfdedfc0254472da864c01978d654c344902"
+          },
+          {
+            "count": 266152,
+            "elapsedMs": 300.005709,
+            "opsPerSecond": 887156.4507460756,
+            "output": "4451724db99ed211d7c4a1a44b0bdfdedfc0254472da864c01978d654c344902"
+          },
+          {
+            "count": 267752,
+            "elapsedMs": 300.00512499999996,
+            "opsPerSecond": 892491.4199382429,
+            "output": "4451724db99ed211d7c4a1a44b0bdfdedfc0254472da864c01978d654c344902"
+          },
+          {
+            "count": 267352,
+            "elapsedMs": 300.003792,
+            "opsPerSecond": 891162.0690447807,
+            "output": "4451724db99ed211d7c4a1a44b0bdfdedfc0254472da864c01978d654c344902"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 5.957486843261289
+    },
+    {
+      "id": "blake2b256_65536",
+      "bytesPerOp": 65536,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 1034.6710131692419,
+        "microsecondsPerOp": 966.4907852564236,
+        "minOpsPerSecond": 1028.2801766861976,
+        "maxOpsPerSecond": 1037.8668929322835,
+        "samples": [
+          {
+            "count": 312,
+            "elapsedMs": 302.03387500000827,
+            "opsPerSecond": 1032.9967127031412
+          },
+          {
+            "count": 312,
+            "elapsedMs": 302.9317080000037,
+            "opsPerSecond": 1029.9351033929936
+          },
+          {
+            "count": 312,
+            "elapsedMs": 301.5451250000042,
+            "opsPerSecond": 1034.6710131692419
+          },
+          {
+            "count": 312,
+            "elapsedMs": 300.86125000000175,
+            "opsPerSecond": 1037.0228801482351
+          },
+          {
+            "count": 312,
+            "elapsedMs": 303.4192500000063,
+            "opsPerSecond": 1028.2801766861976
+          },
+          {
+            "count": 312,
+            "elapsedMs": 301.0010840000032,
+            "opsPerSecond": 1036.5411175728414
+          },
+          {
+            "count": 312,
+            "elapsedMs": 300.61658400000306,
+            "opsPerSecond": 1037.8668929322835
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 24512.27320527114,
+        "microsecondsPerOp": 40.79588994565217,
+        "minOpsPerSecond": 23993.93817146036,
+        "maxOpsPerSecond": 24636.701474161964,
+        "samples": [
+          {
+            "count": 7392,
+            "elapsedMs": 300.040166,
+            "opsPerSecond": 24636.701474161964,
+            "output": "002a166ad690bf836f91efc751e6e02282c086ecfe4640ea03eb58402b9b6feb"
+          },
+          {
+            "count": 7336,
+            "elapsedMs": 300.028833,
+            "opsPerSecond": 24450.98334932363,
+            "output": "002a166ad690bf836f91efc751e6e02282c086ecfe4640ea03eb58402b9b6feb"
+          },
+          {
+            "count": 7320,
+            "elapsedMs": 300.1005,
+            "opsPerSecond": 24391.82873737298,
+            "output": "002a166ad690bf836f91efc751e6e02282c086ecfe4640ea03eb58402b9b6feb"
+          },
+          {
+            "count": 7200,
+            "elapsedMs": 300.07579200000004,
+            "opsPerSecond": 23993.93817146036,
+            "output": "002a166ad690bf836f91efc751e6e02282c086ecfe4640ea03eb58402b9b6feb"
+          },
+          {
+            "count": 7376,
+            "elapsedMs": 300.00124999999997,
+            "opsPerSecond": 24586.564222649075,
+            "output": "002a166ad690bf836f91efc751e6e02282c086ecfe4640ea03eb58402b9b6feb"
+          },
+          {
+            "count": 7376,
+            "elapsedMs": 300.2335,
+            "opsPerSecond": 24567.544927531406,
+            "output": "002a166ad690bf836f91efc751e6e02282c086ecfe4640ea03eb58402b9b6feb"
+          },
+          {
+            "count": 7360,
+            "elapsedMs": 300.25775,
+            "opsPerSecond": 24512.27320527114,
+            "output": "002a166ad690bf836f91efc751e6e02282c086ecfe4640ea03eb58402b9b6feb"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 4.221032478320882
+    },
+    {
+      "id": "blake2b224_65536",
+      "bytesPerOp": 65536,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 1031.2904632763368,
+        "microsecondsPerOp": 969.6589230768902,
+        "minOpsPerSecond": 1022.1992518615435,
+        "maxOpsPerSecond": 1038.2122573249503,
+        "samples": [
+          {
+            "count": 312,
+            "elapsedMs": 300.5165829999896,
+            "opsPerSecond": 1038.2122573249503
+          },
+          {
+            "count": 312,
+            "elapsedMs": 302.16508299999987,
+            "opsPerSecond": 1032.5481584515182
+          },
+          {
+            "count": 312,
+            "elapsedMs": 302.74783300000126,
+            "opsPerSecond": 1030.560638232541
+          },
+          {
+            "count": 312,
+            "elapsedMs": 305.2242499999993,
+            "opsPerSecond": 1022.1992518615435
+          },
+          {
+            "count": 312,
+            "elapsedMs": 301.2016670000012,
+            "opsPerSecond": 1035.850840759121
+          },
+          {
+            "count": 312,
+            "elapsedMs": 302.5335839999898,
+            "opsPerSecond": 1031.2904632763368
+          },
+          {
+            "count": 312,
+            "elapsedMs": 303.9394170000014,
+            "opsPerSecond": 1026.5203607993976
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 24564.872138924664,
+        "microsecondsPerOp": 40.70853674078091,
+        "minOpsPerSecond": 24390.938116064866,
+        "maxOpsPerSecond": 24743.175074754614,
+        "samples": [
+          {
+            "count": 7408,
+            "elapsedMs": 300.2825,
+            "opsPerSecond": 24670.102320315036,
+            "output": "4ad9fbc982f559a10498a27cce6c87a46e0ba02b89d831e9d5627fcc"
+          },
+          {
+            "count": 7320,
+            "elapsedMs": 300.11145799999997,
+            "opsPerSecond": 24390.938116064866,
+            "output": "4ad9fbc982f559a10498a27cce6c87a46e0ba02b89d831e9d5627fcc"
+          },
+          {
+            "count": 7336,
+            "elapsedMs": 300.28691699999996,
+            "opsPerSecond": 24429.96875551525,
+            "output": "4ad9fbc982f559a10498a27cce6c87a46e0ba02b89d831e9d5627fcc"
+          },
+          {
+            "count": 7376,
+            "elapsedMs": 300.266167,
+            "opsPerSecond": 24564.872138924664,
+            "output": "4ad9fbc982f559a10498a27cce6c87a46e0ba02b89d831e9d5627fcc"
+          },
+          {
+            "count": 7392,
+            "elapsedMs": 300.053792,
+            "opsPerSecond": 24635.582675789014,
+            "output": "4ad9fbc982f559a10498a27cce6c87a46e0ba02b89d831e9d5627fcc"
+          },
+          {
+            "count": 7424,
+            "elapsedMs": 300.04233400000004,
+            "opsPerSecond": 24743.175074754614,
+            "output": "4ad9fbc982f559a10498a27cce6c87a46e0ba02b89d831e9d5627fcc"
+          },
+          {
+            "count": 7328,
+            "elapsedMs": 300.13212500000003,
+            "opsPerSecond": 24415.913491433144,
+            "output": "4ad9fbc982f559a10498a27cce6c87a46e0ba02b89d831e9d5627fcc"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 4.1982325714701725
+    },
+    {
+      "id": "sha2_256_65536",
+      "bytesPerOp": 65536,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 5141.386753815811,
+        "microsecondsPerOp": 194.50005375647427,
+        "minOpsPerSecond": 5095.597759829356,
+        "maxOpsPerSecond": 5182.354084342769,
+        "samples": [
+          {
+            "count": 1544,
+            "elapsedMs": 300.30808299999626,
+            "opsPerSecond": 5141.386753815811
+          },
+          {
+            "count": 1560,
+            "elapsedMs": 301.02150000000256,
+            "opsPerSecond": 5182.354084342769
+          },
+          {
+            "count": 1544,
+            "elapsedMs": 300.17508400000224,
+            "opsPerSecond": 5143.664755333219
+          },
+          {
+            "count": 1536,
+            "elapsedMs": 301.43666599999415,
+            "opsPerSecond": 5095.597759829356
+          },
+          {
+            "count": 1536,
+            "elapsedMs": 300.0535000000091,
+            "opsPerSecond": 5119.087096134368
+          },
+          {
+            "count": 1544,
+            "elapsedMs": 300.03137500000594,
+            "opsPerSecond": 5146.1284673976825
+          },
+          {
+            "count": 1544,
+            "elapsedMs": 300.41737500000454,
+            "opsPerSecond": 5139.5163145939105
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 9370.957287579342,
+        "microsecondsPerOp": 106.71268359375,
+        "minOpsPerSecond": 9311.255322725066,
+        "maxOpsPerSecond": 9420.499565898588,
+        "samples": [
+          {
+            "count": 2816,
+            "elapsedMs": 300.7525,
+            "opsPerSecond": 9363.18068843983,
+            "output": "331626a3b21914fed96995c710a7145fb9a14d51b09a16bc3cf8bfe10d431e3a"
+          },
+          {
+            "count": 2816,
+            "elapsedMs": 300.396667,
+            "opsPerSecond": 9374.271785778503,
+            "output": "331626a3b21914fed96995c710a7145fb9a14d51b09a16bc3cf8bfe10d431e3a"
+          },
+          {
+            "count": 2824,
+            "elapsedMs": 300.158417,
+            "opsPerSecond": 9408.365183375818,
+            "output": "331626a3b21914fed96995c710a7145fb9a14d51b09a16bc3cf8bfe10d431e3a"
+          },
+          {
+            "count": 2800,
+            "elapsedMs": 300.711333,
+            "opsPerSecond": 9311.255322725066,
+            "output": "331626a3b21914fed96995c710a7145fb9a14d51b09a16bc3cf8bfe10d431e3a"
+          },
+          {
+            "count": 2832,
+            "elapsedMs": 300.62100000000004,
+            "opsPerSecond": 9420.499565898588,
+            "output": "331626a3b21914fed96995c710a7145fb9a14d51b09a16bc3cf8bfe10d431e3a"
+          },
+          {
+            "count": 2808,
+            "elapsedMs": 300.902333,
+            "opsPerSecond": 9331.931633776998,
+            "output": "331626a3b21914fed96995c710a7145fb9a14d51b09a16bc3cf8bfe10d431e3a"
+          },
+          {
+            "count": 2816,
+            "elapsedMs": 300.50291699999997,
+            "opsPerSecond": 9370.957287579342,
+            "output": "331626a3b21914fed96995c710a7145fb9a14d51b09a16bc3cf8bfe10d431e3a"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 54.865117789304406
+    },
+    {
+      "id": "sha3_256_65536",
+      "bytesPerOp": 65536,
+      "unit": "hashes",
+      "typescript": {
+        "opsPerSecond": 901.973398416943,
+        "microsecondsPerOp": 1108.6801470587757,
+        "minOpsPerSecond": 892.8133052080535,
+        "maxOpsPerSecond": 904.0234016827244,
+        "samples": [
+          {
+            "count": 272,
+            "elapsedMs": 301.56099999998696,
+            "opsPerSecond": 901.973398416943
+          },
+          {
+            "count": 272,
+            "elapsedMs": 300.87716699999874,
+            "opsPerSecond": 904.0234016827244
+          },
+          {
+            "count": 272,
+            "elapsedMs": 301.04979099999764,
+            "opsPerSecond": 903.5050285087298
+          },
+          {
+            "count": 272,
+            "elapsedMs": 304.65495799999917,
+            "opsPerSecond": 892.8133052080535
+          },
+          {
+            "count": 272,
+            "elapsedMs": 301.0777079999971,
+            "opsPerSecond": 903.4212522967746
+          },
+          {
+            "count": 272,
+            "elapsedMs": 302.4835000000021,
+            "opsPerSecond": 899.2226022245779
+          },
+          {
+            "count": 272,
+            "elapsedMs": 302.26741599998786,
+            "opsPerSecond": 899.8654357107778
+          }
+        ]
+      },
+      "rust": {
+        "opsPerSecond": 15193.144093727708,
+        "microsecondsPerOp": 65.81916118421051,
+        "minOpsPerSecond": 15057.268421626834,
+        "maxOpsPerSecond": 15279.479786419492,
+        "samples": [
+          {
+            "count": 4560,
+            "elapsedMs": 300.13537499999995,
+            "opsPerSecond": 15193.144093727708,
+            "output": "7c21207a50f82301ecbb0446d467a23a0010015d1a92cd182409aedd1f47d9e2"
+          },
+          {
+            "count": 4552,
+            "elapsedMs": 300.20908299999996,
+            "opsPerSecond": 15162.765744832579,
+            "output": "7c21207a50f82301ecbb0446d467a23a0010015d1a92cd182409aedd1f47d9e2"
+          },
+          {
+            "count": 4520,
+            "elapsedMs": 300.18725,
+            "opsPerSecond": 15057.268421626834,
+            "output": "7c21207a50f82301ecbb0446d467a23a0010015d1a92cd182409aedd1f47d9e2"
+          },
+          {
+            "count": 4592,
+            "elapsedMs": 300.533792,
+            "opsPerSecond": 15279.479786419492,
+            "output": "7c21207a50f82301ecbb0446d467a23a0010015d1a92cd182409aedd1f47d9e2"
+          },
+          {
+            "count": 4544,
+            "elapsedMs": 300.01775000000004,
+            "opsPerSecond": 15145.770541909602,
+            "output": "7c21207a50f82301ecbb0446d467a23a0010015d1a92cd182409aedd1f47d9e2"
+          },
+          {
+            "count": 4568,
+            "elapsedMs": 300.122375,
+            "opsPerSecond": 15220.45798817899,
+            "output": "7c21207a50f82301ecbb0446d467a23a0010015d1a92cd182409aedd1f47d9e2"
+          },
+          {
+            "count": 4584,
+            "elapsedMs": 300.220917,
+            "opsPerSecond": 15268.75624059199,
+            "output": "7c21207a50f82301ecbb0446d467a23a0010015d1a92cd182409aedd1f47d9e2"
+          }
+        ]
+      },
+      "typescriptPercentOfRust": 5.936713249427491
+    },
+    {
+      "id": "bls_g1_scalar_mul",
+      "unit": "operations",
+      "note": "Compressed point parse, scalar multiply and compressed output; fixed nontrivial scalar.",
+      "typescript": {
+        "opsPerSecond": 295.0044753408124,
+        "microsecondsPerOp": 3389.7790833332992,
+        "minOpsPerSecond": 293.1932959080612,
+        "maxOpsPerSecond": 295.7950496738806,
+        "samples": [
+          {
+            "count": 96,
+            "elapsedMs": 325.5274159999972,
+            "opsPerSecond": 294.9060364242895
+          },
+          {
+            "count": 96,
+            "elapsedMs": 324.54904199999874,
+            "opsPerSecond": 295.7950496738806
+          },
+          {
+            "count": 96,
+            "elapsedMs": 324.8309159999917,
+            "opsPerSecond": 295.53837172322125
+          },
+          {
+            "count": 96,
+            "elapsedMs": 327.4290420000034,
+            "opsPerSecond": 293.1932959080612
+          },
+          {
+            "count": 96,
+            "elapsedMs": 325.2818330000009,
+            "opsPerSecond": 295.1286861446078
+          },
+          {
+            "count": 96,
+            "elapsedMs": 325.41879199999676,
+            "opsPerSecond": 295.0044753408124
+          },
+          {
+            "count": 96,
+            "elapsedMs": 326.95570799999405,
+            "opsPerSecond": 293.6177520412084
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "bls_miller_loop",
+      "unit": "operations",
+      "note": "Compressed point parse and Miller loop; no final exponentiation.",
+      "typescript": {
+        "opsPerSecond": 143.15753593885,
+        "microsecondsPerOp": 6985.31162499997,
+        "minOpsPerSecond": 142.3598016872171,
+        "maxOpsPerSecond": 143.8073882669575,
+        "samples": [
+          {
+            "count": 48,
+            "elapsedMs": 336.9195420000033,
+            "opsPerSecond": 142.46724815979815
+          },
+          {
+            "count": 48,
+            "elapsedMs": 334.9959999999992,
+            "opsPerSecond": 143.28529295872224
+          },
+          {
+            "count": 48,
+            "elapsedMs": 337.173833000008,
+            "opsPerSecond": 142.3598016872171
+          },
+          {
+            "count": 48,
+            "elapsedMs": 335.2949579999986,
+            "opsPerSecond": 143.15753593885
+          },
+          {
+            "count": 48,
+            "elapsedMs": 333.77979099999357,
+            "opsPerSecond": 143.8073882669575
+          },
+          {
+            "count": 48,
+            "elapsedMs": 336.72708299999067,
+            "opsPerSecond": 142.54867643064318
+          },
+          {
+            "count": 48,
+            "elapsedMs": 334.6774580000056,
+            "opsPerSecond": 143.42167018610257
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "bls_final_verify",
+      "unit": "operations",
+      "note": "Distinct Miller outputs whose final exponentiations agree: e(P,Q)*e(2P,Q)=e(3P,Q).",
+      "typescript": {
+        "opsPerSecond": 215.96180154038808,
+        "microsecondsPerOp": 4630.448500000057,
+        "minOpsPerSecond": 213.90000991515137,
+        "maxOpsPerSecond": 217.39882534945679,
+        "samples": [
+          {
+            "count": 72,
+            "elapsedMs": 336.6058750000084,
+            "opsPerSecond": 213.90000991515137
+          },
+          {
+            "count": 72,
+            "elapsedMs": 332.63929199999257,
+            "opsPerSecond": 216.4506771497145
+          },
+          {
+            "count": 72,
+            "elapsedMs": 331.1885420000035,
+            "opsPerSecond": 217.39882534945679
+          },
+          {
+            "count": 72,
+            "elapsedMs": 333.3922920000041,
+            "opsPerSecond": 215.96180154038808
+          },
+          {
+            "count": 72,
+            "elapsedMs": 334.9990000000107,
+            "opsPerSecond": 214.92601470451464
+          },
+          {
+            "count": 72,
+            "elapsedMs": 332.90887500000827,
+            "opsPerSecond": 216.27539968707117
+          },
+          {
+            "count": 72,
+            "elapsedMs": 334.7939170000027,
+            "opsPerSecond": 215.05767083575603
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cbor_decode_alonzo",
+      "bytesPerOp": 80134,
+      "unit": "blocks",
+      "fixture": "blocks/mainnet/11c08542cf8da1ab1d1686c259dfc922e492c8ae893bccb588059f62717e573a.cbor",
+      "typescript": {
+        "opsPerSecond": 2023.8943862518297,
+        "microsecondsPerOp": 494.0969285714357,
+        "minOpsPerSecond": 2015.7580559870069,
+        "maxOpsPerSecond": 2045.093033157872,
+        "samples": [
+          {
+            "count": 608,
+            "elapsedMs": 301.22091699999874,
+            "opsPerSecond": 2018.4521249565234
+          },
+          {
+            "count": 608,
+            "elapsedMs": 301.6235000000015,
+            "opsPerSecond": 2015.7580559870069
+          },
+          {
+            "count": 616,
+            "elapsedMs": 301.2087909999973,
+            "opsPerSecond": 2045.093033157872
+          },
+          {
+            "count": 616,
+            "elapsedMs": 304.3637080000044,
+            "opsPerSecond": 2023.8943862518297
+          },
+          {
+            "count": 616,
+            "elapsedMs": 302.9607079999987,
+            "opsPerSecond": 2033.2669674115054
+          },
+          {
+            "count": 616,
+            "elapsedMs": 301.98075000000244,
+            "opsPerSecond": 2039.8651238530767
+          },
+          {
+            "count": 608,
+            "elapsedMs": 300.486041000011,
+            "opsPerSecond": 2023.3885007655902
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cbor_encode_alonzo",
+      "bytesPerOp": 80134,
+      "unit": "blocks",
+      "fixture": "blocks/mainnet/11c08542cf8da1ab1d1686c259dfc922e492c8ae893bccb588059f62717e573a.cbor",
+      "note": "Preserved encoding of an already decoded tree.",
+      "typescript": {
+        "opsPerSecond": 1230.993702773139,
+        "microsecondsPerOp": 812.3518404255323,
+        "minOpsPerSecond": 1226.2577424097572,
+        "maxOpsPerSecond": 1242.8610195257368,
+        "samples": [
+          {
+            "count": 376,
+            "elapsedMs": 302.52779200000805,
+            "opsPerSecond": 1242.8610195257368
+          },
+          {
+            "count": 376,
+            "elapsedMs": 306.59799999999814,
+            "opsPerSecond": 1226.3615548699022
+          },
+          {
+            "count": 376,
+            "elapsedMs": 306.0873750000028,
+            "opsPerSecond": 1228.407411445822
+          },
+          {
+            "count": 376,
+            "elapsedMs": 304.8907079999917,
+            "opsPerSecond": 1233.2287935780917
+          },
+          {
+            "count": 376,
+            "elapsedMs": 305.44429200000013,
+            "opsPerSecond": 1230.993702773139
+          },
+          {
+            "count": 376,
+            "elapsedMs": 305.1690830000007,
+            "opsPerSecond": 1232.1038432323735
+          },
+          {
+            "count": 368,
+            "elapsedMs": 300.1000420000055,
+            "opsPerSecond": 1226.2577424097572
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "block_decode_alonzo",
+      "bytesPerOp": 80134,
+      "unit": "blocks",
+      "fixture": "blocks/mainnet/11c08542cf8da1ab1d1686c259dfc922e492c8ae893bccb588059f62717e573a.cbor",
+      "note": "Wire shape validation only; no signatures, scripts or ledger state transition.",
+      "typescript": {
+        "opsPerSecond": 105.85988204066564,
+        "microsecondsPerOp": 9446.449218749876,
+        "minOpsPerSecond": 104.61027587197522,
+        "maxOpsPerSecond": 106.32431689724457,
+        "samples": [
+          {
+            "count": 32,
+            "elapsedMs": 305.2525000000023,
+            "opsPerSecond": 104.83124626333857
+          },
+          {
+            "count": 32,
+            "elapsedMs": 301.0137079999986,
+            "opsPerSecond": 106.30745095502478
+          },
+          {
+            "count": 32,
+            "elapsedMs": 305.89729100000113,
+            "opsPerSecond": 104.61027587197522
+          },
+          {
+            "count": 32,
+            "elapsedMs": 300.9659590000083,
+            "opsPerSecond": 106.32431689724457
+          },
+          {
+            "count": 32,
+            "elapsedMs": 302.3129170000029,
+            "opsPerSecond": 105.8505879191384
+          },
+          {
+            "count": 32,
+            "elapsedMs": 302.28637499999604,
+            "opsPerSecond": 105.85988204066564
+          },
+          {
+            "count": 32,
+            "elapsedMs": 301.0197080000071,
+            "opsPerSecond": 106.30533200835889
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cbor_decode_babbage",
+      "bytesPerOp": 89342,
+      "unit": "blocks",
+      "fixture": "blocks/mainnet/8d4eb9c1e090f3ed4f23ff3690a4ace2fb474cbfec15c420c88d9c3fe8fe3823.cbor",
+      "typescript": {
+        "opsPerSecond": 1771.506263687558,
+        "microsecondsPerOp": 564.4913712686543,
+        "minOpsPerSecond": 1741.3738301690737,
+        "maxOpsPerSecond": 1803.6016519240904,
+        "samples": [
+          {
+            "count": 528,
+            "elapsedMs": 301.9016660000052,
+            "opsPerSecond": 1748.9138334201537
+          },
+          {
+            "count": 536,
+            "elapsedMs": 302.5673749999987,
+            "opsPerSecond": 1771.506263687558
+          },
+          {
+            "count": 528,
+            "elapsedMs": 303.2088749999966,
+            "opsPerSecond": 1741.3738301690737
+          },
+          {
+            "count": 528,
+            "elapsedMs": 301.5879169999971,
+            "opsPerSecond": 1750.7332695958276
+          },
+          {
+            "count": 536,
+            "elapsedMs": 302.31287500000326,
+            "opsPerSecond": 1772.9975939661658
+          },
+          {
+            "count": 536,
+            "elapsedMs": 302.33699999999953,
+            "opsPerSecond": 1772.8561175112568
+          },
+          {
+            "count": 544,
+            "elapsedMs": 301.6187079999945,
+            "opsPerSecond": 1803.6016519240904
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cbor_encode_babbage",
+      "bytesPerOp": 89342,
+      "unit": "blocks",
+      "fixture": "blocks/mainnet/8d4eb9c1e090f3ed4f23ff3690a4ace2fb474cbfec15c420c88d9c3fe8fe3823.cbor",
+      "note": "Preserved encoding of an already decoded tree.",
+      "typescript": {
+        "opsPerSecond": 1140.4272598794437,
+        "microsecondsPerOp": 876.8643430232556,
+        "minOpsPerSecond": 1120.4615582439992,
+        "maxOpsPerSecond": 1148.8249115475774,
+        "samples": [
+          {
+            "count": 344,
+            "elapsedMs": 307.0163339999999,
+            "opsPerSecond": 1120.4615582439992
+          },
+          {
+            "count": 352,
+            "elapsedMs": 306.4000410000008,
+            "opsPerSecond": 1148.8249115475774
+          },
+          {
+            "count": 344,
+            "elapsedMs": 302.63204199999745,
+            "opsPerSecond": 1136.6939129333928
+          },
+          {
+            "count": 344,
+            "elapsedMs": 300.98516599999857,
+            "opsPerSecond": 1142.9134683667487
+          },
+          {
+            "count": 344,
+            "elapsedMs": 301.6413339999999,
+            "opsPerSecond": 1140.4272598794437
+          },
+          {
+            "count": 344,
+            "elapsedMs": 300.7465830000001,
+            "opsPerSecond": 1143.8201444170686
+          },
+          {
+            "count": 344,
+            "elapsedMs": 303.2909170000057,
+            "opsPerSecond": 1134.2245372946447
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "block_decode_babbage",
+      "bytesPerOp": 89342,
+      "unit": "blocks",
+      "fixture": "blocks/mainnet/8d4eb9c1e090f3ed4f23ff3690a4ace2fb474cbfec15c420c88d9c3fe8fe3823.cbor",
+      "note": "Wire shape validation only; no signatures, scripts or ledger state transition.",
+      "typescript": {
+        "opsPerSecond": 208.99616958351646,
+        "microsecondsPerOp": 4784.776687499971,
+        "minOpsPerSecond": 207.69895163727284,
+        "maxOpsPerSecond": 210.48445569335277,
+        "samples": [
+          {
+            "count": 64,
+            "elapsedMs": 306.2257079999981,
+            "opsPerSecond": 208.99616958351646
+          },
+          {
+            "count": 64,
+            "elapsedMs": 304.06045799999265,
+            "opsPerSecond": 210.48445569335277
+          },
+          {
+            "count": 64,
+            "elapsedMs": 304.3634170000005,
+            "opsPerSecond": 210.27494247115743
+          },
+          {
+            "count": 64,
+            "elapsedMs": 306.2346249999973,
+            "opsPerSecond": 208.99008399197368
+          },
+          {
+            "count": 64,
+            "elapsedMs": 305.6709169999958,
+            "opsPerSecond": 209.37549645915732
+          },
+          {
+            "count": 64,
+            "elapsedMs": 308.13829099999566,
+            "opsPerSecond": 207.69895163727284
+          },
+          {
+            "count": 64,
+            "elapsedMs": 307.7092080000002,
+            "opsPerSecond": 207.9885760194734
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cbor_decode_conway",
+      "bytesPerOp": 1875,
+      "unit": "blocks",
+      "fixture": "blocks/pallas/conway4.block",
+      "typescript": {
+        "opsPerSecond": 37806.61736582486,
+        "microsecondsPerOp": 26.450395980253607,
+        "minOpsPerSecond": 37582.28934614664,
+        "maxOpsPerSecond": 38103.43320932405,
+        "samples": [
+          {
+            "count": 11328,
+            "elapsedMs": 300.0664170000091,
+            "opsPerSecond": 37751.64216394018
+          },
+          {
+            "count": 11360,
+            "elapsedMs": 300.1013329999987,
+            "opsPerSecond": 37853.88050908807
+          },
+          {
+            "count": 11288,
+            "elapsedMs": 300.15883400000166,
+            "opsPerSecond": 37606.755895113645
+          },
+          {
+            "count": 11352,
+            "elapsedMs": 300.1145839999954,
+            "opsPerSecond": 37825.55265624871
+          },
+          {
+            "count": 11344,
+            "elapsedMs": 300.0532919999969,
+            "opsPerSecond": 37806.61736582486
+          },
+          {
+            "count": 11280,
+            "elapsedMs": 300.14137499999197,
+            "opsPerSecond": 37582.28934614664
+          },
+          {
+            "count": 11432,
+            "elapsedMs": 300.0254580000037,
+            "opsPerSecond": 38103.43320932405
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cbor_encode_conway",
+      "bytesPerOp": 1875,
+      "unit": "blocks",
+      "fixture": "blocks/pallas/conway4.block",
+      "note": "Preserved encoding of an already decoded tree.",
+      "typescript": {
+        "opsPerSecond": 37219.57943841445,
+        "microsecondsPerOp": 26.867579244269933,
+        "minOpsPerSecond": 37076.21648005826,
+        "maxOpsPerSecond": 37359.491537321104,
+        "samples": [
+          {
+            "count": 11168,
+            "elapsedMs": 300.05712500000664,
+            "opsPerSecond": 37219.57943841445
+          },
+          {
+            "count": 11184,
+            "elapsedMs": 300.0827500000014,
+            "opsPerSecond": 37269.71976896355
+          },
+          {
+            "count": 11144,
+            "elapsedMs": 300.13737499999115,
+            "opsPerSecond": 37129.66437452293
+          },
+          {
+            "count": 11184,
+            "elapsedMs": 300.13904199999524,
+            "opsPerSecond": 37262.729718448885
+          },
+          {
+            "count": 11128,
+            "elapsedMs": 300.02312499999243,
+            "opsPerSecond": 37090.474275942164
+          },
+          {
+            "count": 11128,
+            "elapsedMs": 300.13850000000093,
+            "opsPerSecond": 37076.21648005826
+          },
+          {
+            "count": 11208,
+            "elapsedMs": 300.00408299999253,
+            "opsPerSecond": 37359.491537321104
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "block_decode_conway",
+      "bytesPerOp": 1875,
+      "unit": "blocks",
+      "fixture": "blocks/pallas/conway4.block",
+      "note": "Wire shape validation only; no signatures, scripts or ledger state transition.",
+      "typescript": {
+        "opsPerSecond": 9561.788811993096,
+        "microsecondsPerOp": 104.58294150418034,
+        "minOpsPerSecond": 9416.858071289631,
+        "maxOpsPerSecond": 9617.191072703883,
+        "samples": [
+          {
+            "count": 2888,
+            "elapsedMs": 300.29558299999917,
+            "opsPerSecond": 9617.191072703883
+          },
+          {
+            "count": 2872,
+            "elapsedMs": 300.3622080000059,
+            "opsPerSecond": 9561.788811993096
+          },
+          {
+            "count": 2880,
+            "elapsedMs": 301.178917000012,
+            "opsPerSecond": 9562.422325862488
+          },
+          {
+            "count": 2872,
+            "elapsedMs": 300.3257500000036,
+            "opsPerSecond": 9562.949563931716
+          },
+          {
+            "count": 2832,
+            "elapsedMs": 300.7372500000056,
+            "opsPerSecond": 9416.858071289631
+          },
+          {
+            "count": 2848,
+            "elapsedMs": 300.4773750000022,
+            "opsPerSecond": 9478.251066323975
+          },
+          {
+            "count": 2840,
+            "elapsedMs": 300.14366699999664,
+            "opsPerSecond": 9462.135344671562
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "flat_decode_256_adds",
+      "unit": "programs",
+      "bytesPerOp": 1190,
+      "typescript": {
+        "opsPerSecond": 52083.81489288336,
+        "microsecondsPerOp": 19.199822479528823,
+        "minOpsPerSecond": 51924.31048170794,
+        "maxOpsPerSecond": 52212.43423521534,
+        "samples": [
+          {
+            "count": 15616,
+            "elapsedMs": 300.01079200000095,
+            "opsPerSecond": 52051.46086878085
+          },
+          {
+            "count": 15584,
+            "elapsedMs": 300.1291659999988,
+            "opsPerSecond": 51924.31048170794
+          },
+          {
+            "count": 15632,
+            "elapsedMs": 300.03716600000917,
+            "opsPerSecond": 52100.2121450498
+          },
+          {
+            "count": 15632,
+            "elapsedMs": 300.13162499999453,
+            "opsPerSecond": 52083.81489288336
+          },
+          {
+            "count": 15648,
+            "elapsedMs": 300.23041699999885,
+            "opsPerSecond": 52119.9689104121
+          },
+          {
+            "count": 15600,
+            "elapsedMs": 300.0807910000003,
+            "opsPerSecond": 51985.999996914106
+          },
+          {
+            "count": 15664,
+            "elapsedMs": 300.00516600000265,
+            "opsPerSecond": 52212.43423521534
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "flat_encode_256_adds",
+      "unit": "programs",
+      "bytesPerOp": 1190,
+      "typescript": {
+        "opsPerSecond": 35954.232647239136,
+        "microsecondsPerOp": 27.813137045960243,
+        "minOpsPerSecond": 35503.37258717238,
+        "maxOpsPerSecond": 36047.36052601095,
+        "samples": [
+          {
+            "count": 10672,
+            "elapsedMs": 300.0995830000029,
+            "opsPerSecond": 35561.528920884564
+          },
+          {
+            "count": 10816,
+            "elapsedMs": 300.1806670000078,
+            "opsPerSecond": 36031.63424245346
+          },
+          {
+            "count": 10776,
+            "elapsedMs": 300.2134170000063,
+            "opsPerSecond": 35894.465036516915
+          },
+          {
+            "count": 10792,
+            "elapsedMs": 300.1593750000029,
+            "opsPerSecond": 35954.232647239136
+          },
+          {
+            "count": 10816,
+            "elapsedMs": 300.04970799999137,
+            "opsPerSecond": 36047.36052601095
+          },
+          {
+            "count": 10808,
+            "elapsedMs": 300.2324579999986,
+            "opsPerSecond": 35998.7726576853
+          },
+          {
+            "count": 10656,
+            "elapsedMs": 300.14049999999406,
+            "opsPerSecond": 35503.37258717238
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cek_256_adds",
+      "unit": "scripts",
+      "budget": {
+        "cpu": "42309348",
+        "memory": "103112"
+      },
+      "note": "Default machine costs, semantics A; AST already decoded; includes costing and result discharge.",
+      "typescript": {
+        "opsPerSecond": 10235.362800647179,
+        "microsecondsPerOp": 97.70049381510641,
+        "minOpsPerSecond": 10087.441684057041,
+        "maxOpsPerSecond": 10382.344235295028,
+        "samples": [
+          {
+            "count": 3032,
+            "elapsedMs": 300.5717500000028,
+            "opsPerSecond": 10087.441684057041
+          },
+          {
+            "count": 3088,
+            "elapsedMs": 300.6834999999992,
+            "opsPerSecond": 10269.934998096032
+          },
+          {
+            "count": 3064,
+            "elapsedMs": 300.5442089999997,
+            "opsPerSecond": 10194.839588474664
+          },
+          {
+            "count": 3072,
+            "elapsedMs": 300.1359170000069,
+            "opsPerSecond": 10235.362800647179
+          },
+          {
+            "count": 3056,
+            "elapsedMs": 300.63833400000294,
+            "opsPerSecond": 10165.037702743424
+          },
+          {
+            "count": 3088,
+            "elapsedMs": 300.4485830000049,
+            "opsPerSecond": 10277.964932189245
+          },
+          {
+            "count": 3120,
+            "elapsedMs": 300.51016700000037,
+            "opsPerSecond": 10382.344235295028
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cek_256_tails",
+      "unit": "scripts",
+      "budget": {
+        "cpu": "33209828",
+        "memory": "85192"
+      },
+      "note": "Take every tail of an integer list; default machine costs and semantics A.",
+      "typescript": {
+        "opsPerSecond": 16306.203158445867,
+        "microsecondsPerOp": 61.326354779410785,
+        "minOpsPerSecond": 14696.597676734871,
+        "maxOpsPerSecond": 16557.20139143974,
+        "samples": [
+          {
+            "count": 4896,
+            "elapsedMs": 300.2538329999952,
+            "opsPerSecond": 16306.203158445867
+          },
+          {
+            "count": 4928,
+            "elapsedMs": 300.1412080000009,
+            "opsPerSecond": 16418.938381829877
+          },
+          {
+            "count": 4416,
+            "elapsedMs": 300.47770899999887,
+            "opsPerSecond": 14696.597676734871
+          },
+          {
+            "count": 4824,
+            "elapsedMs": 300.3790420000005,
+            "opsPerSecond": 16059.708985955127
+          },
+          {
+            "count": 4968,
+            "elapsedMs": 300.0507079999952,
+            "opsPerSecond": 16557.20139143974
+          },
+          {
+            "count": 4880,
+            "elapsedMs": 300.05408299999544,
+            "opsPerSecond": 16263.734694788585
+          },
+          {
+            "count": 4928,
+            "elapsedMs": 300.30704200000037,
+            "opsPerSecond": 16409.871600679926
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "cek_4096_tails",
+      "unit": "scripts",
+      "budget": {
+        "cpu": "531115748",
+        "memory": "1360072"
+      },
+      "note": "Take every tail of an integer list; default machine costs and semantics A.",
+      "typescript": {
+        "opsPerSecond": 419.4816452201201,
+        "microsecondsPerOp": 2383.8945312500073,
+        "minOpsPerSecond": 402.2200662249062,
+        "maxOpsPerSecond": 423.2099820501759,
+        "samples": [
+          {
+            "count": 128,
+            "elapsedMs": 318.2337499999994,
+            "opsPerSecond": 402.2200662249062
+          },
+          {
+            "count": 128,
+            "elapsedMs": 308.2931249999965,
+            "opsPerSecond": 415.1892780612654
+          },
+          {
+            "count": 128,
+            "elapsedMs": 311.0541249999951,
+            "opsPerSecond": 411.5039464594852
+          },
+          {
+            "count": 128,
+            "elapsedMs": 305.13850000000093,
+            "opsPerSecond": 419.4816452201201
+          },
+          {
+            "count": 128,
+            "elapsedMs": 303.250457999995,
+            "opsPerSecond": 422.0933443734556
+          },
+          {
+            "count": 128,
+            "elapsedMs": 302.4503330000007,
+            "opsPerSecond": 423.2099820501759
+          },
+          {
+            "count": 128,
+            "elapsedMs": 302.9432499999966,
+            "opsPerSecond": 422.5213798293952
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "context_v1_1_inputs",
+      "unit": "contexts",
+      "note": "Private context owner, decoded inputs; V1/protocol 5; one script input, remaining key inputs; no database lookup.",
+      "typescript": {
+        "opsPerSecond": 142755.07258030426,
+        "microsecondsPerOp": 7.005005019611253,
+        "minOpsPerSecond": 141822.17342554263,
+        "maxOpsPerSecond": 143314.54336354916,
+        "samples": [
+          {
+            "count": 42848,
+            "elapsedMs": 300.0431249999965,
+            "opsPerSecond": 142806.13828428998
+          },
+          {
+            "count": 42856,
+            "elapsedMs": 300.00287499999104,
+            "opsPerSecond": 142851.96433534604
+          },
+          {
+            "count": 42832,
+            "elapsedMs": 300.0383749999892,
+            "opsPerSecond": 142755.07258030426
+          },
+          {
+            "count": 43000,
+            "elapsedMs": 300.0393330000079,
+            "opsPerSecond": 143314.54336354916
+          },
+          {
+            "count": 42552,
+            "elapsedMs": 300.03770899999654,
+            "opsPerSecond": 141822.17342554263
+          },
+          {
+            "count": 42576,
+            "elapsedMs": 300.03912500001024,
+            "opsPerSecond": 141901.49368019437
+          },
+          {
+            "count": 42784,
+            "elapsedMs": 300.00862500001676,
+            "opsPerSecond": 142609.23331786747
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "phase_two_v1_1_inputs",
+      "unit": "transactions",
+      "budget": {
+        "cpu": "209100",
+        "memory": "1100"
+      },
+      "note": "Synthetic one-redeemer unit-returning script with synthetic cost model; includes raw decode, resolution, context and evaluation; not full ledger validation.",
+      "typescript": {
+        "opsPerSecond": 27100.117278412836,
+        "microsecondsPerOp": 36.900209313727615,
+        "minOpsPerSecond": 20698.128977046897,
+        "maxOpsPerSecond": 27746.57759308842,
+        "samples": [
+          {
+            "count": 6216,
+            "elapsedMs": 300.31700000001,
+            "opsPerSecond": 20698.128977046897
+          },
+          {
+            "count": 7600,
+            "elapsedMs": 300.04154200002085,
+            "opsPerSecond": 25329.82582791643
+          },
+          {
+            "count": 8328,
+            "elapsedMs": 300.14512500001,
+            "opsPerSecond": 27746.57759308842
+          },
+          {
+            "count": 7984,
+            "elapsedMs": 300.13783300001523,
+            "opsPerSecond": 26601.111629934352
+          },
+          {
+            "count": 8232,
+            "elapsedMs": 300.0207079999964,
+            "opsPerSecond": 27438.106039000813
+          },
+          {
+            "count": 8192,
+            "elapsedMs": 300.0112080000108,
+            "opsPerSecond": 27305.646527711408
+          },
+          {
+            "count": 8160,
+            "elapsedMs": 301.10570800001733,
+            "opsPerSecond": 27100.117278412836
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "context_v1_16_inputs",
+      "unit": "contexts",
+      "note": "Private context owner, decoded inputs; V1/protocol 5; one script input, remaining key inputs; no database lookup.",
+      "typescript": {
+        "opsPerSecond": 9213.874737240041,
+        "microsecondsPerOp": 108.53197254334974,
+        "minOpsPerSecond": 8982.558403755122,
+        "maxOpsPerSecond": 9270.8566176614,
+        "samples": [
+          {
+            "count": 2696,
+            "elapsedMs": 300.1372080000001,
+            "opsPerSecond": 8982.558403755122
+          },
+          {
+            "count": 2752,
+            "elapsedMs": 300.6409580000036,
+            "opsPerSecond": 9153.776046708736
+          },
+          {
+            "count": 2728,
+            "elapsedMs": 300.230499999976,
+            "opsPerSecond": 9086.351986224643
+          },
+          {
+            "count": 2768,
+            "elapsedMs": 300.4164999999921,
+            "opsPerSecond": 9213.874737240041
+          },
+          {
+            "count": 2776,
+            "elapsedMs": 300.7360000000044,
+            "opsPerSecond": 9230.687380293544
+          },
+          {
+            "count": 2784,
+            "elapsedMs": 300.2958749999816,
+            "opsPerSecond": 9270.8566176614
+          },
+          {
+            "count": 2768,
+            "elapsedMs": 300.080667000002,
+            "opsPerSecond": 9224.18637519218
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "phase_two_v1_16_inputs",
+      "unit": "transactions",
+      "budget": {
+        "cpu": "209100",
+        "memory": "1100"
+      },
+      "note": "Synthetic one-redeemer unit-returning script with synthetic cost model; includes raw decode, resolution, context and evaluation; not full ledger validation.",
+      "typescript": {
+        "opsPerSecond": 3836.1744773006244,
+        "microsecondsPerOp": 260.676360243047,
+        "minOpsPerSecond": 3822.904189097577,
+        "maxOpsPerSecond": 3881.49100777516,
+        "samples": [
+          {
+            "count": 1160,
+            "elapsedMs": 300.3742500000226,
+            "opsPerSecond": 3861.849010026368
+          },
+          {
+            "count": 1152,
+            "elapsedMs": 300.8586249999935,
+            "opsPerSecond": 3829.0409656695897
+          },
+          {
+            "count": 1168,
+            "elapsedMs": 300.97641699999804,
+            "opsPerSecond": 3880.70271964201
+          },
+          {
+            "count": 1152,
+            "elapsedMs": 300.2991669999901,
+            "opsPerSecond": 3836.1744773006244
+          },
+          {
+            "count": 1152,
+            "elapsedMs": 300.7113749999844,
+            "opsPerSecond": 3830.915940576108
+          },
+          {
+            "count": 1152,
+            "elapsedMs": 301.34158300000126,
+            "opsPerSecond": 3822.904189097577
+          },
+          {
+            "count": 1168,
+            "elapsedMs": 300.9152919999906,
+            "opsPerSecond": 3881.49100777516
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "witness_discovery_16_inputs",
+      "unit": "transactions",
+      "note": "Modern map-form resolved outputs; requirements discovery, no signature or full phase-one validation.",
+      "typescript": {
+        "opsPerSecond": 2084.517219001181,
+        "microsecondsPerOp": 479.7273876582132,
+        "minOpsPerSecond": 1984.1051156666738,
+        "maxOpsPerSecond": 2114.2417305068384,
+        "samples": [
+          {
+            "count": 632,
+            "elapsedMs": 305.3194169999915,
+            "opsPerSecond": 2069.963339409945
+          },
+          {
+            "count": 640,
+            "elapsedMs": 302.70900000000256,
+            "opsPerSecond": 2114.2417305068384
+          },
+          {
+            "count": 632,
+            "elapsedMs": 300.27658299999894,
+            "opsPerSecond": 2104.726228351953
+          },
+          {
+            "count": 608,
+            "elapsedMs": 302.87691600000835,
+            "opsPerSecond": 2007.4161082648611
+          },
+          {
+            "count": 632,
+            "elapsedMs": 301.71054200001527,
+            "opsPerSecond": 2094.722961320881
+          },
+          {
+            "count": 600,
+            "elapsedMs": 302.40333300002385,
+            "opsPerSecond": 1984.1051156666738
+          },
+          {
+            "count": 632,
+            "elapsedMs": 303.1877089999907,
+            "opsPerSecond": 2084.517219001181
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "linear_fee_16_inputs",
+      "unit": "transactions",
+      "note": "Includes serialization; excludes execution and reference-script fees.",
+      "typescript": {
+        "opsPerSecond": 214990.61025910327,
+        "microsecondsPerOp": 4.651365930794912,
+        "minOpsPerSecond": 213808.4335567368,
+        "maxOpsPerSecond": 216864.39805232693,
+        "samples": [
+          {
+            "count": 64224,
+            "elapsedMs": 300.0103340000205,
+            "opsPerSecond": 214072.62591159812
+          },
+          {
+            "count": 64392,
+            "elapsedMs": 300.0237500000221,
+            "opsPerSecond": 214623.00901177074
+          },
+          {
+            "count": 64704,
+            "elapsedMs": 300.003040999989,
+            "opsPerSecond": 215677.81374590256
+          },
+          {
+            "count": 65064,
+            "elapsedMs": 300.0215829999943,
+            "opsPerSecond": 216864.39805232693
+          },
+          {
+            "count": 64504,
+            "elapsedMs": 300.031707999995,
+            "opsPerSecond": 214990.61025910327
+          },
+          {
+            "count": 64144,
+            "elapsedMs": 300.00687499999185,
+            "opsPerSecond": 213808.4335567368
+          },
+          {
+            "count": 64832,
+            "elapsedMs": 300.01654199999757,
+            "opsPerSecond": 216094.75120208712
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "min_utxo_ada",
+      "unit": "outputs",
+      "typescript": {
+        "opsPerSecond": 492039.73335512955,
+        "microsecondsPerOp": 2.032356194450358,
+        "minOpsPerSecond": 489883.8083591481,
+        "maxOpsPerSecond": 496116.24543609837,
+        "samples": [
+          {
+            "count": 148840,
+            "elapsedMs": 300.0103330000129,
+            "opsPerSecond": 496116.24543609837
+          },
+          {
+            "count": 146968,
+            "elapsedMs": 300.0058330000029,
+            "opsPerSecond": 489883.8083591481
+          },
+          {
+            "count": 148056,
+            "elapsedMs": 300.01337499998044,
+            "opsPerSecond": 493497.9982142784
+          },
+          {
+            "count": 147704,
+            "elapsedMs": 301.13508300000103,
+            "opsPerSecond": 490490.84061719733
+          },
+          {
+            "count": 148608,
+            "elapsedMs": 300.00479200002155,
+            "opsPerSecond": 495352.0875759522
+          },
+          {
+            "count": 147136,
+            "elapsedMs": 300.00062499998603,
+            "opsPerSecond": 490452.3115577071
+          },
+          {
+            "count": 147616,
+            "elapsedMs": 300.00829199998407,
+            "opsPerSecond": 492039.73335512955
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "context_v1_64_inputs",
+      "unit": "contexts",
+      "note": "Private context owner, decoded inputs; V1/protocol 5; one script input, remaining key inputs; no database lookup.",
+      "typescript": {
+        "opsPerSecond": 834.0285824918387,
+        "microsecondsPerOp": 1198.9996757812378,
+        "minOpsPerSecond": 831.3157068403398,
+        "maxOpsPerSecond": 837.9845979412803,
+        "samples": [
+          {
+            "count": 256,
+            "elapsedMs": 305.62066700001014,
+            "opsPerSecond": 837.6396875018648
+          },
+          {
+            "count": 256,
+            "elapsedMs": 307.12791700000525,
+            "opsPerSecond": 833.5289168779652
+          },
+          {
+            "count": 256,
+            "elapsedMs": 306.9439169999969,
+            "opsPerSecond": 834.0285824918387
+          },
+          {
+            "count": 256,
+            "elapsedMs": 305.49487500000396,
+            "opsPerSecond": 837.9845979412803
+          },
+          {
+            "count": 256,
+            "elapsedMs": 307.0157499999914,
+            "opsPerSecond": 833.8334433982856
+          },
+          {
+            "count": 256,
+            "elapsedMs": 307.94558299999335,
+            "opsPerSecond": 831.3157068403398
+          },
+          {
+            "count": 256,
+            "elapsedMs": 305.92654099999345,
+            "opsPerSecond": 836.8021916738682
+          }
+        ]
+      },
+      "rust": null
+    },
+    {
+      "id": "phase_two_v1_64_inputs",
+      "unit": "transactions",
+      "budget": {
+        "cpu": "209100",
+        "memory": "1100"
+      },
+      "note": "Synthetic one-redeemer unit-returning script with synthetic cost model; includes raw decode, resolution, context and evaluation; not full ledger validation.",
+      "typescript": {
+        "opsPerSecond": 394.3214426250111,
+        "microsecondsPerOp": 2536.002083333248,
+        "minOpsPerSecond": 392.7936544263756,
+        "maxOpsPerSecond": 396.55274452054,
+        "samples": [
+          {
+            "count": 120,
+            "elapsedMs": 302.60791700001573,
+            "opsPerSecond": 396.55274452054
+          },
+          {
+            "count": 120,
+            "elapsedMs": 304.19987499999115,
+            "opsPerSecond": 394.4774796505209
+          },
+          {
+            "count": 120,
+            "elapsedMs": 305.50391699999454,
+            "opsPerSecond": 392.7936544263756
+          },
+          {
+            "count": 120,
+            "elapsedMs": 304.41425000000163,
+            "opsPerSecond": 394.1996802055073
+          },
+          {
+            "count": 120,
+            "elapsedMs": 305.46195799999987,
+            "opsPerSecond": 392.8476095213141
+          },
+          {
+            "count": 120,
+            "elapsedMs": 304.32024999998976,
+            "opsPerSecond": 394.3214426250111
+          },
+          {
+            "count": 120,
+            "elapsedMs": 304.15474999998696,
+            "opsPerSecond": 394.53600510925816
+          }
+        ]
+      },
+      "rust": null
+    }
+  ],
+  "workers": [
+    {
+      "threads": 1,
+      "opsPerSecond": 1081.825654554816,
+      "microsecondsPerOp": 924.3633627929739,
+      "minOpsPerSecond": 1079.3492781547732,
+      "maxOpsPerSecond": 1087.0762399795199,
+      "samples": [
+        {
+          "count": 2048,
+          "elapsedMs": 1893.0961670000106,
+          "opsPerSecond": 1081.825654554816
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 1887.7300840000098,
+          "opsPerSecond": 1084.9008644606574
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 1897.187833999982,
+          "opsPerSecond": 1079.4924800261076
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 1897.4395419999782,
+          "opsPerSecond": 1079.3492781547732
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 1883.9524999999849,
+          "opsPerSecond": 1087.0762399795199
+        }
+      ]
+    },
+    {
+      "threads": 2,
+      "opsPerSecond": 1988.7428376951011,
+      "microsecondsPerOp": 502.83022070313166,
+      "minOpsPerSecond": 1979.056833985016,
+      "maxOpsPerSecond": 2028.0376883790168,
+      "samples": [
+        {
+          "count": 2048,
+          "elapsedMs": 1012.7265420000185,
+          "opsPerSecond": 2022.2635776440059
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 1009.843166000006,
+          "opsPerSecond": 2028.0376883790168
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 1029.7962920000136,
+          "opsPerSecond": 1988.7428376951011
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 1031.9262910000107,
+          "opsPerSecond": 1984.6378737141592
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 1034.8363749999844,
+          "opsPerSecond": 1979.056833985016
+        }
+      ]
+    },
+    {
+      "threads": 4,
+      "opsPerSecond": 3685.5238588405214,
+      "microsecondsPerOp": 271.33184814454125,
+      "minOpsPerSecond": 3622.4482125216355,
+      "maxOpsPerSecond": 3810.2145384832493,
+      "samples": [
+        {
+          "count": 2048,
+          "elapsedMs": 565.3635000000068,
+          "opsPerSecond": 3622.4482125216355
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 562.6434589999844,
+          "opsPerSecond": 3639.9605598188546
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 552.7830829999875,
+          "opsPerSecond": 3704.8890658617465
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 537.5025419999729,
+          "opsPerSecond": 3810.2145384832493
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 555.6876250000205,
+          "opsPerSecond": 3685.5238588405214
+        }
+      ]
+    },
+    {
+      "threads": 8,
+      "opsPerSecond": 5852.156613152133,
+      "microsecondsPerOp": 170.87717675781278,
+      "minOpsPerSecond": 5624.897863335371,
+      "maxOpsPerSecond": 6018.219961108746,
+      "samples": [
+        {
+          "count": 2048,
+          "elapsedMs": 356.0166250000184,
+          "opsPerSecond": 5752.540348361244
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 364.0954999999958,
+          "opsPerSecond": 5624.897863335371
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 341.713665999996,
+          "opsPerSecond": 5993.321905949246
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 340.2999579999887,
+          "opsPerSecond": 6018.219961108746
+        },
+        {
+          "count": 2048,
+          "elapsedMs": 349.95645800000057,
+          "opsPerSecond": 5852.156613152133
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "operation": "discover_required_witnesses",
+      "fixture": "16 resolved legacy array outputs with datum hashes",
+      "error": "DatumOption[1] requires 32-byte CBOR bytes"
+    }
+  ],
+  "limitations": [
+    "Microbenchmarks, not a validating Cardano node or Cloudflare deployment.",
+    "Crypto equivalence checked on canonical valid fixtures and modified-message rejection only; not all malformed input semantics.",
+    "Prepared Ed25519 keys have different internal representations. Rust stores a parsed curve point; XRAY wrappers store bytes.",
+    "Unimplemented P2P, consensus, VRF/KES, full ledger, epochs, database and block production were not measured.",
+    "No Rust CBOR/UPLC/BLS comparator, memory comparison, p99 latency or energy measurement.",
+    "Worker pools are synthetic host tooling with transferable 64-check jobs; warm pools, startup excluded, copying, messaging and wrappers included. Rust remains a single-thread crypto reference."
+  ]
+}

@@ -1,0 +1,501 @@
+{
+  "metadata": {
+    "date": "2026-09-24T21:22:05.786Z",
+    "node": "v24.18.0",
+    "v8": "13.6.233.17-node.50",
+    "openssl": "3.5.7",
+    "cpu": "Apple M4 Max",
+    "logicalCpus": 14,
+    "platform": "darwin",
+    "arch": "arm64",
+    "release": "25.5.0",
+    "nobleEd25519": "3.2.0",
+    "nobleHashes": "2.2.0",
+    "nobleCurvesUsedByXray": "2.2.0",
+    "nobleDistIntegrity": "sha512-criDgRlnUA09hchYrTy/JUWPIEap5rZxQe6wDWzRx51oWWpDRcUpuNzlgPxDJaOK6AsW9c0wKcj3rKRv6t+bPQ==",
+    "nobleSourceSha256": "a4f631d1876b5d9e43a86cd71194ca27b5e1451edf4ba4db9a418f40a475569a",
+    "harnessSha256": "c3166baa1f590d1d3a6c81afd0b1708316ae5d874e16793c9246a7b8d15077d2",
+    "workspaceLockSha256": "0ff76dd141de4e6f97397278560f1ccc2c00ac085a24a67b82dccf3d585154b9",
+    "fixtureSha256": "35da7a5b3b4dec17818ecd5ab191865e7d5c33d79f8396dd9aa0c117273e37cf",
+    "rustSourceSha256": "a7f1156014869499fc62ce8db5721b0392316fa184fa175aa79dc868a66a2813",
+    "rustBinarySha256": "3ac426973cb46d3940839fa5b1178db75497edc11f2e1bc275c7fa2f3aa3de03",
+    "rustCompiler": "rustc 1.98.1 (48a229cea 2026-09-01), LLVM 22.1.8, aarch64-apple-darwin",
+    "rustFlags": "-C target-cpu=native; release; thin LTO; codegen-units=1",
+    "rustLockSha256": "edc0850a6b7fb1ffc56fbb25a756e9c1abfe82e262c2d8a140eaaa6f924a9223",
+    "rounds": 7,
+    "windowMs": 300,
+    "warmupMs": 400,
+    "fixtureCount": 64,
+    "messageBytes": 32,
+    "method": "Synchronous APIs, one active execution thread, rotated/reversed ordering. IPC, fixture creation and DER byte construction excluded. No forced GC. Noble uses pure-JS @noble/hashes SHA-512 and zip215:false; Rust uses Dalek verify_strict. Prepared key objects differ internally; Noble verify always parses raw bytes. Signing uses a seed for Noble/XRAY versus existing key objects for Node/Dalek."
+  },
+  "results": {
+    "verify_rust_prepared": {
+      "opsPerSecond": 49607.7606530042,
+      "microsecondsPerOp": 20.158136284255775,
+      "minOpsPerSecond": 48488.29493659815,
+      "maxOpsPerSecond": 50403.3480617194,
+      "samples": [
+        {
+          "count": 15128,
+          "elapsedMs": 300.13879199999997,
+          "opsPerSecond": 50403.3480617194,
+          "output": "01"
+        },
+        {
+          "count": 14888,
+          "elapsedMs": 300.114333,
+          "opsPerSecond": 49607.7606530042,
+          "output": "01"
+        },
+        {
+          "count": 14808,
+          "elapsedMs": 300.018959,
+          "opsPerSecond": 49356.88080965577,
+          "output": "01"
+        },
+        {
+          "count": 14968,
+          "elapsedMs": 300.081209,
+          "opsPerSecond": 49879.831029339795,
+          "output": "01"
+        },
+        {
+          "count": 14552,
+          "elapsedMs": 300.11366699999996,
+          "opsPerSecond": 48488.29493659815,
+          "output": "01"
+        },
+        {
+          "count": 14920,
+          "elapsedMs": 300.11604200000005,
+          "opsPerSecond": 49714.10358663866,
+          "output": "01"
+        },
+        {
+          "count": 14560,
+          "elapsedMs": 300.033542,
+          "opsPerSecond": 48527.90758974542,
+          "output": "01"
+        }
+      ],
+      "percentOfRust": 99.99999999999999
+    },
+    "verify_node_prepared": {
+      "opsPerSecond": 27544.27187585548,
+      "microsecondsPerOp": 36.30518913359156,
+      "minOpsPerSecond": 27325.08653113449,
+      "maxOpsPerSecond": 27688.9342117152,
+      "samples": [
+        {
+          "count": 8312,
+          "elapsedMs": 300.1921250000005,
+          "opsPerSecond": 27688.9342117152
+        },
+        {
+          "count": 8256,
+          "elapsedMs": 300.2758750000012,
+          "opsPerSecond": 27494.71631711994
+        },
+        {
+          "count": 8296,
+          "elapsedMs": 300.1338340000002,
+          "opsPerSecond": 27641.002313654495
+        },
+        {
+          "count": 8288,
+          "elapsedMs": 300.1497500000005,
+          "opsPerSecond": 27612.883235784757
+        },
+        {
+          "count": 8200,
+          "elapsedMs": 300.0905410000014,
+          "opsPerSecond": 27325.08653113449
+        },
+        {
+          "count": 8264,
+          "elapsedMs": 300.02608300000065,
+          "opsPerSecond": 27544.27187585548
+        },
+        {
+          "count": 8240,
+          "elapsedMs": 300.101666999999,
+          "opsPerSecond": 27457.36164138011
+        }
+      ],
+      "percentOfRust": 55.52411863240882
+    },
+    "verify_noble_raw": {
+      "opsPerSecond": 2187.4061900465604,
+      "microsecondsPerOp": 457.16246234939763,
+      "minOpsPerSecond": 2179.972639216577,
+      "maxOpsPerSecond": 2210.57288044887,
+      "samples": [
+        {
+          "count": 664,
+          "elapsedMs": 303.555875,
+          "opsPerSecond": 2187.4061900465604
+        },
+        {
+          "count": 664,
+          "elapsedMs": 303.3926670000001,
+          "opsPerSecond": 2188.58289017249
+        },
+        {
+          "count": 664,
+          "elapsedMs": 300.3746250000004,
+          "opsPerSecond": 2210.57288044887
+        },
+        {
+          "count": 656,
+          "elapsedMs": 300.32779200000004,
+          "opsPerSecond": 2184.280034929301
+        },
+        {
+          "count": 656,
+          "elapsedMs": 300.92120799999975,
+          "opsPerSecond": 2179.972639216577
+        },
+        {
+          "count": 656,
+          "elapsedMs": 300.11583299999984,
+          "opsPerSecond": 2185.8226986644863
+        },
+        {
+          "count": 664,
+          "elapsedMs": 301.6812910000008,
+          "opsPerSecond": 2200.9982713843474
+        }
+      ],
+      "percentOfRust": 4.4094032087983255
+    },
+    "verify_xray_wrappers": {
+      "opsPerSecond": 1065.300269928443,
+      "microsecondsPerOp": 938.7024750000023,
+      "minOpsPerSecond": 1050.741654175753,
+      "maxOpsPerSecond": 1077.3552570748668,
+      "samples": [
+        {
+          "count": 320,
+          "elapsedMs": 300.2407910000002,
+          "opsPerSecond": 1065.8112075117729
+        },
+        {
+          "count": 320,
+          "elapsedMs": 303.01095800000076,
+          "opsPerSecond": 1056.0674178654594
+        },
+        {
+          "count": 328,
+          "elapsedMs": 304.44924999999967,
+          "opsPerSecond": 1077.3552570748668
+        },
+        {
+          "count": 320,
+          "elapsedMs": 300.2195840000004,
+          "opsPerSecond": 1065.8864945998978
+        },
+        {
+          "count": 320,
+          "elapsedMs": 300.38479200000074,
+          "opsPerSecond": 1065.300269928443
+        },
+        {
+          "count": 320,
+          "elapsedMs": 304.546792000001,
+          "opsPerSecond": 1050.741654175753
+        },
+        {
+          "count": 320,
+          "elapsedMs": 300.86612500000047,
+          "opsPerSecond": 1063.5959764496567
+        }
+      ],
+      "percentOfRust": 2.147446802487202
+    },
+    "verify_rust_fresh": {
+      "opsPerSecond": 44440.85286048835,
+      "microsecondsPerOp": 22.501818386322736,
+      "minOpsPerSecond": 44157.60812955965,
+      "maxOpsPerSecond": 45300.3246212197,
+      "samples": [
+        {
+          "count": 13592,
+          "elapsedMs": 300.042,
+          "opsPerSecond": 45300.3246212197,
+          "output": "01"
+        },
+        {
+          "count": 13336,
+          "elapsedMs": 300.08425,
+          "opsPerSecond": 44440.85286048835,
+          "output": "01"
+        },
+        {
+          "count": 13336,
+          "elapsedMs": 300.15104199999996,
+          "opsPerSecond": 44430.96352802267,
+          "output": "01"
+        },
+        {
+          "count": 13424,
+          "elapsedMs": 300.07725,
+          "opsPerSecond": 44735.14736621987,
+          "output": "01"
+        },
+        {
+          "count": 13264,
+          "elapsedMs": 300.03999999999996,
+          "opsPerSecond": 44207.439008132256,
+          "output": "01"
+        },
+        {
+          "count": 13520,
+          "elapsedMs": 300.041917,
+          "opsPerSecond": 45060.37068147381,
+          "output": "01"
+        },
+        {
+          "count": 13248,
+          "elapsedMs": 300.01624999999996,
+          "opsPerSecond": 44157.60812955965,
+          "output": "01"
+        }
+      ],
+      "percentOfRust": 100.00000000000001
+    },
+    "verify_node_fresh": {
+      "opsPerSecond": 15727.182222670353,
+      "microsecondsPerOp": 63.58418093220311,
+      "minOpsPerSecond": 15485.672209958699,
+      "maxOpsPerSecond": 15799.743342095091,
+      "samples": [
+        {
+          "count": 4736,
+          "elapsedMs": 300.29712500000005,
+          "opsPerSecond": 15771.046759105666
+        },
+        {
+          "count": 4720,
+          "elapsedMs": 300.11733399999866,
+          "opsPerSecond": 15727.182222670353
+        },
+        {
+          "count": 4736,
+          "elapsedMs": 300.5157909999998,
+          "opsPerSecond": 15759.571183399155
+        },
+        {
+          "count": 4744,
+          "elapsedMs": 300.2580419999995,
+          "opsPerSecond": 15799.743342095091
+        },
+        {
+          "count": 4720,
+          "elapsedMs": 300.4127499999995,
+          "opsPerSecond": 15711.716629870096
+        },
+        {
+          "count": 4704,
+          "elapsedMs": 300.39658300000156,
+          "opsPerSecond": 15659.299293693948
+        },
+        {
+          "count": 4648,
+          "elapsedMs": 300.14841700000034,
+          "opsPerSecond": 15485.672209958699
+        }
+      ],
+      "percentOfRust": 35.38901981031319
+    },
+    "sign_rust_prepared": {
+      "opsPerSecond": 124585.29955064628,
+      "microsecondsPerOp": 8.02662917380137,
+      "minOpsPerSecond": 123769.88924561313,
+      "maxOpsPerSecond": 126197.69870044132,
+      "samples": [
+        {
+          "count": 37864,
+          "elapsedMs": 300.037167,
+          "opsPerSecond": 126197.69870044132,
+          "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+        },
+        {
+          "count": 37816,
+          "elapsedMs": 300.010708,
+          "opsPerSecond": 126048.83423027686,
+          "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+        },
+        {
+          "count": 37344,
+          "elapsedMs": 300.045209,
+          "opsPerSecond": 124461.24410538413,
+          "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+        },
+        {
+          "count": 37696,
+          "elapsedMs": 300.05312499999997,
+          "opsPerSecond": 125631.08616182553,
+          "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+        },
+        {
+          "count": 37376,
+          "elapsedMs": 300.003292,
+          "opsPerSecond": 124585.29955064628,
+          "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+        },
+        {
+          "count": 37376,
+          "elapsedMs": 300.019042,
+          "opsPerSecond": 124578.75923755532,
+          "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+        },
+        {
+          "count": 37136,
+          "elapsedMs": 300.040666,
+          "opsPerSecond": 123769.88924561313,
+          "output": "7322374cc48e06f65c856175debeeb17dd3ec575e640ec9929df341c047c7c03c7284b376fd58ddc72284a6867792505835a401957f914d332f32aee2466160b"
+        }
+      ],
+      "percentOfRust": 100
+    },
+    "sign_node_prepared": {
+      "opsPerSecond": 67507.42674176935,
+      "microsecondsPerOp": 14.813184982227488,
+      "minOpsPerSecond": 67014.51594325872,
+      "maxOpsPerSecond": 68498.80825505432,
+      "samples": [
+        {
+          "count": 20552,
+          "elapsedMs": 300.03441699999985,
+          "opsPerSecond": 68498.80825505432
+        },
+        {
+          "count": 20256,
+          "elapsedMs": 300.055875,
+          "opsPerSecond": 67507.42674176935
+        },
+        {
+          "count": 20328,
+          "elapsedMs": 300.02387500000077,
+          "opsPerSecond": 67754.60786245744
+        },
+        {
+          "count": 20144,
+          "elapsedMs": 300.0530830000007,
+          "opsPerSecond": 67134.78761356355
+        },
+        {
+          "count": 20112,
+          "elapsedMs": 300.1140830000004,
+          "opsPerSecond": 67014.51594325872
+        },
+        {
+          "count": 20352,
+          "elapsedMs": 300.0604579999999,
+          "opsPerSecond": 67826.33118556396
+        },
+        {
+          "count": 20184,
+          "elapsedMs": 300.08650000000125,
+          "opsPerSecond": 67260.60652511832
+        }
+      ],
+      "percentOfRust": 54.18570809337446
+    },
+    "sign_noble_seed": {
+      "opsPerSecond": 8417.206652282217,
+      "microsecondsPerOp": 118.8042590981015,
+      "minOpsPerSecond": 8383.793679681547,
+      "maxOpsPerSecond": 8584.351266828493,
+      "samples": [
+        {
+          "count": 2528,
+          "elapsedMs": 300.3371670000006,
+          "opsPerSecond": 8417.206652282217
+        },
+        {
+          "count": 2536,
+          "elapsedMs": 300.1743750000005,
+          "opsPerSecond": 8448.422687646125
+        },
+        {
+          "count": 2536,
+          "elapsedMs": 300.20458300000064,
+          "opsPerSecond": 8447.572567538033
+        },
+        {
+          "count": 2576,
+          "elapsedMs": 300.0809169999993,
+          "opsPerSecond": 8584.351266828493
+        },
+        {
+          "count": 2520,
+          "elapsedMs": 300.5799159999988,
+          "opsPerSecond": 8383.793679681547
+        },
+        {
+          "count": 2520,
+          "elapsedMs": 300.16691699999865,
+          "opsPerSecond": 8395.328922940604
+        },
+        {
+          "count": 2520,
+          "elapsedMs": 300.50845800000025,
+          "opsPerSecond": 8385.787264596718
+        }
+      ],
+      "percentOfRust": 6.75617964771234
+    },
+    "sign_xray_seed": {
+      "opsPerSecond": 5424.374041860125,
+      "microsecondsPerOp": 184.3530686274504,
+      "minOpsPerSecond": 5347.581720950699,
+      "maxOpsPerSecond": 5472.808786241183,
+      "samples": [
+        {
+          "count": 1624,
+          "elapsedMs": 300.81537500000013,
+          "opsPerSecond": 5398.660224730865
+        },
+        {
+          "count": 1624,
+          "elapsedMs": 300.60112500000014,
+          "opsPerSecond": 5402.508057812489
+        },
+        {
+          "count": 1648,
+          "elapsedMs": 301.125082999999,
+          "opsPerSecond": 5472.808786241183
+        },
+        {
+          "count": 1640,
+          "elapsedMs": 300.5675420000007,
+          "opsPerSecond": 5456.344318110025
+        },
+        {
+          "count": 1632,
+          "elapsedMs": 300.86420799999905,
+          "opsPerSecond": 5424.374041860125
+        },
+        {
+          "count": 1608,
+          "elapsedMs": 300.69666700000016,
+          "opsPerSecond": 5347.581720950699
+        },
+        {
+          "count": 1640,
+          "elapsedMs": 300.5705830000006,
+          "opsPerSecond": 5456.289113961617
+        }
+      ],
+      "percentOfRust": 4.353943893400532
+    }
+  },
+  "limitations": [
+    "Not all malformed-input semantics tested; no Cardano replacement decision implied.",
+    "Noble async Web Crypto hashing and Node async/threadpool APIs not measured.",
+    "Native Node crypto is a host-specific option; the XRAY package currently uses @noble/curves, not @noble/ed25519.",
+    "No batching, parallel verification, Workers deployment, or full-node measurements."
+  ]
+}
