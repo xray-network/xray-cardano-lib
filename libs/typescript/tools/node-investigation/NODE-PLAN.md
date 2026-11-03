@@ -1367,9 +1367,9 @@ For TypeScript library changes, run focused semantic checks and the required
 build, integration and deployed-host gates; the existing library command does not validate
 a Workers deployment or a full node.
 
-Before a stable security-sensitive release, complete the independent review required by the
-[security ADR](../../../../docs/src/adr/typescript/0002-cryptography-dependency-policy.md). For a producer,
-include consensus decisions, VRF/KES acceptance, secret lifecycle and recovery. Define supported
+For a stable security-sensitive release, consider the optional independent review recommended by the
+[security ADR](../../../../docs/src/adr/typescript/0002-cryptography-dependency-policy.md). If commissioned
+for a producer, include consensus decisions, VRF/KES acceptance, secret lifecycle and recovery. Define supported
 network/protocol versions, migration and rollback procedures, and a halt/degrade behavior for
 unknown future semantics. Do not substitute source compilation, capture completion, or a
 successful transaction demonstration for this release evidence.

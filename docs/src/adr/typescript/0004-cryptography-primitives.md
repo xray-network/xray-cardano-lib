@@ -38,5 +38,6 @@ updated vectors, browser checks, and the complete TypeScript gate.
 
 JavaScript cannot guarantee constant-time execution or secret zeroization. Owned secret arrays
 are overwritten on disposal as a best effort, but runtime copying and garbage collection may
-retain inaccessible copies. Automated vector coverage does not replace independent review before
-a stable release.
+retain inaccessible copies. Automated vector coverage is not an independent audit. Independent
+review is recommended for stable security-sensitive releases and remains optional under
+[ADR 0002](0002-cryptography-dependency-policy.md).

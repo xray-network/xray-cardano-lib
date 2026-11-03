@@ -39,7 +39,8 @@ policy must be fixed now.
   authoritative and independently published vectors.
 - Adding a dependency that violates the binary-free browser graph requires rejecting it, not hiding
   it behind a facade.
-- Stable release requires independent security review of wrappers and key handling.
+- Independent security review of wrappers and key handling is recommended for stable releases
+  but remains optional and is not a publication prerequisite.
 
 ## Vulnerability reporting
 
@@ -92,8 +93,8 @@ semantic failures.
 ## Independent review
 
 Automated tests and self-review are not an audit opinion. No independent XRAY Cardano Lib security
-review has been commissioned. Before a stable security-sensitive release, an independent reviewer
-must inspect:
+review has been commissioned. Independent review is recommended for stable security-sensitive
+releases but remains optional. When commissioned, its recommended scope includes:
 
 - CBOR decoding and canonicalization;
 - JSON and recursive data handling;
@@ -101,6 +102,7 @@ must inspect:
 - transaction construction and signing boundaries; and
 - package contents and dependency controls.
 
-The review record must identify the reviewer, reviewed revision, dates, methods, findings,
-dispositions, and a verifiable report location or digest. No critical or high-severity finding may
-remain unresolved at release.
+When an independent review is performed, its record must identify the reviewer, reviewed revision,
+dates, methods, findings, dispositions, and a verifiable report location or digest. Known critical
+or high-severity findings must be resolved before release, whether or not an independent review
+has been commissioned.
