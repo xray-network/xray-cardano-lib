@@ -104,6 +104,43 @@ test("required witness discovery identifies datum, Plutus redeemer, and matching
   assert.ok(discovered.redeemers.has(`${RedeemerTag.Mint}:4`));
 });
 
+test("required witness discovery reads datum hashes from legacy and modern outputs alike", () => {
+  const plutus = PlutusScript.from_v1(PlutusV1Script.new(Uint8Array.of(1, 2, 3)));
+  const scriptAddress = EnterpriseAddress.new(0, Credential.new_script(plutus.hash())).to_address();
+  const datum = PlutusData.from_cbor_bytes(Uint8Array.of(0));
+  const datumHash = hash_plutus_data(datum);
+  // Alonzo-format [address, value, datum_hash]: the hash is raw bytes, not a DatumOption.
+  const legacy = (hash) => TransactionOutput.from_cbor_bytes(encodeCbor(array([
+    bytes(scriptAddress.to_raw_bytes()),
+    uint(2_000_000n),
+    ...(hash === undefined ? [] : [bytes(hash)]),
+  ])));
+  const outputs = {
+    legacy: legacy(datumHash.to_raw_bytes()),
+    modern: output(scriptAddress, DatumOption.new(0n, datumHash)),
+  };
+  assert.equal(node(outputs.legacy).kind, "array");
+  assert.equal(node(outputs.modern).kind, "map");
+
+  const spendInput = input(24);
+  const tx = transaction([[uint(0n), tagged([node(spendInput)])]]);
+  const requirements = (resolved) => {
+    const discovered = discover_required_witnesses(tx, [TransactionUnspentOutput.new(spendInput, resolved)]);
+    return Object.fromEntries(Object.entries(discovered).map(([kind, entries]) => [kind, [...entries.keys()].sort()]));
+  };
+  const legacyRequirements = requirements(outputs.legacy);
+  assert.deepEqual(legacyRequirements.plutusData, [datumHash.to_hex()]);
+  assert.deepEqual(legacyRequirements.scripts, [plutus.hash().to_hex()]);
+  assert.deepEqual(legacyRequirements, requirements(outputs.modern));
+  assert.deepEqual(requirements(legacy(undefined)).plutusData, []);
+
+  // Malformed legacy hashes never reach discovery, including the 34-byte CBOR-encoded form.
+  const hash = datumHash.to_raw_bytes();
+  for (const malformed of [hash.subarray(1), Uint8Array.of(...hash, 0), encodeCbor(bytes(hash))]) {
+    assert.throws(() => legacy(malformed), TypeError, `${malformed.length}-byte datum hash`);
+  }
+});
+
 test("required witness discovery rejects missing and conflicting resolutions", () => {
   const source = input(30), address = EnterpriseAddress.new(0, Credential.new_pub_key(hash28(7))).to_address();
   const tx = transaction([[uint(0n), tagged([node(source)])]]);

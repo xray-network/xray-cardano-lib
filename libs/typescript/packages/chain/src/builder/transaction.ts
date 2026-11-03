@@ -143,7 +143,12 @@ function outputParts(output: TransactionOutput): {
       address: Address.from_raw_bytes(decoded.values[0].value),
       amount: Value.from_cbor_bytes(encodeCbor(decoded.values[1])),
     };
-    if (decoded.values[2] !== undefined) result.datum = DatumOption.new(0n, encodeCbor(decoded.values[2]));
+    // The legacy third field is a bare datum hash; DatumOption takes its raw 32 bytes, not their CBOR encoding.
+    const datumHash = decoded.values[2];
+    if (datumHash !== undefined) {
+      if (datumHash.kind !== "bytes" || datumHash.value.length !== 32) throw new TypeError("legacy transaction output datum hash must be 32 bytes");
+      result.datum = DatumOption.new(0n, datumHash.value);
+    }
     return result;
   }
   if (decoded.kind !== "map") throw new TypeError("invalid transaction output");

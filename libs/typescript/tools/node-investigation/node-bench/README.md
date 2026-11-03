@@ -80,12 +80,14 @@ and end-to-end relay are not implemented in this workspace and have no measureme
 Workers, network I/O, memory, startup, p99 latency and energy are also unmeasured. Node timings must
 not be presented as deployed Worker performance.
 
-The harness records a failure of `discover_required_witnesses` on valid resolved legacy array
-outputs carrying datum hashes. In `chain/src/builder/transaction.ts`, `outputParts` passes the CBOR
+The recorded run found a failure of `discover_required_witnesses` on valid resolved legacy array
+outputs carrying datum hashes. In `chain/src/builder/transaction.ts`, `outputParts` passed the CBOR
 encoding of the datum-hash bytes to `DatumOption.new`, which expects the 32 raw bytes. The encoded
 value is 34 bytes, causing `DatumOption[1] requires 32-byte CBOR bytes`. The timed discovery case
 uses semantically equivalent modern map-form outputs. Raw phase-two accepts the legacy fixtures.
-This observation is recorded for follow-up; the benchmark does not change library behavior.
+This has since been fixed in `outputParts`, with a regression test in
+`chain/test/witness-discovery.test.mjs`; the harness still records any failure in `findings`, so a new
+run should report none. The benchmark itself does not change library behavior.
 
 Reference API documentation: [Dalek strict verification](https://docs.rs/ed25519-dalek/2.2.0/ed25519_dalek/struct.VerifyingKey.html#method.verify_strict),
 [k256 raw Schnorr verification](https://docs.rs/k256/0.13.4/k256/schnorr/struct.VerifyingKey.html#method.verify_raw),
