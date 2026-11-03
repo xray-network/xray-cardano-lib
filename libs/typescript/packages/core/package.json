@@ -1,6 +1,6 @@
 {
   "name": "@xray-network/xray-cardano-lib-core",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Browser-safe Cardano primitives, CBOR codecs, numeric types, and shared conventions",
   "publishConfig": { "access": "public" },
   "license": "MIT",

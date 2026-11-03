@@ -9,16 +9,16 @@ const typescriptRoot = fileURLToPath(new URL("../../", import.meta.url));
 const packageRules = {
   chain: {
     dependencies: {
-      "@xray-network/xray-cardano-lib-core": "0.1.0",
-      "@xray-network/xray-cardano-lib-crypto": "0.1.0",
+      "@xray-network/xray-cardano-lib-core": "1.0.0",
+      "@xray-network/xray-cardano-lib-crypto": "1.0.0",
     },
     name: "@xray-network/xray-cardano-lib-chain",
   },
   cip: {
     dependencies: {
-      "@xray-network/xray-cardano-lib-chain": "0.1.0",
-      "@xray-network/xray-cardano-lib-core": "0.1.0",
-      "@xray-network/xray-cardano-lib-crypto": "0.1.0",
+      "@xray-network/xray-cardano-lib-chain": "1.0.0",
+      "@xray-network/xray-cardano-lib-core": "1.0.0",
+      "@xray-network/xray-cardano-lib-crypto": "1.0.0",
     },
     name: "@xray-network/xray-cardano-lib-cip",
     subpaths: ["./cip4", "./cip8", "./cip14", "./cip21", "./cip25", "./cip36", "./cip67", "./cip68", "./cip129"],
@@ -32,25 +32,25 @@ const packageRules = {
       "@noble/ciphers": "2.2.0",
       "@noble/curves": "2.2.0",
       "@noble/hashes": "2.2.0",
-      "@xray-network/xray-cardano-lib-core": "0.1.0",
+      "@xray-network/xray-cardano-lib-core": "1.0.0",
     },
     name: "@xray-network/xray-cardano-lib-crypto",
   },
   runtime: {
     dependencies: {
-      "@xray-network/xray-cardano-lib-chain": "0.1.0",
-      "@xray-network/xray-cardano-lib-cip": "0.1.0",
-      "@xray-network/xray-cardano-lib-core": "0.1.0",
-      "@xray-network/xray-cardano-lib-crypto": "0.1.0",
-      "@xray-network/xray-cardano-lib-plutus": "0.1.0",
+      "@xray-network/xray-cardano-lib-chain": "1.0.0",
+      "@xray-network/xray-cardano-lib-cip": "1.0.0",
+      "@xray-network/xray-cardano-lib-core": "1.0.0",
+      "@xray-network/xray-cardano-lib-crypto": "1.0.0",
+      "@xray-network/xray-cardano-lib-plutus": "1.0.0",
     },
     name: "@xray-network/xray-cardano-lib",
   },
   plutus: {
     dependencies: {
-      "@xray-network/xray-cardano-lib-chain": "0.1.0",
-      "@xray-network/xray-cardano-lib-core": "0.1.0",
-      "@xray-network/xray-cardano-lib-crypto": "0.1.0",
+      "@xray-network/xray-cardano-lib-chain": "1.0.0",
+      "@xray-network/xray-cardano-lib-core": "1.0.0",
+      "@xray-network/xray-cardano-lib-crypto": "1.0.0",
     },
     name: "@xray-network/xray-cardano-lib-plutus",
     subpaths: ["./data", "./uplc", "./blueprint"],

@@ -1,6 +1,6 @@
 {
   "name": "@xray-network/xray-cardano-lib-crypto",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Native ESM cryptography and Cardano key types for XRAY Cardano Lib",
   "publishConfig": {
     "access": "public"
@@ -31,7 +31,7 @@
     "@noble/ciphers": "2.2.0",
     "@noble/curves": "2.2.0",
     "@noble/hashes": "2.2.0",
-    "@xray-network/xray-cardano-lib-core": "0.1.0"
+    "@xray-network/xray-cardano-lib-core": "1.0.0"
   },
   "engines": {
     "node": ">=20.19.0"
